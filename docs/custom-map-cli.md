@@ -459,8 +459,17 @@ d'en fournir une autre copie, dont l'empreinte est toujours vérifiée.
 `--no-build-isolation` construit sans téléchargement si `setuptools>=77` et
 `wheel` sont déjà installés dans le Python utilisé.
 
+Le dépôt GitHub publie automatiquement les nouvelles versions de `main` après
+réussite des tests. Les versions de `pyproject.toml` et `tools/skieo_loader.py`
+doivent correspondre et avoir une entrée dans `CHANGELOG.md`. Le workflow
+construit les paquets et le site, publie une version GitHub `vX.Y.Z`, puis le
+serveur l'installe sous cinq minutes environ. Un push sans augmentation de
+version ne déclenche pas de déploiement. Voir
+[`deployment/README.md`](../deployment/README.md) pour le suivi et la reprise.
+
 Pour tester d'abord dans le jeu, préparer sans contacter le serveur, puis
-publier les mêmes paquets après le test :
+committer et pousser la nouvelle version. Pour une publication SSH manuelle
+des mêmes paquets après le test :
 
 ```sh
 python3 deployment/release_custom_map.py 1.17.1 --prepare-only

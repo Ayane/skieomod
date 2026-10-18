@@ -1,0 +1,75 @@
+name: Publish release
+on:
+  workflow_run:
+    workflows: [Checks]
+    types: [completed]
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: publish-release
+  cancel-in-progress: false
+
+jobs:
+  release:
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      (github.event.workflow_run.conclusion == 'success' &&
+       github.event.workflow_run.event == 'push' &&
+       github.event.workflow_run.head_repository.full_name == github.repository)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    permissions:
+      contents: write
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+      QT_QPA_PLATFORM: offscreen
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Select a new stable version
+        id: version
+        run: python deployment/github_release.py select
+      - uses: actions/setup-node@v4
+        if: steps.version.outputs.publish == 'true'
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: repository/web/package-lock.json
+      - name: Install build dependencies
+        if: steps.version.outputs.publish == 'true'
+        run: |
+          sudo apt-get update && sudo apt-get install -y lua5.4
+          python -m pip install 'setuptools>=77' wheel build
+          python -m pip install -e . --no-deps numpy
+      - name: Check the selected revision
+        if: steps.version.outputs.publish == 'true'
+        run: python tests/run_custom_map_checks.py
+      - name: Prepare and verify the mod distribution
+        if: steps.version.outputs.publish == 'true'
+        env:
+          RELEASE_VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          python deployment/github_release.py dependency
+          python deployment/release_custom_map.py "$RELEASE_VERSION" --prepare-only --no-build-isolation --skip-discord
+      - name: Build the website
+        if: steps.version.outputs.publish == 'true'
+        working-directory: repository/web
+        run: |
+          npm ci
+          npm run build
+      - name: Bundle and publish the checked release
+        if: steps.version.outputs.publish == 'true'
+        env:
+          RELEASE_VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          python deployment/build_server_release.py "build/release-$RELEASE_VERSION" "build/skieomod-server-$RELEASE_VERSION.tar.gz"
+          python deployment/github_release.py publish

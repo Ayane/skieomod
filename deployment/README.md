@@ -1,8 +1,55 @@
 # Existing server deployment
 
-The public source repository does not deploy the production server on push.
-The existing Nginx + Gunicorn installation remains under `/opt/custom-map`;
-release preparation is separate from deployment.
+New stable source versions on `main` are published automatically after the
+`Checks` workflow succeeds. Increase the matching versions in `pyproject.toml`
+and `tools/skieo_loader.py`, add release notes to `CHANGELOG.md`, test the mod in
+the game, then push. A change without a version increase does not redeploy.
+
+The `Publish release` workflow checks the exact commit again, prepares the mod,
+CLI and featured maps, builds the website, then creates `vX.Y.Z` and a GitHub
+release. Assets are uploaded to a draft before the release becomes public.
+Published versions and existing tags cannot be overwritten. An interrupted
+draft upload can be retried with `gh workflow run release.yml --ref main`;
+the same checks run before publication. UE4SS is fetched from the existing
+public download and checked against its pinned SHA-256.
+
+The server polls the public GitHub Releases API every five minutes (up to 15
+seconds of jitter), without a GitHub token or an inbound webhook. It verifies
+GitHub's bundle size and SHA-256, rejects unsafe archive entries, prepares a
+separate Python environment and merges the existing immutable downloads into
+the candidate release using hard links. The normal publisher validates the
+artifacts and retains earlier featured mapmod versions. The candidate downloads,
+website and API become active together by an atomic `current` symlink switch.
+The map database, account configuration and user publications remain in
+`/srv/custom-map-data` and `/etc/custom-map.env`.
+
+If the service, Nginx, website or HTTPS update feed check fails, the previous
+code, downloads, service unit and Nginx configuration are restored. Failed
+attempts are retried on the next timer tick. Successful releases are retained
+under `/opt/custom-map/releases/github-VERSION-ASSETID` and the deployment
+receipt is `/var/lib/skieomod-autopublish/last-success.json`. No Discord
+announcement is sent by this workflow.
+
+Install or update the poller once on the existing server:
+
+```sh
+sudo bash deployment/install_autopublish.sh
+systemctl status skieomod-autopublish.timer
+journalctl -u skieomod-autopublish.service -n 50
+# Check now without deploying:
+sudo python3 /opt/skieomod-autopublish/github_autopublish.py --check
+# Publish an available release immediately:
+sudo systemctl start skieomod-autopublish.service
+# Stop automatic publication:
+sudo systemctl disable --now skieomod-autopublish.timer
+```
+
+The poller is installed separately in `/opt/skieomod-autopublish`; updating its
+code requires rerunning the installation command. Each deployed application has
+its own `.venv` so rolling back also restores its Python dependencies.
+
+For a new server or a manual bootstrap, use the existing Nginx + Gunicorn
+installation under `/opt/custom-map`:
 
 1. Build `repository/web` with `npm ci && npm run build`.
 2. Prepare a release directory with the source, built site, `docs/` and

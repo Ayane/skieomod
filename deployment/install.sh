@@ -20,14 +20,14 @@ chown custom-map:custom-map /srv/custom-map-data
 mkdir -p /srv/custom-map-data/nginx-body /srv/custom-map-data/logs
 chown www-data:custom-map /srv/custom-map-data/nginx-body /srv/custom-map-data/logs
 chmod 0750 /srv/custom-map-data/nginx-body /srv/custom-map-data/logs
-if [ ! -x /opt/custom-map/venv/bin/pip ]; then
+if [ ! -x "$release_dir/.venv/bin/pip" ]; then
     if ! python3 -m ensurepip --version >/dev/null 2>&1; then
         apt-get update -qq
         apt-get install -y --no-install-recommends python3-venv
     fi
-    python3 -m venv /opt/custom-map/venv
+    python3 -m venv "$release_dir/.venv"
 fi
-/opt/custom-map/venv/bin/pip install -r "$release_dir/repository/server/requirements.txt"
+"$release_dir/.venv/bin/pip" install -r "$release_dir/repository/server/requirements.txt"
 if [ ! -f /etc/custom-map.env ]; then
     cat > /etc/custom-map.env <<'ENV'
 CUSTOM_MAP_URL=https://skieomod.emillon.fr

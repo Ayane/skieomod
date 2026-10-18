@@ -1,0 +1,12 @@
+[Unit]
+Description=Publish checked skieomod GitHub releases
+After=network-online.target
+Wants=network-online.target
+RequiresMountsFor=/srv/custom-map-data
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/python3 /opt/skieomod-autopublish/github_autopublish.py
+StateDirectory=skieomod-autopublish
+UMask=0022
+TimeoutStartSec=15min

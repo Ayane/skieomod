@@ -173,8 +173,8 @@ with tempfile.TemporaryDirectory(prefix=".skieomod-upload-", dir=destination) as
 '''.replace('__TOOLS_LIMIT__', str(MAX_TOOLS_BYTES)).replace('__MEMBER_LIMIT__', str(MAX_MEMBER_BYTES)).replace('__MAP_LIMIT__', str(MAX_MAP_BYTES)).replace('__MOD_LIMIT__', str(MAX_MOD_BYTES))
 
 
-def publish(args):
-    folder = args.directory.resolve()
+def publication_payload(folder):
+    folder = folder.resolve()
     feed = json.loads((folder / 'loader-latest.json').read_text(encoding='utf-8'))
     release = feed['release']
     archive = folder / ('CustomMap-Mod-' + release + '.zip')
@@ -194,13 +194,21 @@ def publish(args):
             item = tarfile.TarInfo(name)
             item.size = len(data)
             archive_stream.addfile(item, io.BytesIO(data))
+    return payload.getvalue()
+
+
+def publish(args):
+    payload = publication_payload(args.directory)
+    if getattr(args, 'local_directory', None):
+        subprocess.run([sys.executable, '-c', REMOTE, str(args.local_directory)], input=payload, check=True)
+        return
     command = ['ssh', '-o', 'BatchMode=yes', '-o', 'ConnectTimeout=10']
     if args.ssh_config:
         command.extend(['-F', str(args.ssh_config)])
     if args.known_hosts:
         command.extend(['-o', 'UserKnownHostsFile=' + str(args.known_hosts)])
     remote_command = 'python3 -c ' + shlex.quote(REMOTE) + ' ' + shlex.quote(args.remote_directory)
-    subprocess.run([*command, args.host, remote_command], input=payload.getvalue(), check=True)
+    subprocess.run([*command, args.host, remote_command], input=payload, check=True)
 
 
 if __name__ == '__main__':
@@ -208,6 +216,7 @@ if __name__ == '__main__':
     parser.add_argument('directory', nargs='?', type=Path, default=Path('build/custom-map-downloads'))
     parser.add_argument('--host', default='root@skieomod.emillon.fr')
     parser.add_argument('--remote-directory', default='/opt/custom-map/current/downloads')
+    parser.add_argument('--local-directory', type=Path, help='publish on this server using the same checks, without SSH')
     parser.add_argument('--ssh-config', type=Path, help='optional SSH configuration file')
     parser.add_argument('--known-hosts', type=Path, help='optional SSH known-hosts file')
     publish(parser.parse_args())
