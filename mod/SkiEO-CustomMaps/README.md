@@ -3,9 +3,9 @@
 Par **Albatar (Élie Millon)**. La distribution inclut le guide anglais
 `getting-started.md`. Veymont, du même auteur, est proposée comme carte Featured.
 
-Chargeur générique de cartes personnalisées pour la démo de Ski-E-O!, validé
-en jeu sur le build `25996759`, avec compatibilité conservée pour les builds
-précédents vérifiés.
+Chargeur générique de cartes personnalisées pour la démo de Ski-E-O!.
+Le protocole de compatibilité vérifie les ponts natifs, le rendu et les
+sauvegardes à chaque mise à jour du jeu ; voir `docs/game-compatibility-testing.md`.
 Il découvre les dossiers `custom-map.json` et les archives
 `.skieomap`, ajoute la section **Custom Map** au dialogue **New Game**, puis
 construit leur terrain directement depuis le heightmap R16 source.

@@ -62,7 +62,8 @@ int exercise(const char *path,int modern,int broken,size_t limit) {
     static const unsigned char query[]={0x40,0x55,0x53,0x56,0x48,0x8d,0x6c,0x24,0xb9,0x48,0x81,0xec,0xb0,0,0,0};
     static const unsigned char old_memo[]={0x44,0x3b,0xbe,0x9c,0x01,0,0,0x75,0x27,0x0f,0x28,0xc6,0xf3,0x0f,0x5c,0x86,0xa0,0x01,0,0};
     static const unsigned char new_memo[]={0x44,0x3b,0xbe,0xb4,0x01,0,0,0x75,0x27,0x0f,0x28,0xc6,0xf3,0x0f,0x5c,0x86,0xb8,0x01,0,0};
-    size_t q=modern?0x5390430:0x538df30,m=modern?0x5390712:0x538e212;
+    size_t q=modern==2?0x53a6210:modern?0x5390430:0x538df30;
+    size_t m=modern==2?0x53a64f2:modern?0x5390712:0x538e212;
     memcpy(executable+q,query,sizeof(query));
     memcpy(executable+m,modern?new_memo:old_memo,sizeof(old_memo));
     if(broken==1)executable[q]^=1;
@@ -103,6 +104,19 @@ int exercise(const char *path,int modern,int broken,size_t limit) {
         struct.pack_into('<Q', expected, 0x10, 0x123456789)
         expected[0x1B4:0x1B8] = b'\xff' * 4
         self.assertEqual(data, expected)
+
+    def test_relocated_build_uses_the_same_reviewed_memo_and_rejects_bad_guards(self):
+        data, status = self.run_case(2)
+        self.assertTrue(status.startswith('ok:'), status)
+        expected = bytearray(b'\xa7' * 0x200)
+        struct.pack_into('<Q', expected, 0x10, 0x123456789)
+        expected[0x1B4:0x1B8] = b'\xff' * 4
+        self.assertEqual(data, expected)
+        for broken in (1, 2, 3):
+            with self.subTest(broken=broken):
+                data, status = self.run_case(2, broken)
+                self.assertTrue(status.startswith('error:'), status)
+                self.assertEqual(data[0x18:], b'\xa7' * (0x200-0x18))
 
     def test_previous_build_keeps_its_own_offset(self):
         data, status = self.run_case(False, limit=0x1A5)

@@ -97,8 +97,8 @@ Pour les ressources, le script utilise le `retoc` local déjà construit sous
 python3 tools/check_game_compatibility.py --retoc /chemin/retoc
 ```
 
-Le catalogue courant conserve les noms des ressources du build 25996759 ;
-la capture antérieure 25970577 reste archivée.
+Le catalogue courant conserve les noms des ressources du build 26019240 ;
+les captures antérieures 25996759 et 25970577 restent archivées.
 Les rapports suivants permettent aussi de comparer les hashes de contenu :
 
 ```sh
@@ -108,6 +108,8 @@ python3 tools/check_game_compatibility.py --previous build/compatibility/essai-p
 Les limites de qualification du build 25996759 restent décrites dans
 [son rapport](game-update-25996759.md), notamment pour le rendu et certaines
 positions restaurées. Elles restent à vérifier lors d'une nouvelle revue.
+Le [rapport du build 26019240](game-update-26019240.md) distingue les correctifs
+natifs et de sauvegarde des défauts de rendu qui empêchent sa qualification.
 
 ## 2. Contrôles UE4SS dans une copie isolée
 

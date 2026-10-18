@@ -41,7 +41,8 @@ assert(#registered==4 and registered[1]==0xA0 and registered[4]==0xAC)
 assert(session.SkiEOPlaythroughWord0==0x11111111 and session.SkiEOPlaythroughWord3==0x44444444)
 local function saved(id,path)
  return {IsValid=function() return true end,MapPath=str(path or '/Engine/Maps/Entry'),
-  SlotName=str('test.slot'),PlaythroughId=id}
+  SlotName=str('test.slot'),PlaythroughId=id,
+  Buildings={ForEach=function()end},Lifts={ForEach=function()end}}
 end
 objects={saved(fresh)}
 local restored=Saves.find_restore({other,map})
@@ -68,6 +69,54 @@ notify(objects[2])
 assert(Saves.find_restore({map,other}).map==other,'stale save objects overrode the loaded map')
 notify(saved(legacy,'/Game/Maps/Generated/Map_sugar_bowl_real'))
 assert(not Saves.find_restore({map,other}),'old custom save overrode a stock load')
+local function array(values)
+ return {ForEach=function(_,callback) for i,value in ipairs(values) do callback(i,{get=function() return value end}) end end}
+end
+local building_id='12345678-00000000-00000000-00000001'
+local lift_id='12345678-00000000-00000000-00000002'
+local base={ID=building_id,DisplayName=str(''),Transform={Translation={X=1,Y=2,Z=3}}}
+local lift_base={ID=lift_id,DisplayName=str('Custom lift'),Transform={Translation={X=10,Y=20,Z=30}}}
+local entries=Saves.read_placeables({Buildings=array({{BaseData=base}}),Lifts=array({{BaseData=lift_base}})})
+local key=lift_id:gsub('[^%x]',''):lower()
+lift_base.Transform.Translation.Z=-900
+assert(entries[key].position.Z==30,'saved transform retained a native wrapper')
+assert(entries[building_id:gsub('[^%x]',''):lower()].name=='','empty native label was discarded')
+assert(not pcall(Saves.read_placeables,{Buildings=array({{BaseData=base},{BaseData=base}}),Lifts=array({})}),
+ 'duplicate saved identities were accepted')
+lift_base.Transform.Translation.Z=0/0
+assert(not pcall(Saves.read_placeables,{Buildings=array({}),Lifts=array({{BaseData=lift_base}})}),
+ 'non-finite origin was accepted')
+local root={Mobility=0,IsValid=function()return true end,GetAddress=function()return 123 end}
+root.SetMobility=function(self,value)self.Mobility=value end
+local position={X=10,Y=20,Z=45}
+local child_pose={Translation={X=15,Y=25,Z=50},Rotation={X=0,Y=0,Z=0,W=1},Scale3D={X=1,Y=1,Z=1}}
+local child={Mobility=0,GetAttachParent=function()return root end,K2_GetComponentToWorld=function()return child_pose end}
+child.SetMobility=root.SetMobility
+child.K2_SetWorldTransform=function(_,pose)child_pose=pose end
+local actor={RootComponent=root,GetPlaceableId=function()return lift_id end,
+ IsA=function(_,class)return class=='/Script/SkiResortSimulator.LiftActor' end,
+ K2_GetActorLocation=function()return position end,K2_GetComponentsByClass=function()return {child} end,
+ SetInstanceName=function(self,name)self.name=name end}
+actor.K2_SetActorLocation=function(_,value)
+ -- Model the attached terminal moving with its root. The saved origin repair
+ -- must preserve this geometry and must not retain a live transform view.
+ child_pose.Translation.Z=child_pose.Translation.Z+value.Z-position.Z
+ position={X=value.X,Y=value.Y,Z=value.Z}
+end
+FText=function(value)return value end
+Saves.restore_placeable(actor,entries)
+assert(position.Z==30 and child_pose.Translation.Z==50,'origin repair moved the grounded terminal')
+assert(root.Mobility==0 and child.Mobility==0 and actor.name=='Custom lift')
+actor.GetPlaceableId=function()return building_id end
+Saves.restore_placeable(actor,entries)
+assert(actor.name=='' and position.Z==30,'empty name was replaced or a building was moved')
+actor.GetPlaceableId=function()return fresh end
+actor.name='Unrelated';Saves.restore_placeable(actor,entries)
+assert(actor.name=='Unrelated','missing/deleted save entries changed another actor')
+actor.GetPlaceableId=function()return lift_id end
+position.Z=45;actor.K2_SetActorLocation=function()error('engine refused movement')end
+assert(not pcall(Saves.restore_placeable,actor,entries),'movement failure was ignored')
+assert(root.Mobility==0 and child.Mobility==0,'movement failure left movable components')
 for path in pairs(tracked) do os.remove(path) end
 io=actual_io
 print('Custom map saves: fresh identities, persistent association, legacy migration and stock isolation OK')

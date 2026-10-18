@@ -108,6 +108,82 @@ local function guid_string(value)
     assert(#result == 32, 'invalid saved playthrough identifier')
     return result
 end
+local function unwrap(value)
+    local ok, nested = pcall(function() return value:get() end)
+    return ok and nested or value
+end
+function Saves.read_placeables(save)
+    -- Copy reflected save data while it is alive. Never retain its UObject or
+    -- UScriptStruct wrappers across world travel or garbage collection.
+    local result = {}
+    for _, field in ipairs({'Buildings', 'Lifts'}) do
+        save[field]:ForEach(function(_, value)
+            local base = unwrap(value).BaseData
+            local id = guid_string(base.ID)
+            assert(not result[id], 'duplicate saved placeable identifier')
+            local entry = {name=base.DisplayName:ToString()}
+            if field == 'Lifts' then
+                local p = base.Transform.Translation
+                entry.position = {X=p.X,Y=p.Y,Z=p.Z}
+                for _, coordinate in pairs(entry.position) do
+                    assert(coordinate == coordinate and math.abs(coordinate) < math.huge,
+                        'invalid saved lift origin')
+                end
+            end
+            result[id] = entry
+        end)
+    end
+    return result
+end
+function Saves.restore_placeable(actor, entries)
+    local entry = entries and entries[guid_string(actor:GetPlaceableId())]
+    if not entry then return end
+    -- Native LoadFromSaveData replaces an empty label with its type name.
+    -- An empty saved label is still intentional and must survive a roundtrip.
+    actor:SetInstanceName(FText(entry.name))
+    if not entry.position then return end
+    local location = actor:K2_GetActorLocation()
+    if math.abs(location.X-entry.position.X) < 0.001
+        and math.abs(location.Y-entry.position.Y) < 0.001
+        and math.abs(location.Z-entry.position.Z) < 0.001 then return end
+    assert(actor:IsA('/Script/SkiResortSimulator.LiftActor'), 'saved lift class changed')
+    -- Lift waypoints/towers are world-space geometry, already grounded by the
+    -- terrain finalizer. Native loading also snaps the invisible actor origin
+    -- to its quantized heightfield. Restore that origin without moving the
+    -- grounded terminals, cables, queues or their attached children.
+    local root = actor.RootComponent
+    assert(valid(root), 'saved lift root is unavailable')
+    local children = {}
+    for _, value in ipairs(actor:K2_GetComponentsByClass(StaticFindObject('/Script/Engine.SceneComponent'))) do
+        local component = unwrap(value)
+        local parent = component:GetAttachParent()
+        if valid(parent) and parent:GetAddress() == root:GetAddress() then
+            local pose, copy = component:K2_GetComponentToWorld(), {}
+            for _, field in ipairs({'Translation','Rotation','Scale3D'}) do
+                local vector = pose[field]
+                copy[field] = {X=vector.X,Y=vector.Y,Z=vector.Z}
+                if field == 'Rotation' then copy[field].W = vector.W end
+            end
+            children[#children+1] = {component=component,pose=copy,mobility=component.Mobility}
+        end
+    end
+    local mobility = root.Mobility
+    local ok, message = pcall(function()
+        root:SetMobility(2)
+        for _, child in ipairs(children) do child.component:SetMobility(2) end
+        actor:K2_SetActorLocation(entry.position,false,{},true)
+        for _, child in ipairs(children) do
+            child.component:K2_SetWorldTransform(child.pose,false,{},true)
+        end
+        local restored = actor:K2_GetActorLocation()
+        for _, axis in ipairs({'X','Y','Z'}) do
+            assert(math.abs(restored[axis]-entry.position[axis]) <= 1, 'saved lift origin was not restored')
+        end
+    end)
+    root:SetMobility(mobility)
+    for _, child in ipairs(children) do child.component:SetMobility(child.mobility) end
+    assert(ok, message)
+end
 local function metadata_path(guid)
     local library = StaticFindObject('/Script/SkiResortSimulator.Default__SaveDumpLibrary')
     local directory = library:GetSaveGamesDir():ToString():gsub('\\', '/')
@@ -182,7 +258,8 @@ function Saves.find_restore(maps)
                 map = maps[1]
             end
             assert(not result or result.map == map, 'ambiguous pending custom-map saves')
-            result = {map=map,guid=guid,legacy=not id,script_state=Saves.read_state(save,map)}
+            result = {map=map,guid=guid,legacy=not id,script_state=Saves.read_state(save,map),
+                placeables=Saves.read_placeables(save)}
         end
     end
     if result then Saves.bind(result.guid, result.map) end

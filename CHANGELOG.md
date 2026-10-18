@@ -12,6 +12,16 @@ have their own package versions. Download the
 - Prepare optional Discord release announcements after HTTPS publication checks,
   with a preview mode and receipts for confirmed messages.
 
+## [1.24.1] - 2026-10-18
+
+- Add reviewed native profiles for Steam demo build 26019240, retaining the
+  previous signatures and structure guards for older builds.
+- Preserve empty furniture labels and saved lift origins when restoring a
+  custom map. Keep grounded lift components at their world transforms.
+- Record the updated asset inventory and compatibility results. Full
+  qualification remains blocked by the snow surface and black trail ribbons;
+  this build is not announced as fully compatible.
+
 ## [1.24.0] - 2026-10-18
 
 - Publish the project source on GitHub under BSD-3-Clause, with separate third-party notices.

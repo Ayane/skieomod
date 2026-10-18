@@ -657,6 +657,7 @@ host.loading_finished = function(api, success, message)
                             Terrain.align_building(actor)
                             Terrain.align_lift(actor)
                             if api._restoring then
+                                Saves.restore_placeable(actor, api._saved_placeables)
                                 if class == "LiftActor" then
                                     restored_lifts[#restored_lifts + 1] = actor
                                 elseif not actor:GetClass():GetFullName():find("/Blueprints/Decorations/", 1, true) then
@@ -852,6 +853,7 @@ function Runtime.restore(saved)
     end
     Runtime.pending_script_state = saved.script_state
     local api = assert(activate_map(map,true), 'could not activate saved custom map')
+    api._saved_placeables = saved.placeables
     Loading.show(map)
     Runtime.emit("map.before_load", {restored=true})
     World.prepare(map, log, function(failure) api:_finish_loading(false,failure) end, true)

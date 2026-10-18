@@ -56,14 +56,17 @@ int exercise(const char *input,const char *output,int modern,int broken) {
     static const unsigned char old_lookup[]={0x49,0x63,0xc1,0x4c,0x8d,0x04,0x40,0x49,0xc1,0xe0,0x04};
     static const unsigned char new_lookup[]={0x49,0x63,0xc0,0x48,0x6b,0xd0,0x38,0x49,0x03,0xd2,0x48,0x8b,0x0a,0x41,0x3b,0xc9};
     static const unsigned char ready[]={0x41,0x38,0x54,0x24,0x20,0x0f,0x84,0xe3,0xfd,0xff,0xff};
-    size_t v=modern?0x4f5a315:0x4f576f5,l=modern?0x52ea970:0x5284fb0,m=modern?0x52e8900:0x52863d0;
+    size_t v=modern==2?0x4f5ac15:modern?0x4f5a315:0x4f576f5;
+    size_t l=modern==2?0x52eccc0:modern?0x52ea970:0x5284fb0;
+    size_t m=modern==2?0x52eae50:modern?0x52e8900:0x52863d0;
+    size_t r=modern==2?0x52ecf06:0x52eabb6;
     memcpy(executable+v,validity,sizeof(validity));memcpy(executable+m,mapping,sizeof(mapping));
     memcpy(executable+l,modern?new_lookup:old_lookup,modern?sizeof(new_lookup):sizeof(old_lookup));
-    if(modern)memcpy(executable+0x52eabb6,ready,sizeof(ready));
+    if(modern)memcpy(executable+r,ready,sizeof(ready));
     if(broken==1)executable[v]^=1;
     if(broken==2)executable[l]^=1;
     if(broken==3)executable[m]^=1;
-    if(broken==4)executable[0x52eabb6]^=1;
+    if(broken==4)executable[r]^=1;
     uint64_t cls=0x123456789,pointer=(uintptr_t)entries;
     memcpy(cache+0x10,&cls,8);cache[0x1a5]=broken==5?0:1;
     double bounds[]={0,0,409600,409600};memcpy(cache+0xe8,bounds,sizeof(bounds));
@@ -112,14 +115,15 @@ int exercise(const char *input,const char *output,int modern,int broken) {
         return struct.unpack('<4f', output_path.read_bytes())
 
     def test_sparse_tile_lookup_and_readiness_in_both_layouts(self):
-        for modern in (False, True):
+        for modern in (0, 1, 2):
             with self.subTest(modern=modern):
                 self.assertEqual(self.sample(modern), (1.0, 73.5, 20.0, 100.0))
 
     def test_bad_guards_unready_or_short_data_and_outside_points_are_rejected(self):
-        for broken in range(1, 10):
-            with self.subTest(broken=broken):
-                self.assertEqual(self.sample(True, broken), (0.0, 0.0, 0.0, 0.0))
+        for modern in (1, 2):
+            for broken in range(1, 10):
+                with self.subTest(modern=modern, broken=broken):
+                    self.assertEqual(self.sample(modern, broken), (0.0, 0.0, 0.0, 0.0))
 
 
 if __name__ == '__main__':

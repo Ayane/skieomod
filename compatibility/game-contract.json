@@ -1,11 +1,11 @@
 {
   "format": "skieo-compatibility-contract",
   "version": 1,
-  "reference_build": "25996759",
-  "reference_executable_sha256": "219f73ee4ca1413b04464effe09b6f9a3cb242f8a4745a452f5d523a167657bd",
-  "native_helper_sha256": "de3d7de6b1897aca0e9327bcc23baed1b1a981e38487788b447234727bf59594",
+  "reference_build": "26019240",
+  "reference_executable_sha256": "209da968636fc41034da8e74805c9419636d446c0a13a2e70dbc706835e9a3e6",
+  "native_helper_sha256": "6e64722cf6867b663678fcec6799e4c91d70414c08d816efae34204c6ec7ff3b",
   "native_sources": {
-    "native/SkiEONativeTerrain/native_terrain.c": "b28a7f6fe8f1bd84e41bf07bb63b60f2f7c28680263934667cd662063a224fc2",
+    "native/SkiEONativeTerrain/native_terrain.c": "fd7183e426be3a37e31758c976104bd2c8498dfdb82448d3f02aaad9a7056d51",
     "native/SkiEONativeTerrain/navigation_layout.h": "ae84782dc0a6c010481db6139bd2d66634b9bf1d1f30b840f2fe759a665ac6ba",
     "native/SkiEONativeTerrain/render_mapping_layout.h": "5cf8d6da07c19a575f2d6a93c54156f4f0af3e6a1a8d4f0e04e7fc654f112ff9",
     "native/SkiEOTrailRatings/trail_ratings.c": "c4d23bbaad05bf966ec018e7ed3204fa683683ea1c2de8ae1e85d5ebb31796b7",
@@ -31,121 +31,121 @@
   "guards": [
     {
       "id": "hubs.building",
-      "rva": "0x4faec80",
+      "rva": "0x4fb04b0",
       "bytes": "48895c242055488d6c24a94881ecc0000000",
       "mode": "rva"
     },
     {
       "id": "hubs.lift",
-      "rva": "0x4faee40",
+      "rva": "0x4fb0670",
       "bytes": "40555657488dac2450ffffff4881ecb0010000488bf9",
       "mode": "rva"
     },
     {
       "id": "hubs.rebuild",
-      "rva": "0x5048280",
+      "rva": "0x5049fa0",
       "bytes": "40574883ec2083b9080b000000488bf9",
       "mode": "rva"
     },
     {
       "id": "hubs.deferred",
-      "rva": "0x503f780",
+      "rva": "0x50414a0",
       "bytes": "83b9080b0000000f8ef38a0000c3cccc",
       "mode": "rva"
     },
     {
       "id": "staff.regenerate",
-      "rva": "0x5314480",
+      "rva": "0x53319e0",
       "bytes": "4c8bdc41564881eca0050000",
       "mode": "rva"
     },
     {
       "id": "staff.settings",
-      "rva": "0x531449e",
+      "rva": "0x53319fe",
       "bytes": "4883b908050000004c8bf10f8472020000",
       "mode": "rva"
     },
     {
       "id": "skiability.query",
-      "rva": "0x5390430",
+      "rva": "0x53a6210",
       "bytes": "40555356488d6c24b94881ecb0000000",
       "mode": "rva"
     },
     {
       "id": "skiability.memo",
-      "rva": "0x5390712",
+      "rva": "0x53a64f2",
       "bytes": "443bbeb401000075270f28c6f30f5c86b8010000",
       "mode": "rva"
     },
     {
       "id": "hub_names.get",
-      "rva": "0x503e520",
+      "rva": "0x50401e0",
       "bytes": "48895c240848896c24104889742418574883ec20488bfa488db1d0010000",
       "mode": "rva"
     },
     {
       "id": "hub_names.insert",
-      "rva": "0x501f560",
+      "rva": "0x50210f0",
       "bytes": "48895c241048896c24184889742420574883ec40",
       "mode": "rva"
     },
     {
       "id": "hub_names.text",
-      "rva": "0x1349600",
+      "rva": "0x13499c0",
       "bytes": "488bc45741564883ec5848895810",
       "mode": "rva"
     },
     {
       "id": "navigation.tick",
-      "rva": "0x52432e0",
+      "rva": "0x524ea00",
       "bytes": "48895c24184889742420574883ec60488d71c80f29742450488bd9",
       "mode": "unique"
     },
     {
       "id": "navigation.changed",
-      "rva": "0x52360e0",
+      "rva": "0x52417b0",
       "bytes": "c6814808000001c6416901c3",
       "mode": "unique"
     },
     {
       "id": "snow_cpu.validity",
-      "rva": "0x4f5a315",
+      "rva": "0x4f5ac15",
       "bytes": "0fb681a5010000418800",
       "mode": "rva"
     },
     {
       "id": "snow_cpu.lookup",
-      "rva": "0x52ea970",
+      "rva": "0x52eccc0",
       "bytes": "4963c0486bd0384903d2488b0a413bc9",
       "mode": "rva"
     },
     {
       "id": "snow_cpu.mapping",
-      "rva": "0x52e8900",
+      "rva": "0x52eae50",
       "bytes": "f20f1089f80000000f57d2f20f5c89e8000000",
       "mode": "rva"
     },
     {
       "id": "snow_cpu.ready",
-      "rva": "0x52eabb6",
+      "rva": "0x52ecf06",
       "bytes": "41385424200f84e3fdffff",
       "mode": "rva"
     },
     {
       "id": "trail_ratings.classifier",
-      "rva": "0x53b9dd0",
+      "rva": "0x539cbc0",
       "bytes": "0f2f0551d7ea027203b003c30f2f05f9d7eb027203b002c30f2f05a975e0020f93c0c3",
       "mode": "rating_semantic"
     },
     {
       "id": "trail_ratings.palette",
-      "rva": "0x50d26c0",
+      "rva": "0x50d6d60",
       "bytes": "0fb6d184c9742f83ea01741d83ea01741583fa017403b004c3803df8d14605020f94c00405c3b003c3803de8d14605010f95c0fec0c3803ddbd14605020f94c0c3",
       "mode": "rating_semantic"
     },
     {
       "id": "trail_ratings.color",
-      "rva": "0x53bd020",
+      "rva": "0x53a3b80",
       "bytes": "40534883ec20488bd90fb6cae88f56d1ff0fb6c083f8060f879d000000488d0dbc2fc4fa8b9481f0d03b054803d1ffe233c048c743040000803f8903488bc3c7430c0000803f4883c4205bc333c0c743080000803f488903488bc3c7430c0000803f4883c4205bc333c048c7030000803f894308488bc3c7430c0000803f4883c4205bc333c0c7430c0000803f488903894308488bc34883c4205bc3c7030000803f488bc348c74304ae47613ec7430c0000803f4883c4205bc30f1005fffbdd02488bc30f11034883c4205bc3",
       "mode": "rating_semantic"
     }
@@ -498,8 +498,8 @@
     "Trail ribbons can appear black on snow in build 25970577; do not use that rendering as a passing visual baseline."
   ],
   "ue4ss_sha256": "b6c3833120285cb49e90849dbca39d658573c4b8bac07ab2b62f78428cf3b1d3",
-  "reference_inventory": "compatibility/reference-assets-25996759.json",
-  "reference_inventory_sha256": "fab89831c054328b644786a2d9d4bd34559cf4ac0cdd2403ef4c74eef424daf1",
+  "reference_inventory": "compatibility/reference-assets-26019240.json",
+  "reference_inventory_sha256": "0851bc20dc9a1e5806b3da07062809cf2e9341472897cd6b358906f8e95f723c",
   "dependencies": [
     {
       "id": "community.foxes",

@@ -40,6 +40,8 @@ Try [Veymont](mod/SkiEO-Veymont/README.md), based on real Vercors terrain, or
 [Super Saint-Bernard](mod/SkiEO-SuperSaintBernard/README.md), a historical
 resort scenario. Game updates can require compatibility fixes; see the
 [compatibility protocol](docs/game-compatibility-testing.md).
+The [26019240 report](docs/game-update-26019240.md) records native fixes and
+remaining rendering failures; this game build has not passed full qualification.
 
 ## Create and publish
 
