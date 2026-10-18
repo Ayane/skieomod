@@ -11,6 +11,10 @@ have their own package versions. Download the
 - Include this changelog in the tools and publish a versioned copy with each release.
 - Prepare optional Discord release announcements after HTTPS publication checks,
   with a preview mode and receipts for confirmed messages.
+- Keep nights dark in the independent world: lower the environment controller's
+  night sky-light intensity from its stock 9 to 0.5. The stock value offsets a
+  captured night sky on cooked maps; with the static daylight cubemap it made
+  nights brighter than noon.
 
 ## [1.24.2] - 2026-10-18
 

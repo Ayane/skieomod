@@ -85,6 +85,9 @@ local function initialize(pending, world)
         actor.SunLight,actor.MoonLight,actor.SkyLight = sun,moon,sky
         actor.PostProcessVolume,actor.MPC_Weather = post_process,environment.WeatherMPC
         actor.SunIntensity_Day = 5
+        -- The stock night value (9) offsets a captured, nearly black night sky.
+        -- With the static daylight cubemap above it made nights brighter than noon.
+        actor.SkyLightIntensity_Night = 0.5
         actor.AutoExposureMinEV100,actor.AutoExposureMaxEV100 = 0,1
     end)
     sky.LightComponent:RecaptureSky()
