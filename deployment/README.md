@@ -18,9 +18,14 @@ release preparation is separate from deployment.
 the new SAN certificate through a separate HTTP challenge host. It then migrates the
 old `CUSTOM_MAP_URL` value while preserving other settings, restarts Gunicorn,
 validates Nginx and checks the API. Nginx redirects HTTP and the old HTTPS
-hostname to `https://skieomod.emillon.fr` with 308, preserving paths, query
-strings and request methods. The old hostname must remain in DNS and in the
-certificate renewal configuration.
+hostname's web pages to `https://skieomod.emillon.fr` with 308, preserving paths,
+query strings and request methods. HTTPS `/downloads/` links on the old hostname
+remain directly available because installed native helpers reject redirects.
+The old hostname must remain in DNS and in the certificate renewal configuration.
+
+Creating a DNS record alone does not activate HTTPS for a new hostname: Nginx
+must serve a certificate covering that name. The certificate's saved deploy
+hook validates and reloads Nginx after each successful automatic renewal.
 
 The landing page replaces the old browser catalogue. `/publish` points to
 its publishing instructions and old `/packages/…` links point to the in-game

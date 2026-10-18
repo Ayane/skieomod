@@ -67,7 +67,10 @@ HTTP
     systemctl reload nginx
 fi
 # Cover the canonical host and the redirect alias with a single SAN certificate.
-certbot certonly --webroot -w /var/www/custom-map-acme --cert-name skieomod.emillon.fr -d skieomod.emillon.fr -d skieomap.emillon.fr --keep-until-expiring --expand --non-interactive --agree-tos --register-unsafely-without-email
+certbot certonly --webroot -w /var/www/custom-map-acme \
+    --cert-name skieomod.emillon.fr -d skieomod.emillon.fr -d skieomap.emillon.fr \
+    --keep-until-expiring --expand --non-interactive --agree-tos \
+    --register-unsafely-without-email --deploy-hook 'nginx -t && systemctl reload nginx'
 install -m 0644 "$release_dir/deployment/nginx.conf" /etc/nginx/sites-available/custom-map
 ln -sfn /etc/nginx/sites-available/custom-map /etc/nginx/sites-enabled/custom-map
 rm -f /etc/nginx/sites-enabled/custom-map-acme
