@@ -1,0 +1,97 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://skieomod.emillon.fr/schemas/scene.schema.json",
+  "title": "SkiEO authored scene",
+  "type": "object",
+  "required": [
+    "version",
+    "objects"
+  ],
+  "properties": {
+    "version": {
+      "const": 1
+    },
+    "objects": {
+      "type": "array",
+      "maxItems": 1024,
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "class",
+          "kind",
+          "position"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-z0-9][a-z0-9_-]{0,79}$"
+          },
+          "class": {
+            "type": "string"
+          },
+          "kind": {
+            "enum": [
+              "building",
+              "lift",
+              "decoration",
+              "park",
+              "snowblower",
+              "system"
+            ]
+          },
+          "name": {
+            "type": "string",
+            "maxLength": 256
+          },
+          "variant": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9_-]{1,80}$",
+            "description": "Native building variant ID, for example Beginner, Intermediate, Expert or TwoSided."
+          },
+          "position": {
+            "$ref": "#/$defs/position"
+          },
+          "end_position": {
+            "$ref": "#/$defs/position"
+          },
+          "rotation_degrees": {
+            "type": "number",
+            "default": 0
+          },
+          "height_offset_meters": {
+            "type": "number",
+            "default": 0
+          }
+        },
+        "allOf": [
+          {
+            "if": {
+              "properties": {
+                "kind": {
+                  "const": "lift"
+                }
+              }
+            },
+            "then": {
+              "required": [
+                "end_position"
+              ]
+            }
+          }
+        ]
+      }
+    }
+  },
+  "$defs": {
+    "position": {
+      "type": "array",
+      "items": {
+        "type": "number"
+      },
+      "minItems": 2,
+      "maxItems": 2,
+      "description": "Metres east and south of the map centre; build derives ground height."
+    }
+  }
+}

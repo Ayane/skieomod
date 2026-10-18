@@ -1,0 +1,605 @@
+{
+  "$schema": "https://skieo.community/schemas/custom-map-1.json",
+  "format": {
+    "name": "skieo-map",
+    "version": "1.4.0"
+  },
+  "id": "community.veymont",
+  "metadata": {
+    "name": "Veymont",
+    "version": "0.7.7",
+    "authors": [
+      "Albatar (Élie Millon)"
+    ],
+    "description": "Build your mountain escape in the heart of the Vercors. From Gresse-en-Vercors to the Grand Veymont and Mont Aiguille, explore snowy forests and open meadows, develop a resort with 20 trails and nine lifts, and watch for shy foxes roaming between the trees.",
+    "language": "en",
+    "players": {
+      "min": 1,
+      "max": 1
+    },
+    "tags": [
+      "Alps",
+      "France",
+      "Nature",
+      "Sandbox"
+    ],
+    "license": "IGN Open Licence v2.0 data and OpenStreetMap ODbL 1.0",
+    "localizations": {
+      "fr": {
+        "description": "Créez votre échappée alpine au cœur du Vercors. De Gresse-en-Vercors au Grand Veymont et au Mont Aiguille, explorez les forêts enneigées et les grandes prairies, développez une station de 20 pistes et neuf remontées, et guettez les renards discrets qui se faufilent entre les arbres.",
+        "license": "Données IGN Licence Ouverte v2.0 et OpenStreetMap ODbL 1.0"
+      }
+    }
+  },
+  "terrain": {
+    "size_meters": [
+      8064,
+      12096
+    ],
+    "elevation_meters": [
+      745.262,
+      2341.113
+    ],
+    "origin_centimeters": [
+      -403200,
+      -604800,
+      0
+    ],
+    "source": {
+      "file": "Terrain/heightmap.r16",
+      "format": "r16le",
+      "vertices": [
+        2017,
+        3025
+      ],
+      "spacing_meters": 4.0,
+      "row_order": "north_to_south",
+      "height_scale_meters": 0.025,
+      "height_offset_meters": 723.9875
+    },
+    "textures": {
+      "albedo": {
+        "file": "Terrain/limestone-albedo.png",
+        "mips": [
+          "Terrain/limestone-albedo-mip01.png",
+          "Terrain/limestone-albedo-mip02.png",
+          "Terrain/limestone-albedo-mip03.png",
+          "Terrain/limestone-albedo-mip04.png",
+          "Terrain/limestone-albedo-mip05.png",
+          "Terrain/limestone-albedo-mip06.png",
+          "Terrain/limestone-albedo-mip07.png",
+          "Terrain/limestone-albedo-mip08.png",
+          "Terrain/limestone-albedo-mip09.png"
+        ],
+        "color_space": "srgb"
+      }
+    },
+    "runtime": {
+      "sample_step": 4,
+      "tile_quads": 63,
+      "uv_tile_meters": 20.0,
+      "snow_material": "/Game/Materials/Snow/M_Snow.M_Snow",
+      "snow_offset_centimeters": 30.0,
+      "placeable_clearance_centimeters": 20.0,
+      "snow_surface_bias_centimeters": -12
+    },
+    "preview": {
+      "samples": [
+        [
+          0.5402,
+          0.5775,
+          0.6153,
+          0.6605,
+          0.6439,
+          0.4571,
+          0.2812,
+          0.2003,
+          0.1513,
+          0.2629,
+          0.3826,
+          0.2694,
+          0.2387,
+          0.3779,
+          0.4034,
+          0.2899,
+          0.162
+        ],
+        [
+          0.5484,
+          0.5454,
+          0.6196,
+          0.7015,
+          0.5711,
+          0.3902,
+          0.3062,
+          0.2118,
+          0.1369,
+          0.2939,
+          0.4595,
+          0.3187,
+          0.2214,
+          0.4442,
+          0.5912,
+          0.4,
+          0.2147
+        ],
+        [
+          0.5419,
+          0.5827,
+          0.6536,
+          0.7364,
+          0.6168,
+          0.4417,
+          0.336,
+          0.2427,
+          0.1821,
+          0.3229,
+          0.4688,
+          0.2877,
+          0.2942,
+          0.4081,
+          0.5042,
+          0.4635,
+          0.319
+        ],
+        [
+          0.5629,
+          0.5683,
+          0.6361,
+          0.7612,
+          0.6397,
+          0.4504,
+          0.2977,
+          0.243,
+          0.2187,
+          0.3481,
+          0.4504,
+          0.2836,
+          0.2921,
+          0.3903,
+          0.4991,
+          0.5777,
+          0.344
+        ],
+        [
+          0.5174,
+          0.5464,
+          0.5866,
+          0.6893,
+          0.5733,
+          0.4197,
+          0.3346,
+          0.2807,
+          0.2386,
+          0.3576,
+          0.3864,
+          0.2617,
+          0.2893,
+          0.3904,
+          0.5104,
+          0.5344,
+          0.3074
+        ],
+        [
+          0.5201,
+          0.5575,
+          0.5662,
+          0.6681,
+          0.8166,
+          0.5279,
+          0.4001,
+          0.3418,
+          0.3101,
+          0.2955,
+          0.3179,
+          0.2902,
+          0.2906,
+          0.3866,
+          0.4898,
+          0.5779,
+          0.3809
+        ],
+        [
+          0.5268,
+          0.5434,
+          0.5713,
+          0.6815,
+          0.8311,
+          0.6132,
+          0.4873,
+          0.3932,
+          0.3437,
+          0.3186,
+          0.3055,
+          0.3,
+          0.2904,
+          0.3858,
+          0.4889,
+          0.5712,
+          0.3833
+        ],
+        [
+          0.5409,
+          0.5381,
+          0.5506,
+          0.6278,
+          0.7558,
+          0.5662,
+          0.4674,
+          0.3956,
+          0.3232,
+          0.3116,
+          0.3367,
+          0.3638,
+          0.3409,
+          0.4554,
+          0.5097,
+          0.6372,
+          0.4488
+        ],
+        [
+          0.5282,
+          0.5467,
+          0.5425,
+          0.6049,
+          0.7842,
+          0.6527,
+          0.5387,
+          0.382,
+          0.3834,
+          0.386,
+          0.4607,
+          0.4152,
+          0.4097,
+          0.4494,
+          0.5366,
+          0.6001,
+          0.3957
+        ],
+        [
+          0.5382,
+          0.5619,
+          0.6064,
+          0.6331,
+          0.7808,
+          0.6761,
+          0.5056,
+          0.3735,
+          0.5622,
+          0.5271,
+          0.396,
+          0.3306,
+          0.3586,
+          0.4233,
+          0.4301,
+          0.317,
+          0.2155
+        ],
+        [
+          0.5279,
+          0.5443,
+          0.5785,
+          0.647,
+          0.8178,
+          0.9499,
+          0.581,
+          0.5026,
+          0.4563,
+          0.329,
+          0.2659,
+          0.2988,
+          0.2171,
+          0.2172,
+          0.2178,
+          0.1432,
+          0.103
+        ],
+        [
+          0.5437,
+          0.5596,
+          0.5838,
+          0.6182,
+          0.7315,
+          0.8965,
+          0.7578,
+          0.5274,
+          0.375,
+          0.2748,
+          0.2664,
+          0.2131,
+          0.3334,
+          0.1614,
+          0.0521,
+          0.0248,
+          0.0244
+        ],
+        [
+          0.5392,
+          0.5534,
+          0.5812,
+          0.6169,
+          0.7034,
+          0.7069,
+          0.4867,
+          0.3866,
+          0.376,
+          0.2813,
+          0.2375,
+          0.292,
+          0.3836,
+          0.3309,
+          0.3023,
+          0.3214,
+          0.1702
+        ],
+        [
+          0.5226,
+          0.5516,
+          0.5949,
+          0.656,
+          0.719,
+          0.589,
+          0.5934,
+          0.4776,
+          0.3221,
+          0.3394,
+          0.3588,
+          0.3912,
+          0.3709,
+          0.261,
+          0.2345,
+          0.3774,
+          0.3964
+        ],
+        [
+          0.5395,
+          0.5525,
+          0.6195,
+          0.7003,
+          0.7353,
+          0.7414,
+          0.6116,
+          0.5253,
+          0.4718,
+          0.4834,
+          0.5311,
+          0.3935,
+          0.2549,
+          0.2047,
+          0.1871,
+          0.3505,
+          0.391
+        ],
+        [
+          0.5823,
+          0.6065,
+          0.6772,
+          0.6628,
+          0.7079,
+          0.7269,
+          0.6521,
+          0.5285,
+          0.5709,
+          0.5542,
+          0.4819,
+          0.3257,
+          0.277,
+          0.223,
+          0.1416,
+          0.3172,
+          0.1925
+        ],
+        [
+          0.5983,
+          0.6198,
+          0.6612,
+          0.6682,
+          0.6624,
+          0.6966,
+          0.5485,
+          0.385,
+          0.3789,
+          0.3639,
+          0.2743,
+          0.2087,
+          0.182,
+          0.1813,
+          0.1777,
+          0.0544,
+          0.0433
+        ]
+      ]
+    }
+  },
+  "location": {
+    "latitude": 44.88601663,
+    "longitude": 5.54604349,
+    "world_map_uv": [
+      0.462,
+      0.276
+    ],
+    "label": "Gresse-en-Vercors, France"
+  },
+  "content": {
+    "assets": [
+      "Preview/veymont.png",
+      "Preview/veymont-loading.png",
+      "Scripts/veymont_data.lua",
+      "Scripts/veymont_staff.lua",
+      "Vegetation/forest.skxy",
+      "Scripts/furnishings.lua"
+    ]
+  },
+  "script": {
+    "language": "lua",
+    "api": "1.0",
+    "entry": "Scripts/main.lua",
+    "permissions": [
+      "gameplay",
+      "skieo.unrestricted"
+    ]
+  },
+  "editor": {
+    "coordinate_system": {
+      "horizontal": "EPSG:2154",
+      "vertical": "NGF-IGN69",
+      "axis_order": "east,north,up"
+    },
+    "layers": [
+      {
+        "kind": "trails",
+        "format": "OpenStreetMap"
+      },
+      {
+        "kind": "lifts",
+        "format": "OpenStreetMap"
+      },
+      {
+        "kind": "forest",
+        "format": "OpenStreetMap"
+      }
+    ]
+  },
+  "extensions": {
+    "community.skieo.presentation": {
+      "image": "Preview/veymont.png",
+      "loading_image": "Preview/veymont-loading.png",
+      "trails": 20,
+      "lifts": 9,
+      "difficulties": [
+        "beginner",
+        "intermediate",
+        "expert"
+      ]
+    },
+    "community.skieo.data-sources": {
+      "terrain": "IGN LiDAR HD Isère 2021-2022",
+      "layout": "OpenStreetMap",
+      "terrain_repairs": [
+        {
+          "name": "Les Deux / Col des Deux",
+          "bounds_east_north": [
+            902000,
+            6429000,
+            903000,
+            6430000
+          ],
+          "blend_meters": 32,
+          "dataset": "IGN LiDAR HD MNT, mission 21LHD7PN, acquisition 2021-10-14, classification Avineon, edition 2025-02-20",
+          "url": "https://data.geopf.fr/wms-r?SERVICE=WMS&VERSION=1.3.0&EXCEPTIONS=text%2Fxml&REQUEST=GetMap&LAYERS=IGNF_LIDAR-HD_MNT_ELEVATION.ELEVATIONGRIDCOVERAGE.LAMB93&FORMAT=image%2Fgeotiff&STYLES=&CRS=EPSG%3A2154&BBOX=901965.75%2C6428965.75%2C903034.25%2C6430050.25&WIDTH=2137&HEIGHT=2169&FILENAME=veymont-les-deux-ign-2025.tif",
+          "licence": "Licence Ouverte v2.0"
+        }
+      ]
+    },
+    "community.skieo.landmarks": {
+      "mont_aiguille": {
+        "name": "Mont Aiguille",
+        "latitude": 44.8417918,
+        "longitude": 5.5522225,
+        "osm_node": "410304217",
+        "elevation_meters": 2087,
+        "source": "https://www.openstreetmap.org/node/410304217"
+      }
+    },
+    "community.foxes": {
+      "count": 4,
+      "seed": 7521,
+      "habitats": [
+        {
+          "forest": {
+            "x": -54800,
+            "y": -76800,
+            "radius": 1600
+          },
+          "meadow": {
+            "x": -64100,
+            "y": -80000,
+            "radius": 1200
+          },
+          "crossing": [
+            {
+              "x": -56500,
+              "y": -78000
+            },
+            {
+              "x": -63400,
+              "y": -79800
+            }
+          ]
+        },
+        {
+          "forest": {
+            "x": -68317,
+            "y": -125216,
+            "radius": 2000
+          },
+          "meadow": {
+            "x": -57925,
+            "y": -119216,
+            "radius": 1600
+          },
+          "crossing": [
+            {
+              "x": -68317,
+              "y": -125216
+            },
+            {
+              "x": -57925,
+              "y": -119216
+            }
+          ]
+        },
+        {
+          "forest": {
+            "x": 40259,
+            "y": 83308,
+            "radius": 2000
+          },
+          "meadow": {
+            "x": 34609,
+            "y": 73522,
+            "radius": 1600
+          },
+          "crossing": [
+            {
+              "x": 40259,
+              "y": 83308
+            },
+            {
+              "x": 34609,
+              "y": 73522
+            }
+          ]
+        },
+        {
+          "forest": {
+            "x": 42916,
+            "y": -19110,
+            "radius": 2000
+          },
+          "meadow": {
+            "x": 48916,
+            "y": -8718,
+            "radius": 1600
+          },
+          "crossing": [
+            {
+              "x": 42916,
+              "y": -19110
+            },
+            {
+              "x": 48916,
+              "y": -8718
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "dependencies": [
+    {
+      "id": "community.foxes",
+      "version": "=0.4.0"
+    }
+  ]
+}

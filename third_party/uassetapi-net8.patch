@@ -1,0 +1,33 @@
+diff --git a/UAssetAPI/UAssetAPI.csproj b/UAssetAPI/UAssetAPI.csproj
+index 37f7351..e250407 100644
+--- a/UAssetAPI/UAssetAPI.csproj
++++ b/UAssetAPI/UAssetAPI.csproj
+@@ -1,7 +1,7 @@
+ ﻿<Project Sdk="Microsoft.NET.Sdk">
+   <PropertyGroup>
+     <ProjectGuid>{178417EC-1177-413E-BE85-C83AECD64279}</ProjectGuid>
+-    <TargetFramework>net10.0</TargetFramework>
++    <TargetFramework>net8.0</TargetFramework>
+     <AssemblyTitle>UAssetAPI</AssemblyTitle>
+     <Product>UAssetAPI</Product>
+     <Copyright>Copyright (c) 2020 - 2026 atenfyr</Copyright>
+@@ -134,4 +134,4 @@
+     </None>
+     <None Include="Resources\AC7Key.bin" />
+   </ItemGroup>
+-</Project>
+\ No newline at end of file
++</Project>
+diff --git a/UAssetAPI/Unversioned/JmapHelper.cs b/UAssetAPI/Unversioned/JmapHelper.cs
+index 8f7e979..5b64501 100644
+--- a/UAssetAPI/Unversioned/JmapHelper.cs
++++ b/UAssetAPI/Unversioned/JmapHelper.cs
+@@ -268,7 +268,7 @@ namespace UAssetAPI.Unversioned
+                 "Enum" => JsonSerializer.Deserialize<JmapEnum>(ref reader, options),
+                 _ => null,
+             };
+-            res?.Type = typeDiscriminator;
++            if (res != null) res.Type = typeDiscriminator;
+ 
+             return res;
+         }

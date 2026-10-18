@@ -1,0 +1,20 @@
+{
+  "name": "Super Saint-Bernard",
+  "terrain": {
+    "bounds_east_north": [
+      2576704,
+      1078516,
+      2586304,
+      1086516
+    ],
+    "vertices_x": 2401,
+    "vertices_y": 2001,
+    "extent_meters": [
+      9600,
+      8000
+    ],
+    "spacing_meters": 4
+  },
+  "horizontal_epsg": 2056,
+  "vertical_epsg": 5728
+}

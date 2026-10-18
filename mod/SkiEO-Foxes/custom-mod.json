@@ -1,0 +1,87 @@
+{
+  "format": {
+    "name": "skieo-mod",
+    "version": "1.0.0"
+  },
+  "id": "community.foxes",
+  "metadata": {
+    "name": "Forest foxes",
+    "version": "0.4.0",
+    "authors": [
+      "Albatar (Élie Millon)",
+      "npbehunin (original fox model)"
+    ],
+    "description": "Animated foxes roam woodland and meadows, hunt rodents, cross pistes at night and leave pawprints in snow. A standalone mapmod example.",
+    "license": "MIT (code); CC BY 4.0 (fox model and textures)",
+    "language": "en"
+  },
+  "runtime": "map-api",
+  "dependencies": [],
+  "script": {
+    "language": "lua",
+    "api": "1.4",
+    "entry": "Scripts/main.lua",
+    "permissions": [
+      "gameplay"
+    ]
+  },
+  "content": {
+    "assets": [
+      "Assets/fox.skan",
+      "Assets/skin.png",
+      "Assets/eyeballs.png",
+      "Assets/fox-eyes.json",
+      "Scripts/behaviour.lua",
+      "Scripts/gaze.lua",
+      "Assets/snow.png",
+      "Assets/pawprint.png",
+      "Assets/fox-ground.json",
+      "Assets/snow-coat-01.png",
+      "Assets/snow-coat-02.png",
+      "Assets/snow-coat-03.png",
+      "Assets/snow-coat-04.png",
+      "Assets/snow-coat-05.png",
+      "Assets/snow-coat-06.png",
+      "Assets/snow-coat-07.png",
+      "Assets/snow-coat-08.png",
+      "Assets/snow-coat-09.png",
+      "Assets/snow-coat-10.png",
+      "Assets/snow-coat-11.png",
+      "Assets/snow-coat-12.png",
+      "Assets/snow-coat-13.png",
+      "Assets/snow-coat-14.png",
+      "Assets/snow-coat-15.png",
+      "Assets/snow-coat-16.png"
+    ]
+  },
+  "files": [
+    "Scripts/main.lua",
+    "Assets/fox.skan",
+    "Assets/skin.png",
+    "Assets/eyeballs.png",
+    "Assets/fox-eyes.json",
+    "Scripts/behaviour.lua",
+    "Scripts/gaze.lua",
+    "CREDITS.txt",
+    "LICENSE",
+    "Assets/snow.png",
+    "Assets/pawprint.png",
+    "Assets/fox-ground.json",
+    "Assets/snow-coat-01.png",
+    "Assets/snow-coat-02.png",
+    "Assets/snow-coat-03.png",
+    "Assets/snow-coat-04.png",
+    "Assets/snow-coat-05.png",
+    "Assets/snow-coat-06.png",
+    "Assets/snow-coat-07.png",
+    "Assets/snow-coat-08.png",
+    "Assets/snow-coat-09.png",
+    "Assets/snow-coat-10.png",
+    "Assets/snow-coat-11.png",
+    "Assets/snow-coat-12.png",
+    "Assets/snow-coat-13.png",
+    "Assets/snow-coat-14.png",
+    "Assets/snow-coat-15.png",
+    "Assets/snow-coat-16.png"
+  ]
+}

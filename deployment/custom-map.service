@@ -1,0 +1,27 @@
+[Unit]
+Description=Custom Map repository
+After=network-online.target
+Wants=network-online.target
+RequiresMountsFor=/srv/custom-map-data
+
+[Service]
+Type=simple
+User=custom-map
+Group=custom-map
+WorkingDirectory=/opt/custom-map/current
+EnvironmentFile=/etc/custom-map.env
+ExecStart=/opt/custom-map/venv/bin/gunicorn 'repository.server.app:create_app()' --bind 127.0.0.1:8091 --workers 2 --threads 2 --timeout 180 --max-requests 1000 --max-requests-jitter 100 --error-logfile - --no-control-socket
+Restart=on-failure
+RestartSec=5
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/srv/custom-map-data
+MemoryMax=1G
+CPUQuota=150%
+TasksMax=32
+UMask=0027
+
+[Install]
+WantedBy=multi-user.target

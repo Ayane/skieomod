@@ -1,0 +1,147 @@
+{
+  "version": 1,
+  "photos": {
+    "20240406_145511.jpg": {
+      "priority": 3,
+      "roles": [
+        "shape",
+        "context"
+      ],
+      "notes": "Vue large, ciel voilé et détails lointains. GPS absent ; utile pour la silhouette générale."
+    },
+    "20250105_124419.jpg": {
+      "priority": 3,
+      "roles": [
+        "shape",
+        "snow"
+      ],
+      "notes": "Parois sombres et ciel lumineux : conserver la forme et la neige, examiner le contre-jour avant toute radiométrie."
+    },
+    "20250118_103053.jpg": {
+      "priority": 2,
+      "roles": [
+        "shape",
+        "snow"
+      ],
+      "notes": "Premier recalage GPS du prototype. Parois surtout ombragées ; détails radiométriques limités."
+    },
+    "20250126_121102.jpg": {
+      "priority": 3,
+      "roles": [
+        "shape",
+        "snow",
+        "context"
+      ],
+      "notes": "Vue large enneigée sous ciel nuageux. Peut compléter le contour et les dépôts ; éclairage direct incertain."
+    },
+    "20250202_110550.jpg": {
+      "priority": 2,
+      "roles": [
+        "shape",
+        "snow",
+        "radiometry_candidate"
+      ],
+      "notes": "Vue des parois et corniches avec GPS. Nuages : examiner les zones effectivement éclairées avant le calcul de normales."
+    },
+    "20250202_151519.jpg": {
+      "priority": 3,
+      "roles": [
+        "shape",
+        "snow"
+      ],
+      "notes": "Contre-jour et parois sombres. Le soleil calculé ne décrit pas leur éclairage diffus."
+    },
+    "20251012_094453.jpg": {
+      "priority": 2,
+      "roles": [
+        "shape",
+        "rock",
+        "radiometry_candidate"
+      ],
+      "notes": "Vue d'automne avec GPS et ciel bleu. Peu de neige ; taille apparente des parois modeste."
+    },
+    "20251012_124008.jpg": {
+      "priority": 2,
+      "roles": [
+        "shape",
+        "rock"
+      ],
+      "notes": "Vue proche et très oblique depuis la crête. Utile pour les volumes et angles des tours ; contre-jour et voile limitent la radiométrie."
+    },
+    "20251207_082025.jpg": {
+      "priority": 1,
+      "roles": [
+        "shape",
+        "snow",
+        "radiometry_candidate"
+      ],
+      "notes": "Vue rapprochée au soleil levant avec GPS et UTC. Parois et bandes de neige lisibles ; première priorité de recalage, ombres portées à exclure."
+    },
+    "20251228_082731.jpg": {
+      "priority": 2,
+      "roles": [
+        "shape",
+        "snow",
+        "context"
+      ],
+      "notes": "Vue large au soleil levant. GPS et UTC absents ; préciser le point de vue avant d'en déduire une direction de lumière."
+    },
+    "20260221_121310.jpg": {
+      "priority": 2,
+      "roles": [
+        "shape",
+        "snow",
+        "radiometry_candidate"
+      ],
+      "notes": "Vue proche depuis le Brisou avec GPS. Le pylône et les câbles demandent un masque ; neige abondante et nuages à contrôler."
+    },
+    "20260308_065954.jpg": {
+      "priority": 3,
+      "roles": [
+        "shape",
+        "snow"
+      ],
+      "notes": "Vue matinale avant le lever géométrique du soleil. Indices de neige et silhouette ; pas de modèle solaire direct."
+    },
+    "20260308_095749.jpg": {
+      "priority": 2,
+      "roles": [
+        "shape",
+        "snow",
+        "rock"
+      ],
+      "notes": "Vue proche depuis la crête avec GPS. Bon complément pour la géométrie latérale, mais angle oblique et nuages."
+    },
+    "20260705_105825.jpg": {
+      "priority": 1,
+      "roles": [
+        "shape",
+        "rock",
+        "radiometry_candidate"
+      ],
+      "notes": "Vue d'été avec GPS et ciel dégagé. Référence pour la roche sans neige ; Grand Veymont plus lointain que les falaises du premier plan."
+    },
+    "20260818_205108.jpg": {
+      "priority": 4,
+      "roles": [
+        "context",
+        "shape"
+      ],
+      "notes": "Coucher du soleil et silhouettes. Point de vue hors des limites de la heightmap ; utile au contexte, pas aux normales de roche."
+    },
+    "IMG-20250927-WA0009.jpg": {
+      "priority": 1,
+      "roles": [
+        "shape",
+        "rock"
+      ],
+      "notes": "Parois très lisibles sans neige. Sentier avant Sous le Pas de la Ville ; point de vue corrigé par l’auteur d’après l’arbre au premier plan (marge de recalage 25 m). Version WhatsApp carrée sans EXIF ; heure et recadrage inconnus. Brouillard à masquer.",
+      "location_hint": {
+        "latitude": 44.88286111111111,
+        "longitude": 5.529138888888889,
+        "radius_meters": 25,
+        "source": "author corrected map position using the foreground tree; not EXIF"
+      }
+    }
+  }
+}

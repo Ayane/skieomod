@@ -1,0 +1,157 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://skieomod.emillon.fr/schemas/triggers.schema.json",
+  "title": "SkiEO trigger source",
+  "type": "object",
+  "required": [
+    "version",
+    "triggers"
+  ],
+  "properties": {
+    "version": {
+      "const": 1
+    },
+    "triggers": {
+      "type": "array",
+      "maxItems": 256,
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "event"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9_-]{1,80}$"
+          },
+          "name": {
+            "type": "string"
+          },
+          "event": {
+            "enum": [
+              "map.before_load",
+              "map.after_load",
+              "map.ready",
+              "map.terrain_loaded",
+              "map.load_failed",
+              "map.unloading",
+              "calendar.month_changed",
+              "calendar.year_changed",
+              "weather.changed",
+              "placeable.built",
+              "placeable.removed",
+              "trail.created",
+              "trail.removed"
+            ]
+          },
+          "enabled": {
+            "type": "boolean",
+            "default": true
+          },
+          "before_script": {
+            "type": "boolean",
+            "default": false,
+            "description": "Register this handler before the base project script; execution still waits for event."
+          },
+          "mode": {
+            "enum": [
+              "graph",
+              "lua"
+            ],
+            "default": "graph"
+          },
+          "lua": {
+            "type": "string"
+          },
+          "graph": {
+            "type": "object",
+            "required": [
+              "nodes",
+              "edges"
+            ],
+            "properties": {
+              "nodes": {
+                "type": "array",
+                "maxItems": 512,
+                "items": {
+                  "type": "object",
+                  "required": [
+                    "id",
+                    "kind"
+                  ],
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "pattern": "^[A-Za-z0-9_-]{1,80}$"
+                    },
+                    "kind": {
+                      "enum": [
+                        "entry",
+                        "log",
+                        "funds",
+                        "time",
+                        "pause",
+                        "weather",
+                        "release_weather",
+                        "status",
+                        "scenario_configure",
+                        "branch",
+                        "delay",
+                        "number",
+                        "text",
+                        "boolean",
+                        "event_value",
+                        "add",
+                        "multiply",
+                        "compare"
+                      ]
+                    },
+                    "position": {
+                      "type": "array",
+                      "items": {
+                        "type": "number"
+                      },
+                      "minItems": 2,
+                      "maxItems": 2
+                    },
+                    "params": {
+                      "type": "object"
+                    }
+                  }
+                }
+              },
+              "edges": {
+                "type": "array",
+                "maxItems": 2048,
+                "items": {
+                  "type": "object",
+                  "required": [
+                    "source",
+                    "port",
+                    "target",
+                    "input"
+                  ],
+                  "properties": {
+                    "source": {
+                      "type": "string"
+                    },
+                    "port": {
+                      "type": "string"
+                    },
+                    "target": {
+                      "type": "string"
+                    },
+                    "input": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

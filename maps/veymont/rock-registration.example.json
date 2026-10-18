@@ -1,0 +1,43 @@
+{
+  "version": 1,
+  "photo": "grand-veymont-sunrise.jpg",
+  "heightmap_manifest": "../../mod/SkiEO-Veymont/custom-map.json",
+  "provenance": {
+    "viewpoint": "Crête du Brisou, supplied by the map author",
+    "photo_credit": "Pierre Lonchampt (EXIF)",
+    "skyline": "Manually traced from the supplied 1400 x 700 photograph; approximate observations",
+    "coordinate_system": "map metres: east, south, up; NGF-IGN69 elevations",
+    "brisou_reference_meters": [38.0217, 1012.4284, 1675.7309]
+  },
+  "camera_search": {
+    "position_xy_bounds_meters": [[-60, 160], [900, 1110]],
+    "height_above_ground_meters": 1.7,
+    "minimum_elevation_meters": 1600,
+    "aim_meters": [-1500, 1800, 2100],
+    "yaw_offset_degrees": [-15, 15],
+    "pitch_degrees": [1, 29],
+    "focal_pixels": [1300, 4000],
+    "terrain_window_meters": [-2400, -700, -500, 3300],
+    "grid_step": 2,
+    "iterations": 100,
+    "seed": 5
+  },
+  "patch": {
+    "surface_template": "rock-surface.example.json",
+    "photo_pixel": [985, 170],
+    "extent_meters": [80, 100],
+    "light_direction_world": [0.8, 0.6, 0.07]
+  },
+  "skyline_pixels": [
+    [210, 422], [250, 386], [300, 355], [325, 315], [342, 335],
+    [367, 286], [378, 239], [410, 216], [450, 183], [481, 165],
+    [501, 154], [522, 134], [542, 129], [560, 131], [580, 139],
+    [600, 136], [614, 138], [628, 113], [653, 107], [675, 105],
+    [691, 112], [706, 123], [737, 145], [753, 148], [773, 105],
+    [792, 99], [807, 100], [833, 112], [840, 128], [849, 107],
+    [861, 110], [877, 126], [891, 134], [904, 167], [918, 116],
+    [940, 105], [960, 104], [977, 108], [997, 102], [1018, 100],
+    [1037, 105], [1052, 126], [1080, 141], [1120, 154], [1150, 165],
+    [1177, 175], [1199, 167], [1220, 165], [1259, 173], [1290, 180]
+  ]
+}

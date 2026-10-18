@@ -1,0 +1,4 @@
+SkiEO tutorial Ticket Office OBJ mesh
+CC0 1.0 Universal: https://creativecommons.org/publicdomain/zero/1.0/
+No game assets or materials are included.
+Units: metres. Up axis: Z. Static single-material geometry.

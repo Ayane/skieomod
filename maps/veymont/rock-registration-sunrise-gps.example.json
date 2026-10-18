@@ -1,0 +1,254 @@
+{
+  "version": 1,
+  "photo": "20251207_082025.jpg",
+  "heightmap_manifest": "../../mod/SkiEO-Veymont/custom-map.json",
+  "provenance": {
+    "viewpoint": "GPS coordinates from the map author's own photograph",
+    "skyline": "Warm rock / blue-grey sky boundary on the upper wall, visually reviewed; approximate observations",
+    "coordinate_system": "map metres: east, south, up; NGF-IGN69 elevations"
+  },
+  "camera_search": {
+    "from_exif": {
+      "map_georeference": "map.json",
+      "gps_radius_meters": 40,
+      "focal_relative_uncertainty": 0.2
+    },
+    "height_above_ground_meters": 1.7,
+    "aim_meters": [
+      -1500,
+      1800,
+      2100
+    ],
+    "yaw_offset_degrees": [
+      -30,
+      30
+    ],
+    "pitch_degrees": [
+      0,
+      40
+    ],
+    "terrain_window_meters": [
+      -2300,
+      1000,
+      -750,
+      3300
+    ],
+    "grid_step": 2,
+    "iterations": 60,
+    "seed": 5,
+    "roll_degrees": [
+      -4,
+      4
+    ]
+  },
+  "patch": {
+    "surface_template": "rock-surface-sunrise-gps.example.json",
+    "photo_pixel": [
+      2120,
+      900
+    ],
+    "extent_meters": [
+      80,
+      100
+    ],
+    "light_direction_from_exif": true
+  },
+  "skyline_pixels": [
+    [
+      1000,
+      1106
+    ],
+    [
+      1040,
+      1069
+    ],
+    [
+      1080,
+      1051
+    ],
+    [
+      1120,
+      1006
+    ],
+    [
+      1160,
+      960
+    ],
+    [
+      1200,
+      912
+    ],
+    [
+      1240,
+      918
+    ],
+    [
+      1280,
+      922
+    ],
+    [
+      1320,
+      842
+    ],
+    [
+      1360,
+      797
+    ],
+    [
+      1400,
+      777
+    ],
+    [
+      1440,
+      853
+    ],
+    [
+      1480,
+      846
+    ],
+    [
+      1520,
+      912
+    ],
+    [
+      1560,
+      768
+    ],
+    [
+      1600,
+      712
+    ],
+    [
+      1640,
+      704
+    ],
+    [
+      1680,
+      736
+    ],
+    [
+      1720,
+      751
+    ],
+    [
+      1760,
+      739
+    ],
+    [
+      1800,
+      742
+    ],
+    [
+      1840,
+      789
+    ],
+    [
+      1880,
+      814
+    ],
+    [
+      1920,
+      739
+    ],
+    [
+      1960,
+      696
+    ],
+    [
+      2000,
+      678
+    ],
+    [
+      2040,
+      674
+    ],
+    [
+      2080,
+      677
+    ],
+    [
+      2120,
+      643
+    ],
+    [
+      2160,
+      635
+    ],
+    [
+      2200,
+      636
+    ],
+    [
+      2240,
+      656
+    ],
+    [
+      2280,
+      688
+    ],
+    [
+      2320,
+      719
+    ],
+    [
+      2360,
+      718
+    ],
+    [
+      2400,
+      738
+    ],
+    [
+      2440,
+      763
+    ],
+    [
+      2480,
+      783
+    ],
+    [
+      2520,
+      824
+    ],
+    [
+      2560,
+      832
+    ],
+    [
+      2600,
+      846
+    ],
+    [
+      2640,
+      825
+    ],
+    [
+      2680,
+      789
+    ],
+    [
+      2720,
+      768
+    ],
+    [
+      2760,
+      771
+    ],
+    [
+      2800,
+      774
+    ],
+    [
+      2840,
+      774
+    ],
+    [
+      2880,
+      781
+    ],
+    [
+      2920,
+      791
+    ]
+  ]
+}

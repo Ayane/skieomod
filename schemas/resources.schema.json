@@ -1,0 +1,102 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://skieomod.emillon.fr/schemas/resources.schema.json",
+  "title": "SkiEO resource source",
+  "type": "object",
+  "required": [
+    "version",
+    "assets"
+  ],
+  "properties": {
+    "version": {
+      "const": 1
+    },
+    "assets": {
+      "type": "array",
+      "maxItems": 1024,
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "kind"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-z0-9][a-z0-9._-]{0,79}$"
+          },
+          "kind": {
+            "enum": [
+              "model",
+              "image",
+              "sound",
+              "game"
+            ]
+          },
+          "file": {
+            "type": "string",
+            "minLength": 1
+          },
+          "path": {
+            "type": "string",
+            "pattern": "^/(Game|Engine)/[A-Za-z0-9_/]+\\.[A-Za-z0-9_]+$"
+          },
+          "units": {
+            "enum": [
+              "meters",
+              "centimeters"
+            ],
+            "default": "meters"
+          },
+          "up_axis": {
+            "enum": [
+              "z",
+              "y"
+            ],
+            "default": "z"
+          },
+          "license": {
+            "type": "string"
+          }
+        },
+        "allOf": [
+          {
+            "if": {
+              "properties": {
+                "kind": {
+                  "const": "game"
+                }
+              }
+            },
+            "then": {
+              "required": [
+                "path"
+              ]
+            },
+            "else": {
+              "required": [
+                "file"
+              ]
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "kind": {
+                  "const": "model"
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "file": {
+                  "pattern": "\\.[oO][bB][jJ]$"
+                }
+              }
+            }
+          }
+        ]
+      }
+    }
+  }
+}

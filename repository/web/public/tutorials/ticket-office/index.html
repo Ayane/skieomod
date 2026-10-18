@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Change the Ticket Office model · Ski-E-O! Custom Map</title>
+<meta name="description" content="Import your own OBJ into the SkiEO 3D Map Workshop, select the Ticket Office mesh in the Object Editor, and build a map with a custom building model.">
+<link rel="canonical" href="https://skieomod.emillon.fr/tutorials/ticket-office/">
+<link rel="stylesheet" href="../heightmap/tutorial.css?v=1.14.0">
+<script src="../heightmap/tutorial.js?v=1.14.0" defer></script>
+</head>
+<body>
+<a class="skip" href="#guide">Skip to the tutorial</a>
+<header class="site-header"><a class="brand" href="/"><span aria-hidden="true">◭</span> Custom Map <small>FOR SKI-E-O!</small></a><nav aria-label="Main navigation"><a href="../editor/">Create a map</a><a href="../scripts/">Scripts &amp; scenarios</a><a href="/docs/editor.md">Workshop guide ↗</a><a href="../mapmods/">Create a mapmod</a></nav></header>
+<main id="guide">
+<section class="hero"><p class="eyebrow">THE MAP MAKER’S GUIDE · OBJECT EDITOR</p><h1>Your resort.<br><em>Your Ticket Office.</em></h1>
+<p class="lead">Bring your own static model into a map, choose it in the Object Editor, then let <code>skieomod build</code> compile and package the change. The existing Ticket Office keeps its gameplay and original collision.</p>
+<div class="hero-meta"><span>Qt workshop · skieomod 1.14+</span><span>Portable OBJ or cooked game reference</span><span>English · 8 October 2026</span></div>
+<figure class="hero-figure"><a href="images/resources.png"><img src="images/resources.png" width="1100" height="780" alt="Actual Resource Editor window with the imported sample Ticket Office displayed as a 3D model."></a><figcaption>The downloadable sample in the Resource Editor. This is an actual desktop capture, using the imported OBJ geometry.</figcaption></figure>
+</section>
+<div class="guide-layout"><aside class="contents"><nav aria-label="Tutorial steps"><p class="eyebrow">ON THIS PAGE</p><a href="#prepare"><span>01</span> Update and open your map</a><a href="#choose"><span>02</span> Choose your model</a><a href="#import"><span>03</span> Import the resource</a><a href="#object"><span>04</span> Change the Ticket Office</a><a href="#build"><span>05</span> Build and play</a><a href="#source">Source files and CLI</a><a href="#questions">Troubleshooting</a></nav></aside>
+<article class="steps">
+<section class="step" id="prepare"><p class="step-number">STEP 01</p><h2>Open the source project</h2>
+<p>You need an existing map source folder containing <code>custom-map.json</code>. Create one with the <a href="../editor/">editor map tutorial</a> or the workshop’s <strong>New</strong> button.</p>
+<p>Install or update the tools, close the game, then update its loader:</p>
+<div class="command"><pre><code>pipx install --force --index-url https://skieomod.emillon.fr/downloads/pypi/ skieo-custom-map
+skieomod update
+skieomod editor my-mountain</code></pre><button type="button" class="copy">Copy</button></div>
+<p>Replace <code>my-mountain</code> with your project folder, or run <code>skieomod editor</code> and select it with <strong>Open</strong>. Use <code>skieomod setup</code> for your first game installation. The tools and the installed Custom Map loader both need version <strong>1.15 or later</strong>.</p>
+<p class="checkpoint"><strong>Checkpoint:</strong> the workshop shows your source terrain in 3D and the toolbar contains <strong>Triggers, Resources and Objects</strong>.</p>
+</section>
+<section class="step" id="choose"><p class="step-number">STEP 02</p><h2>Which kind of model do you have?</h2>
+<div class="qa-tabs" data-tabs><div class="tab-list" role="tablist" aria-label="Choose your model format">
+<button type="button" role="tab" id="model-tab-obj" data-answer="obj" aria-controls="model-obj">I have an OBJ model</button><button type="button" role="tab" id="model-tab-game" data-answer="game" aria-controls="model-game">I have a cooked game asset</button><button type="button" role="tab" id="model-tab-example" data-answer="example" aria-controls="model-example">I want to try the sample</button>
+</div>
+<div class="tab-answer" id="model-obj" role="tabpanel" aria-labelledby="model-tab-obj" tabindex="0"><h3>I have an OBJ model</h3><p>Use a static OBJ, at most <strong>50,000 triangles</strong> and <strong>32 MiB</strong>. Put the origin at the ground contact point, choose metres or centimetres, and remember whether its up axis is Z or Y. Build triangulates faces automatically.</p><p>The portable replacement uses the original component’s first game material. It supports one material; MTL files and custom textures are not turned into Unreal materials. Images may be kept in the resource library separately.</p><p>Continue with <a href="#import">Import the resource</a>.</p></div>
+<div class="tab-answer" id="model-game" role="tabpanel" aria-labelledby="model-tab-game" tabindex="0"><h3>I have a cooked game asset</h3><p>In <strong>Resources → Game reference…</strong>, enter a resource ID and its full Unreal object path, such as <code>/Game/YourMod/Office.Office</code>. Select that resource in step 4.</p><p>The asset must already be available in the game or a compatible installed mod. Add the owning mod’s ID and version to the map’s dependencies. A reference does not package or cook the external asset. Use a compatible <strong>StaticMesh</strong> for this field.</p></div>
+<div class="tab-answer" id="model-example" role="tabpanel" aria-labelledby="model-tab-example" tabindex="0"><h3>I want to try the sample</h3><div class="download-card"><h3>A small Ticket Office</h3><p>A static cabin with a pitched roof and ticket windows, supplied in metres with Z up. This original tutorial mesh includes no game assets.</p><div class="download-links"><a class="button" href="files/ticket-office.obj" download>Download sample OBJ</a><a href="files/LICENSE.txt">CC0 licence and source details</a></div></div><p>Import it with resource ID <code>ticket-office</code>, units <strong>meters</strong> and up axis <strong>z</strong>.</p></div>
+</div>
+<details><summary>I have FBX, GLB or a Blender file instead</summary><p>Export a static version to OBJ from your modelling application, with the correct scale and up axis, then follow the OBJ route. Animated models and custom Unreal materials need a compatible cooked asset workflow. Renaming the extension does not convert a model.</p></details>
+</section>
+<section class="step" id="import"><p class="step-number">STEP 03</p><h2>Import and inspect the resource</h2>
+<p>Click the toolbar’s <strong>Resources</strong> icon, then <strong>Import…</strong>. Use <strong>Browse…</strong> to select the OBJ, set its resource ID, choose <strong>model</strong>, units and up axis, and add its licence or credit. Click <strong>Import</strong>.</p>
+<figure class="game-figure"><a href="images/import.png"><img src="images/import.png" width="720" height="490" loading="lazy" alt="Resource import dialog with the sample OBJ selected using Browse, resource ID ticket-office, metres and Z up."></a><figcaption>The import dialog chooses a real local file; the original remains untouched.</figcaption></figure>
+<p>Select the model in the library to check it in 3D. <strong>Right drag</strong> rotates it, <strong>middle drag</strong> moves the view and the <strong>wheel</strong> zooms. Correct scale or orientation in your model/export if needed, then import a revised resource with a new ID.</p>
+<p>The workshop copies the file into <code>Resources/Files/</code> and keeps its options in <code>Resources/assets.json</code>. Close the Resource Editor to return to your map.</p>
+<p class="checkpoint"><strong>Checkpoint:</strong> the imported model appears upright in the 3D resource preview.</p>
+</section>
+<section class="step" id="object"><p class="step-number">STEP 04</p><h2>Choose the Ticket Office mesh</h2>
+<p>Click <strong>Objects</strong> in the toolbar and select <strong>Ticket Office</strong> in the left list. Search for <code>MeshComponent</code>, select <code>MeshComponent.StaticMesh</code>, then click <strong>Choose resource…</strong>. Select your imported resource and click <strong>Use resource</strong>.</p>
+<p>The map value becomes <code>asset:ticket-office</code> for the sample and appears in <strong>bold</strong>. The change is already applied to the project. Click <strong>Place on map</strong> and left-click the terrain to add a Ticket Office. Press <strong>Escape</strong> to stop placing, then click <strong>Save</strong>.</p>
+<figure class="game-figure"><a href="images/objects.png"><img src="images/objects.png" width="1130" height="750" loading="lazy" alt="Actual Object Editor with Ticket Office selected, the game default mesh path shown, and asset:ticket-office in bold as the map override."></a><figcaption>The game default was captured from the installed demo, and the bold map value selects the imported resource. Defaults may differ after a game update.</figcaption></figure>
+<details><summary>Why does the default say “Not captured”?</summary><p>Start any map with loader 1.15 or later, then use <strong>Read game defaults</strong>. The loader exports actual class defaults to <code>Scripts/object-defaults.json</code> in its mod directory. The editor also accepts that file through <strong>Import defaults…</strong> and stores a project copy. You can set a resource without a captured default; missing values are not guessed.</p></details>
+<p><strong>Reset to game default</strong> removes the override. The CSV records differences only. The same editor exposes game properties such as construction cost; enter only changes you want your map to apply.</p>
+</section>
+<section class="step" id="selected-object"><h2>Change one placed building</h2>
+<p class="checkpoint"><strong>Version availability:</strong> the per-object property controls below require the prepared 1.16 release, which is awaiting publication. The current public download is 1.15.</p>
+<p>Select its footprint or its entry in the workshop’s <strong>Objects in this map</strong> list. The properties panel shows <strong>Default name</strong> and <strong>Name</strong>. Enter <strong>Not Ticket Office</strong> to rename only that building. Its custom name becomes bold; <strong>Reset name</strong> makes it inherit the type’s name again.</p>
+<p>Below, the <strong>Property / Default / This object</strong> table edits this instance’s game properties. Search for a property such as <code>BaseCost</code>, double-click its value, or select <code>MeshComponent.StaticMesh</code> and click <strong>Resource…</strong> to choose a model for only this office. Changes apply immediately and support Undo/Redo. <strong>Reset value</strong> removes the instance’s difference.</p>
+<figure class="game-figure"><a href="images/selected-properties.png"><img src="images/selected-properties.png" width="1440" height="1024" loading="lazy" alt="Selected Not Ticket Office with the default name, custom name, reset controls and a bold instance construction cost in the map workshop."></a><figcaption>A second Ticket Office retains its own name and values. Save records the selected object’s property differences in the CSV’s instance column.</figcaption></figure>
+<details><summary>Should I use this panel or the toolbar’s Object Editor?</summary><p>Use the selected-object panel for one building or lift already placed in your map. Use the toolbar’s <strong>Object Editor</strong> to set defaults for that entire type in this map, including objects built later in the game. Instance differences take priority over the map’s type defaults.</p></details>
+<details><summary>I changed DisplayName, but my building kept its old name</summary><p><code>DisplayName</code> in the Object Editor sets the type’s default name. A placed object with a custom <strong>Name</strong> keeps that name. Select it and click <strong>Reset name</strong> to inherit the default, or enter the intended custom name in its own <strong>Name</strong> field. Save, Build and Play the rebuilt map to see it in the game.</p></details>
+</section>
+<figure class="game-figure"><a href="images/placement.png"><img src="images/placement.png" width="1500" height="980" loading="lazy" alt="Actual 3D map workshop with a Ticket Office footprint and a two-terminal chair lift placed on the terrain."></a><figcaption>Author buildings directly in the terrain view. Cooked game actors appear as labelled footprints here; the game creates their actual meshes after Build.</figcaption></figure>
+<section class="step" id="build"><p class="step-number">STEP 05</p><h2>Build, then test a Ticket Office</h2>
+<p>Click <strong>Build</strong>, then <strong>Test</strong>. Build reads the resource library and object CSV, converts the OBJ to portable geometry and combines the result with your existing map script, graph/Lua triggers and compiled forest.</p>
+<p>Click <strong>Play</strong> to start the editor’s own test instance, or reload that instance after rebuilding. Your ordinary game session stays separate. In this fresh map session, the Ticket Office you placed in the editor is created automatically on the final terrain. You can also place additional offices with the game’s building controls. Existing Ticket Offices in the loaded map and offices built later receive the override.</p>
+<div class="command"><pre><code>skieomod build my-mountain
+skieomod test my-mountain
+skieomod run my-mountain</code></pre><button type="button" class="copy">Copy</button></div>
+<p>The replacement remains attached to the original component, using its transform and material. Its original actor, construction behaviour and collision remain in use; the OBJ does not create a new collision shape. Keep the visual footprint close to the original building when collision matters. Overrides are restored when the map unloads.</p>
+<p>The main terrain viewport previews relief, trees and labelled object footprints. The Resource Editor previews the OBJ; the actual placed building is inspected in the game.</p>
+<p class="checkpoint"><strong>Checkpoint:</strong> your map’s Ticket Office uses the selected model. Other maps and the game’s class defaults keep their normal values.</p>
+</section>
+<section class="step" id="source"><h2>The source files behind the buttons</h2>
+<p>The workshop adds these project-relative build instructions to <code>custom-map.json</code>. You can author the same files manually and use the CLI; no separate converter is required.</p>
+<div class="json-block"><pre><code>"build": {
+  "resources": { "file": "Resources/assets.json" },
+  "objects": { "file": "Objects/overrides.csv" }
+}</code></pre><button type="button" class="copy">Copy</button></div>
+<p>Merge these keys into your existing <code>build</code> object, retaining heightmap, forest and vegetation settings.</p>
+<div class="json-block"><pre><code>{
+  "version": 1,
+  "assets": [{
+    "id": "ticket-office",
+    "kind": "model",
+    "file": "Resources/Files/ticket-office.obj",
+    "units": "meters",
+    "up_axis": "z",
+    "license": "CC0 1.0"
+  }]
+}</code></pre><button type="button" class="copy">Copy</button></div>
+<p>The UTF-8 CSV uses the columns <code>object,field,type,value</code>. Values are JSON literals, quoted as required by CSV:</p>
+<div class="file-tree"><pre><code>object,field,type,value
+/Game/Blueprints/Buildings/BP_TicketOffice.BP_TicketOffice_C,MeshComponent.StaticMesh,model,"""asset:ticket-office"""</code></pre></div>
+<p>Build produces <code>Scripts/skieomod-generated-authoring.lua</code> and uses it as the packaged script entry. Your original script remains a source. Resource JSON, object CSV and OBJ authoring files stay in the project; runtime geometry is compiled into the package. Edit the sources and rebuild.</p>
+</section>
+<section class="step" id="questions"><h2>Common questions</h2>
+<details><summary>The model is too small, huge, sideways or buried</summary><p>Check the import’s units and up axis. Place the model origin at ground level and export the intended size. The game uses the replaced component’s transform; it does not automatically resize the replacement to fit the original mesh. Reimport a corrected model with a new ID, select it and rebuild.</p></details>
+<details><summary>The game still shows the old Ticket Office</summary><p>Check <code>skieomod update --check</code> and upgrade the installed loader to 1.15 or later. Save the Object Editor changes, rebuild and relaunch the latest package in a new session on the correct map. The old package is not changed by editing sources alone. Look in the UE4SS game log for <code>Object override</code> errors if a game update changed the component.</p></details>
+<details><summary>The material does not look like my modelling application</summary><p>The portable OBJ route reuses the original game material. Exported MTL files and custom image textures do not become Unreal materials. Use a compatible cooked StaticMesh reference for a model with authored game materials.</p></details>
+<details><summary>Can I replace a skier this way?</summary><p>The skier/crowd entries use instanced game components. Choose a compatible cooked game mesh for those properties; the portable OBJ replacement is for individual StaticMesh components such as the Ticket Office.</p></details>
+</section>
+</article></div>
+</main><footer><span>Custom Map for Ski-E-O! · Albatar (Élie Millon)</span><a href="../heightmap/">Create a map from your heightmap ↗</a></footer>
+<p id="copy-status" class="sr-only" role="status" aria-live="polite"></p>
+</body></html>

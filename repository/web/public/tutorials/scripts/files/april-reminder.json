@@ -1,0 +1,124 @@
+{
+  "version": 1,
+  "triggers": [
+    {
+      "id": "april-reminder",
+      "name": "April reminder",
+      "enabled": true,
+      "event": "calendar.month_changed",
+      "mode": "graph",
+      "graph": {
+        "nodes": [
+          {
+            "id": "event",
+            "kind": "entry",
+            "position": [
+              40,
+              40
+            ]
+          },
+          {
+            "id": "branch",
+            "kind": "branch",
+            "position": [
+              710,
+              40
+            ]
+          },
+          {
+            "id": "month",
+            "kind": "event_value",
+            "position": [
+              40,
+              200
+            ],
+            "params": {
+              "key": "month",
+              "fallback": 0
+            }
+          },
+          {
+            "id": "april",
+            "kind": "number",
+            "position": [
+              40,
+              360
+            ],
+            "params": {
+              "value": 4
+            }
+          },
+          {
+            "id": "compare",
+            "kind": "compare",
+            "position": [
+              380,
+              200
+            ],
+            "params": {
+              "operator": "=="
+            }
+          },
+          {
+            "id": "message",
+            "kind": "log",
+            "position": [
+              1050,
+              40
+            ]
+          },
+          {
+            "id": "text",
+            "kind": "text",
+            "position": [
+              710,
+              250
+            ],
+            "params": {
+              "value": "April: check your cash reserve."
+            }
+          }
+        ],
+        "edges": [
+          {
+            "source": "event",
+            "port": "then",
+            "target": "branch",
+            "input": "in"
+          },
+          {
+            "source": "month",
+            "port": "value",
+            "target": "compare",
+            "input": "a"
+          },
+          {
+            "source": "april",
+            "port": "value",
+            "target": "compare",
+            "input": "b"
+          },
+          {
+            "source": "compare",
+            "port": "value",
+            "target": "branch",
+            "input": "condition"
+          },
+          {
+            "source": "branch",
+            "port": "true",
+            "target": "message",
+            "input": "in"
+          },
+          {
+            "source": "text",
+            "port": "value",
+            "target": "message",
+            "input": "message"
+          }
+        ]
+      },
+      "lua": "if (event.month or 0) == 4 then\n    api:log('April: check your cash reserve.')\nend"
+    }
+  ]
+}

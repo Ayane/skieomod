@@ -1,0 +1,9 @@
+In-game capture by Albatar (Élie Millon), 13 October 2026.
+Custom Map 1.20.7, Veymont 0.7.6, Forest foxes 0.4.0.
+Native Unreal HighResShot requested through UE4SS in -RenderOffscreen mode.
+
+Fox model: Fox Anatomy by npbehunin, CC BY 4.0.
+https://sketchfab.com/3d-models/fox-anatomy-bc5e3b0399784323a161005c74109578
+https://creativecommons.org/licenses/by/4.0/
+Changes: skin/eyes isolated, scale/axis conversion, weighted rig, animation,
+snow textures and behavioural/terrain adaptation by SkiEO contributors.

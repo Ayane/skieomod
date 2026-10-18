@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Scripts &amp; scenarios · SkiEO Map Workshop</title>
+<meta name="description" content="Create your first Ski-E-O! scenario with visual programming graphs. Follow Super Saint-Bernard's starting economy, connect conditions, and use optional Lua equivalents.">
+<link rel="canonical" href="https://skieomod.emillon.fr/tutorials/scripts/">
+<link rel="stylesheet" href="../heightmap/tutorial.css?v=1.19.3">
+<script src="../heightmap/tutorial.js?v=1.19.3" defer></script>
+</head>
+<body>
+<a class="skip" href="#guide">Skip to the tutorial</a>
+<header class="site-header"><a class="brand" href="/"><span aria-hidden="true">◭</span> Custom Map <small>FOR SKI-E-O!</small></a><nav aria-label="Main navigation"><a href="../editor/">Create a map</a><a href="/docs/editor.md">Workshop guide ↗</a><a href="../mapmods/">Create a mapmod</a></nav></header>
+<main id="guide">
+<section class="hero">
+<p class="eyebrow">SKIEOMOD · SCRIPTING WORKSHOP</p>
+<h1>Give your mountain<br><em>a story to play.</em></h1>
+<p class="lead">Start with visual programming: choose an event, connect actions and give them values. Rebuild the starting economy of <strong>Super Saint-Bernard</strong>, add a condition, then make a small scenario with a briefing, objectives and an ending. Lua equivalents are available in optional tabs.</p>
+<div class="hero-meta"><span>Beginner route: Visual graph</span><span>Real Qt editor captures</span><span>English · 11 October 2026</span></div>
+<figure class="hero-figure"><a href="images/starting-economy.png"><img src="images/starting-economy.png" width="1500" height="960" alt="Super Saint-Bernard starting economy in the actual Qt Trigger Editor: Event connects to Configure scenario, with CHF, 2003, 250000 and 38 as connected constants."></a><figcaption>This is the real source graph used by Super Saint-Bernard. Its starting cash, currency, year and ticket price have been moved out of the handwritten initialization script.</figcaption></figure>
+</section>
+<div class="guide-layout">
+<aside class="contents"><nav aria-label="Tutorial steps"><p class="eyebrow">ON THIS PAGE</p><a href="#prepare"><span>01</span> Open a source project</a><a href="#first-trigger"><span>02</span> Your first trigger</a><a href="#starting-economy"><span>03</span> Starting economy</a><a href="#condition"><span>04</span> Add a condition</a><a href="#scenario"><span>05</span> Create a scenario</a><a href="#test"><span>06</span> Build and test</a><a href="#sources">Source files</a><a href="#questions">Troubleshooting</a></nav></aside>
+<article class="steps">
+<section class="step" id="prepare">
+<p class="step-number">STEP 01</p><h2>Open a source project</h2>
+<p>The workshop edits a folder containing <code>custom-map.json</code>, its terrain and its scripts. A map downloaded from Featured is a playable package. For authoring, use the source project rather than its installed package.</p>
+<div class="download-card"><h3>Practice: My first season</h3><p>A small source map with the starting-economy graph, an April reminder and a ready-to-edit scenario. It uses generated terrain and no Super Saint-Bernard data. Extract the ZIP, then open the <code>first-season</code> folder.</p><div class="download-links"><a class="button" href="files/first-season-project.zip" download>Download practice project</a><a href="files/first-season.lua" download>Download scenario script</a></div></div>
+<div class="command"><pre><code>skieomod editor first-season</code></pre><button type="button" class="copy">Copy</button></div>
+<p>For Super Saint-Bernard in a repository checkout, open <code>mod/SkiEO-SuperSaintBernard</code>. Make a separate copy before experimenting. To start from your own terrain, use <strong>New</strong> or the <a href="../heightmap/">heightmap tutorial</a>, then <strong>Save</strong>.</p>
+<p>This tutorial uses the workshop build with <strong>Configure scenario</strong> and <strong>Register before project script</strong>. If either control is missing, update the tools to a release containing this tutorial, or run this repository's workshop with its Qt dependencies installed. The scenario APIs in the game require Custom Map <strong>1.19.3 or newer</strong>.</p>
+<div class="command"><pre><code>pipx install --force --index-url https://skieomod.emillon.fr/downloads/pypi/ skieo-custom-map
+skieomod update</code></pre><button type="button" class="copy">Copy</button></div>
+<p>For a first installation, run <code>skieomod setup</code> instead of <code>update</code>. Click <strong>Triggers</strong> in the toolbar. The practice project already contains two visual triggers and <strong>Project initialization • Lua</strong>.</p>
+<p class="checkpoint"><strong>Checkpoint:</strong> the Trigger Editor opens with a trigger list on the left, a graph in the centre and node properties on the right.</p>
+</section>
+<section class="step" id="first-trigger">
+<p class="step-number">STEP 02</p><h2>Connect an event to an action</h2>
+<p>A trigger waits for its selected <strong>event</strong>. When that event occurs, the white execution connections tell it which actions to run. Coloured connections supply the data those actions need. A value connection alone does not execute an action.</p>
+<div class="qa-tabs" data-tabs><div class="tab-list" role="tablist" aria-label="First trigger implementation"><button type="button" role="tab" id="welcome-tab-graph" data-answer="graph" aria-controls="welcome-graph">Visual graph · recommended</button><button type="button" role="tab" id="welcome-tab-lua" data-answer="lua" aria-controls="welcome-lua">Lua equivalent</button></div>
+<div class="tab-answer" id="welcome-graph" role="tabpanel" aria-labelledby="welcome-tab-graph" tabindex="0"><h3>Your first graph</h3><ol><li>Click <strong>New trigger</strong>, name it <strong>Welcome</strong>, leave <strong>Enabled</strong> checked and choose <code>map.ready</code>.</li><li>Leave the mode at <strong>Visual graph</strong>. The default graph already connects <strong>Event.then → Print message.in</strong> and <strong>Text.value → Print message.message</strong>.</li><li>Select <strong>Text</strong>. Change its <strong>Value</strong> in the right-hand inspector to <code>My first scenario is ready.</code></li><li>Click <strong>Apply to project</strong>, close the dialog, then <strong>Save → Build → Test → Play</strong>.</li></ol><p><strong>Print message</strong> writes to the Custom Map/UE4SS log. It does not open an in-game briefing or notification.</p></div>
+<div class="tab-answer" id="welcome-lua" role="tabpanel" aria-labelledby="welcome-tab-lua" tabindex="0"><h3>The same trigger in Lua</h3><p>Select event <code>map.ready</code> and mode <strong>Lua</strong>. Paste only this body; the editor registers the event callback for you:</p><div class="command"><pre><code>api:log('My first scenario is ready.')</code></pre><button type="button" class="copy">Copy</button></div><p>In <code>Scripts/main.lua</code>, the corresponding registration would be <code>api:on('map.ready', function(event) … end)</code>. Do not add that wrapper inside a Lua trigger.</p></div>
+</div>
+<div class="table-wrap"><table><caption>The pins use both names and colours.</caption><thead><tr><th scope="col">Connection</th><th scope="col">Use</th></tr></thead><tbody><tr><td>White · execution</td><td><code>then → in</code> runs the next action.</td></tr><tr><td>Green · number</td><td>A Number supplies an amount, year, rate or delay.</td></tr><tr><td>Purple · text</td><td>A Text supplies a message, currency or weather name.</td></tr><tr><td>Pink · boolean</td><td>A comparison supplies <code>true</code> or <code>false</code> to Branch.</td></tr><tr><td>Gold · event value</td><td>Reads a field from the selected event; the compiler checks its type when an action needs it.</td></tr></tbody></table></div>
+<p>Add nodes with <strong>Add node…</strong> or right-click. Drag from an output pin to a compatible input pin. Each input accepts one link. Use the wheel to zoom, middle-drag to move around, and <strong>Undo</strong> to correct a change. Select a node or link and press Delete to remove it.</p>
+</section>
+<section class="step" id="starting-economy">
+<p class="step-number">STEP 03</p><h2>Super Saint-Bernard's starting economy</h2>
+<p>Select <strong>Starting economy · 2003</strong>. This is a converted part of the actual scenario's <code>map.ready</code> initialization: it configures the session with <strong>250,000 CHF</strong>, a <strong>38 CHF</strong> ticket and historical reference year <strong>2003</strong>.</p>
+<div class="qa-tabs" data-tabs><div class="tab-list" role="tablist" aria-label="Starting economy implementation"><button type="button" role="tab" id="economy-tab-graph" data-answer="graph" aria-controls="economy-graph">Visual graph · recommended</button><button type="button" role="tab" id="economy-tab-lua" data-answer="lua" aria-controls="economy-lua">Lua equivalent</button></div>
+<div class="tab-answer" id="economy-graph" role="tabpanel" aria-labelledby="economy-tab-graph" tabindex="0"><h3>Recreate the graph on your own map</h3><ol><li>Create a trigger with event <code>map.ready</code>. Delete the default Print message and Text nodes, keeping Event.</li><li>Add <strong>Configure scenario</strong>. Connect <strong>Event.then → Configure scenario.in</strong>.</li><li>Add a <strong>Text</strong> constant set to <code>CHF</code>, and three <strong>Number</strong> constants set to <code>2003</code>, <code>250000</code> and <code>38</code>.</li><li>Connect their <code>value</code> outputs to <code>currency</code>, <code>start_year</code>, <code>starting_balance</code> and <code>ticket_price</code>, respectively.</li><li>Check <strong>Register before project script</strong>. This registers the configuration handler first, so it runs before the project's other <code>map.ready</code> handlers. It still waits for <code>map.ready</code>.</li></ol><p>On a new map, leave the action's <strong>Rules module</strong> empty. Super Saint-Bernard uses <code>economy</code>: its local <code>Scripts/economy.lua</code> retains the advanced construction costs, loans and lift tracking. The practice map needs none of those rules.</p><p>To try an easier start, select the <strong>250000</strong> Number node, change its Value to <strong>300000</strong>, then Apply, Save and Build. Keep a single enabled configuration trigger: the game can be configured once per session.</p></div>
+<div class="tab-answer" id="economy-lua" role="tabpanel" aria-labelledby="economy-tab-lua" tabindex="0"><h3>The same Super Saint-Bernard configuration</h3><p>The real trigger retains this Lua equivalent. Leave its event and registration-order checkbox as shown:</p><div class="command"><pre><code>local rules = require('economy')
+api.game:configure({
+    currency = 'CHF', start_year = 2003,
+    starting_balance = 250000, ticket_price = 38,
+    costs = rules.costs, class_costs = rules.class_costs,
+    loans = rules.loans,
+    track_lift_rides = rules.track_lift_rides
+})</code></pre><button type="button" class="copy">Copy</button></div><p>For the practice map or a new project, remove <code>require('economy')</code> and the last four optional fields. Configure only currency, start year, starting balance and ticket price.</p></div>
+</div>
+<p><strong>Configure scenario</strong> sets starting cash and ticket price only on a new game. A restored save keeps its current cash and ticket price. <code>start_year</code> is used by the script's historical calendar; the native game date and money symbol remain visible. In Super Saint-Bernard, native <strong>Year 1</strong> represents the 2003–2004 season.</p>
+<p>The graph and Lua sources are retained separately. Switching modes selects which source is compiled; it does not translate later edits. If you change the graph's amount, update the optional Lua equivalent before using that mode.</p>
+<p class="checkpoint"><strong>Checkpoint:</strong> your new test starts with the chosen cash and ticket price. Loading an older save does not reset its economy.</p>
+</section>
+<section class="step" id="condition">
+<p class="step-number">STEP 04</p><h2>Run an action only in April</h2>
+<p>Select <strong>April reminder</strong> in the practice map, or create it on your map. This exercise introduces a condition without changing Super Saint-Bernard's rescue payments.</p>
+<div class="qa-tabs" data-tabs><div class="tab-list" role="tablist" aria-label="Conditional trigger implementation"><button type="button" role="tab" id="condition-tab-graph" data-answer="graph" aria-controls="condition-graph">Visual graph · recommended</button><button type="button" role="tab" id="condition-tab-lua" data-answer="lua" aria-controls="condition-lua">Lua equivalent</button></div>
+<div class="tab-answer" id="condition-graph" role="tabpanel" aria-labelledby="condition-tab-graph" tabindex="0"><h3>Connect the month test</h3><ol><li>Choose event <code>calendar.month_changed</code>. Add <strong>Event value</strong>, <strong>Number</strong>, <strong>Compare</strong> and <strong>Branch</strong>.</li><li>Select Event value: set <strong>Key</strong> to <code>month</code> and <strong>Fallback</strong> to <code>0</code>. Set Number to <code>4</code> and Compare's <strong>Operator</strong> to <code>==</code>.</li><li>Connect <strong>Event value.value → Compare.a</strong>, <strong>Number.value → Compare.b</strong>, then <strong>Compare.value → Branch.condition</strong>.</li><li>Connect <strong>Event.then → Branch.in</strong> and <strong>Branch.true → Print message.in</strong>. Connect a Text containing <code>April: check your cash reserve.</code> to <strong>Print message.message</strong>.</li></ol><p>Leave <strong>Branch.false</strong> unconnected: other months do nothing. April's reminder is written to the log. Calendar event months use January = 1 through December = 12.</p></div>
+<div class="tab-answer" id="condition-lua" role="tabpanel" aria-labelledby="condition-tab-lua" tabindex="0"><h3>The same condition in Lua</h3><p>Choose event <code>calendar.month_changed</code> and use this body:</p><div class="command"><pre><code>if (event.month or 0) == 4 then
+    api:log('April: check your cash reserve.')
+end</code></pre><button type="button" class="copy">Copy</button></div><p><code>event</code> is the selected event's payload. A month-changed event supplies <code>month</code>; a year-changed event supplies the native <code>year</code> counter. Use <code>api.game:snapshot()</code> in Lua when you need the scenario's historical year.</p></div>
+</div>
+<figure class="game-figure"><a href="images/april-condition.png"><img src="images/april-condition.png" width="1780" height="900" loading="lazy" alt="Actual Qt graph for calendar.month_changed with Event value, Number 4, Compare equal, Branch and Print message."></a><figcaption>The white path executes the branch. The data path compares the event's month with 4 and supplies the branch's condition.</figcaption></figure>
+<p><strong>Delay</strong> waits a Number of seconds before continuing a white connection. It uses runtime timers; a delay is not a calendar month or year. Use calendar events for seasonal rules. <strong>Add funds</strong> changes the cash balance; it does not record scenario revenue. A one-time rescue grant also needs saved state so reopening a save or reaching April again cannot pay it twice.</p>
+</section>
+<section class="step" id="scenario">
+<p class="step-number">STEP 05</p><h2>Make it a playable scenario</h2>
+<p>The practice map already has a briefing and two objectives: reach <strong>April 2004</strong> with at least <strong>100,000 CHF</strong> left. A negative cash balance fails the scenario immediately. You can place a Ticket Office and a lift, sculpt or import your terrain, then build a resort within that budget.</p>
+<p>Keep using visual graphs for events, starting values and simple actions. The objective panel, saved progress and victory/failure evaluator currently use the scenario Lua API. The included starter supplies those parts so you can begin by changing the graphs.</p>
+<div class="qa-tabs" data-tabs><div class="tab-list" role="tablist" aria-label="Scenario authoring route"><button type="button" role="tab" id="scenario-tab-starter" data-answer="starter" aria-controls="scenario-starter">Use the starter · recommended</button><button type="button" role="tab" id="scenario-tab-lua" data-answer="lua" aria-controls="scenario-lua">Lua: objectives and saved state</button></div>
+<div class="tab-answer" id="scenario-starter" role="tabpanel" aria-labelledby="scenario-tab-starter" tabindex="0"><h3>Give the starter your own setting</h3><ol><li>Open the practice project. In the workshop's <strong>Map</strong> panel, set your map's name, author and a unique ID before sharing it.</li><li>Set your starting cash and ticket price in <strong>Starting economy · 2003</strong>. Keep its year at <code>2003</code> for this first exercise: the starter's deadline is April 2004.</li><li>Use the <strong>Objects</strong> placement panel to add your initial buildings and lift, or let the player construct them. See the <a href="../ticket-office/#selected-object">object placement tutorial</a>.</li><li>Select <strong>Project initialization • Lua</strong>. Its full script contains the title, briefing, deadline, minimum reserve and objective labels. Edit those together if you want a different goal. Changes to the graph's year do not automatically rewrite these rules.</li><li>Apply, Save, Build, Test and Play. The game displays the native briefing and tracks the two objectives.</li></ol><p>To add this evaluator to a blank map, download <a href="files/first-season.lua">the complete starter script</a> and paste it into <strong>Project initialization • Lua</strong>. Recreate the starting-economy graph from step 3. For a map with an existing script, merge the starter's registration into the existing initialization function so its other handlers remain in use.</p></div>
+<div class="tab-answer" id="scenario-lua" role="tabpanel" aria-labelledby="scenario-tab-lua" tabindex="0"><h3>How the starter stores progress</h3><p>The initialization function receives <code>api</code>. It obtains a JSON-compatible state table and registers a scenario with one to four objectives. Each objective returns display text and a fraction between 0 and 1.</p><div class="command"><pre><code>local state = api:state({status = 'active', balance = 250000})
+api:scenario({
+    title = 'My first season',
+    briefing = 'Reach April 2004 with a cash reserve.',
+    goal = 'Finish with at least 100,000 CHF.',
+    deadline = 'April 2004',
+    status = function() return state.status end,
+    objectives = {{
+        label = 'Keep a cash reserve',
+        progress = function()
+            return {
+                value = string.format('%.0f CHF', state.balance),
+                fraction = math.max(0, math.min(1, state.balance / 100000))
+            }
+        end
+    }}
+})</code></pre><button type="button" class="copy">Copy</button></div><p>This fragment belongs inside the initialization function. The <a href="files/first-season.lua">complete downloadable script</a> also registers a <code>map.ready</code> handler and checks <code>api.game:snapshot()</code> every second. It sets <code>state.status</code> to <code>completed</code> or <code>failed</code> when the conditions are met.</p><p><code>api:state(defaults)</code> restores saved values before the script registers its panels. Native manual saves and autosaves retain that table for a declared scenario. Store numbers, strings, booleans and tables, keeping the state under 32 KiB; keep functions and game objects in the script.</p><p>The evaluator stops changing a completed or failed result. Real-time polling checks the current game calendar; pausing the game does not advance the April deadline.</p></div>
+</div>
+<figure class="game-figure"><a href="images/project-initialization.png"><img src="images/project-initialization.png" width="1500" height="960" loading="lazy" alt="Project initialization Lua entry of Super Saint-Bernard in the real Trigger Editor, showing saved state, briefing and objective callbacks."></a><figcaption>Super Saint-Bernard keeps its detailed maintenance, approvals, historical weather and save rules in project Lua. Its starting economy is now edited separately in the visual graph.</figcaption></figure>
+</section>
+<section class="step" id="test">
+<p class="step-number">STEP 06</p><h2>Build, then test the rules</h2>
+<p>Click <strong>Apply to project</strong> in the Trigger Editor, close it, then <strong>Save → Build → Test → Play</strong>. Build validates graph types, missing inputs and cycles, then compiles the enabled graphs and Lua triggers into the package's entry script.</p>
+<div class="command"><pre><code>skieomod build first-season
+skieomod test first-season --check-scripts
+skieomod run first-season</code></pre><button type="button" class="copy">Copy</button></div>
+<p><code>--check-scripts</code> requires Lua 5.4 / <code>luac</code>; syntax validation does not execute your gameplay rules. Omit this option if the compiler is unavailable. Play is where you check the scenario's behaviour. Editor Play starts its own fresh test instance and reloads that instance after a rebuild.</p>
+<ul><li><strong>Fresh start:</strong> verify the briefing, initial cash, ticket price and objective text.</li><li><strong>Calendar:</strong> let April arrive and check that the reminder appears in the UE4SS log, with the expected victory or failure result in the game.</li><li><strong>Failure:</strong> on a disposable test, create a deficit and check that the scenario fails. For a fast deadline test, use a copied starter script with an earlier deadline.</li><li><strong>Restoration:</strong> save after spending some cash, reload and verify that cash and scenario progress resume. Repeat with a completed or failed scenario.</li></ul>
+<p class="checkpoint"><strong>Checkpoint:</strong> saving and reopening preserves progress; rebuilding then starting a new test uses your edited source values.</p>
+</section>
+<section class="step" id="sources"><h2>The files behind the graph</h2>
+<div class="file-tree"><pre><code>custom-map.json                Source manifest and build settings
+Triggers/triggers.json         Graphs, Lua equivalents, events and enabled flags
+Scripts/main.lua               Project initialization and scenario evaluator
+Scripts/economy.lua            Advanced rules module (Super Saint-Bernard only)
+bin/*.skieomap                 Built playable package</code></pre></div>
+<p>The source manifest keeps its original script entry and links the trigger source:</p>
+<div class="json-block"><pre><code>"script": {
+  "language": "lua", "api": "1.1",
+  "entry": "Scripts/main.lua", "permissions": ["gameplay"]
+},
+"build": {
+  "triggers": {"file": "Triggers/triggers.json"}
+}</code></pre><button type="button" class="copy">Copy</button></div>
+<p>Merge these settings into your existing manifest, preserving terrain, vegetation, resources and scene settings. Local Lua modules need to be declared in <code>content.assets</code>, such as <code>Scripts/economy.lua</code>, along with their module dependencies.</p>
+<p>Build creates <code>Scripts/skieomod-generated-authoring.lua</code> inside the package. Edit the source graph or project Lua and rebuild. The generated entry is not the authoring file. Raw <code>pack</code> archives files; use <code>build</code> to compile your graph first.</p>
+<p><a href="files/starting-economy.json" download>Super Saint-Bernard's actual trigger JSON ↓</a> · <a href="files/april-reminder.json" download>April reminder trigger JSON ↓</a> · <a href="/docs/custom-map-format.md">API and source format reference ↗</a></p>
+<p>The starting-economy JSON references the real <code>economy</code> module. Use it with the Super Saint-Bernard source, or clear Rules module before adapting it to another map. To add the reminder to an existing project, merge its trigger entry into the existing <code>triggers</code> array rather than replacing your other triggers.</p>
+</section>
+<section class="step" id="questions"><h2>When a trigger does not behave as expected</h2>
+<details><summary>Build asks me to connect an input</summary><p>Select the named action. Add a constant of the required type and connect its value to the missing input. Values are edited on constant nodes, not in an action's unconnected input. Configure scenario needs all four data connections.</p></details>
+<details><summary>The message is missing from the game screen</summary><p>Print message writes to the UE4SS log. Use the starter's scenario briefing and objective panel for player-facing instructions.</p></details>
+<details><summary>Configuration says it ran twice, or the wrong year is used</summary><p>Use one enabled Configure scenario action. Remove the older api.game:configure call if you moved it from project Lua into the graph. Check Register before project script so the first snapshot and resort initialization see the chosen historical year.</p></details>
+<details><summary>My graph changed but Lua still has the old value</summary><p>Switching mode retains both sources without synchronizing them. Only the selected mode runs. Update the Lua equivalent explicitly if you want to use it.</p></details>
+<details><summary>Saving did not change my test's starting cash</summary><p>Apply the trigger changes, Save, Build, then start a fresh test. A saved game retains the cash and ticket price it had when saved. This prevents loading a save from granting the starting capital again.</p></details>
+<details><summary>A calendar trigger repeats after reloading or in another year</summary><p>Events are not one-time payment records. Store a paid flag in api:state and check it before awarding a grant. Super Saint-Bernard's Lua grant evaluator checks the year, committed investment and saved grant amount. Keep that evaluator when editing its economy graph.</p></details>
+</section>
+</article></div>
+</main>
+<footer><span>Custom Map for Ski-E-O! · Albatar (Élie Millon)</span><a href="../heightmap/">Create a map from your heightmap ↗</a></footer>
+<p id="copy-status" class="sr-only" role="status" aria-live="polite"></p>
+</body>
+</html>

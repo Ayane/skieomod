@@ -1,0 +1,190 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Create a map with the editor · Ski-E-O! Custom Map</title>
+  <meta name="description" content="Create your first Ski-E-O! map with skieomod editor. Sculpt or import terrain, add trees, place buildings and lifts, then build and play using the graphical workshop. Real captures and a practice source project.">
+  <meta name="theme-color" content="#102a27">
+  <link rel="canonical" href="https://skieomod.emillon.fr/tutorials/editor/">
+  <link rel="stylesheet" href="../heightmap/tutorial.css?v=1.20.9">
+  <script src="../heightmap/tutorial.js?v=1.20.9" defer></script>
+</head>
+<body>
+  <a class="skip" href="#guide">Skip to the tutorial</a>
+  <header class="site-header">
+    <a class="brand" href="/"><span aria-hidden="true">◭</span> Custom Map <small>FOR SKI-E-O!</small></a>
+    <nav aria-label="Main navigation"><a href="#downloads">Practice project</a><a href="../heightmap/">Command-line tutorial</a><a href="/docs/editor.md">Editor reference ↗</a></nav>
+  </header>
+  <main id="guide">
+    <section class="hero" aria-labelledby="title">
+      <p class="eyebrow">THE MAP MAKER’S GUIDE · GRAPHICAL EDITOR</p>
+      <h1 id="title">Create a map<br><em>with the editor.</em></h1>
+      <p class="lead">Shape a mountain in <strong>SkiEO Map Workshop</strong>, add trees and place a small resort. Build and try your map with the toolbar. Start with the base terrain or import your own heightmap.</p>
+      <div class="hero-meta"><span>Beginner route · skieomod editor</span><span>Real Qt captures · 1.20.9 source</span><span>English · 13 October 2026</span></div>
+      <figure class="hero-figure">
+        <a href="images/built-map.png"><img src="images/built-map.png" width="1500" height="980" alt="The Alpine Valley practice map in the actual workshop after Build, showing final terrain, compiled trees and two placed objects."></a>
+        <figcaption>The practice project after Build in the actual editor. The workshop shows simplified terrain, trees and object footprints; snow, game materials and gameplay are checked with Play.</figcaption>
+      </figure>
+    </section>
+
+    <div class="guide-layout">
+      <aside class="contents"><nav aria-label="Tutorial steps">
+        <p class="eyebrow">ON THIS PAGE</p>
+        <a href="#open"><span>01</span> Open the workshop</a>
+        <a href="#terrain"><span>02</span> Choose a terrain</a>
+        <a href="#sculpt"><span>03</span> Shape the slopes</a>
+        <a href="#save"><span>04</span> Name and save</a>
+        <a href="#trees"><span>05</span> Add trees</a>
+        <a href="#objects"><span>06</span> Place a resort</a>
+        <a href="#play"><span>07</span> Build and play</a>
+        <a href="#share"><span>08</span> Share and continue</a>
+        <a href="#downloads">Practice source</a>
+        <a href="#questions">Troubleshooting</a>
+      </nav></aside>
+
+      <article class="steps">
+        <section id="open" class="step">
+          <p class="step-number">STEP 01</p><h2>Open the workshop</h2>
+          <p>Install the current <strong>skieo-custom-map</strong> tools with Python 3.10+ and pipx using the <a href="/downloads/getting-started.md">installation guide</a>. Qt and the OpenGL dependencies are included. You need a graphical desktop and an OpenGL-capable driver.</p>
+          <details><summary>Install or update skieomod</summary>
+            <p>With Python and pipx installed, open a terminal and run:</p>
+            <div class="command"><pre><code>pipx install --force --index-url https://skieomod.emillon.fr/downloads/pypi/ skieo-custom-map</code></pre><button type="button" class="copy">Copy</button></div>
+            <p>If this is your first installation, follow the installation guide to prepare pipx and your PATH. Game setup can be done from the editor in step 7.</p>
+          </details>
+          <p>Launch the editor from a terminal:</p>
+          <div class="command"><pre><code>skieomod editor</code></pre><button type="button" class="copy">Copy</button></div>
+          <p>Click <strong>New</strong>, or <strong>Create a map</strong> on the welcome panel. An empty map opens immediately with the base terrain. If the workshop reopens your last map, New starts another.</p>
+          <figure class="game-figure"><a href="images/new-map.png"><img src="images/new-map.png" width="1500" height="980" loading="lazy" alt="A new Untitled map in the workshop, with terrain tools on the left, a base terrain in the centre and settings on the right."></a><figcaption>New opens a terrain immediately. You choose the project folder when you first save.</figcaption></figure>
+          <ul>
+            <li><strong>Left:</strong> brushes and their settings, overview and project files.</li>
+            <li><strong>Centre:</strong> the 3D terrain, Source/Last built selector and output panel.</li>
+            <li><strong>Right:</strong> Terrain, Nature, Map and Objects tabs.</li>
+          </ul>
+          <p>The top toolbar contains <strong>Save</strong>, <strong>Build</strong>, <strong>Test</strong> and <strong>Play</strong>, plus separate editors for triggers, resources and object defaults. After launching, this walkthrough uses the graphical controls.</p>
+          <p class="checkpoint"><strong>Checkpoint:</strong> you can see the base terrain and rotate it. Authoring works without the game; Play needs Ski-E-O! or its Steam demo on Windows or Linux with Proton.</p>
+        </section>
+
+        <section id="terrain" class="step">
+          <p class="step-number">STEP 02</p><h2>Choose a terrain</h2>
+          <p><strong>You can sculpt the base terrain and go straight to step 3.</strong> Import is optional. If you already have a heightmap, click <strong>Import</strong>, choose your R16/RAW or 16-bit grayscale PNG, and enter the <strong>Sample spacing</strong> in metres from your exporter.</p>
+          <div class="download-card">
+            <p class="eyebrow">OPTIONAL PRACTICE TERRAIN</p><h3>Alpine Valley</h3>
+            <p>Use this synthetic CC0 heightmap to follow the illustrated example. It has <strong>513 × 513 samples</strong>, <strong>8 m spacing</strong> and elevations from <strong>800 to 2200 m</strong>.</p>
+            <div class="download-links"><a class="button" href="../heightmap/downloads/alpine-valley.png" download>Download 16-bit PNG ↓</a><a href="../heightmap/downloads/alpine-valley.r16" download>Raw R16 ↓</a><a href="../heightmap/downloads/practice-terrain-license.txt">Licence</a></div>
+          </div>
+          <p>For the practice file, use these import settings:</p>
+          <div class="table-wrap"><table><thead><tr><th scope="col">Setting</th><th scope="col">Practice value</th></tr></thead><tbody>
+            <tr><td>Sample spacing</td><td><strong>8 m</strong></td></tr>
+            <tr><td>Elevation</td><td><strong>Known lowest / highest</strong></td></tr>
+            <tr><td>Lowest / highest (m)</td><td><strong>800 / 2200</strong></td></tr>
+            <tr><td>File encoding</td><td>Leave automatic</td></tr>
+          </tbody></table></div>
+          <figure class="game-figure"><a href="images/import-heightmap.png"><img src="images/import-heightmap.png" width="680" height="640" loading="lazy" alt="The real import dialog with spacing 8 m, Known lowest / highest selected, elevations 800 and 2200 m, and a ready to import message for 513 by 513 samples."></a><figcaption>Wait for the dimensions and “ready to import”, then click Import heightmap. The original file is preserved.</figcaption></figure>
+          <details><summary>Settings for your own heightmap</summary>
+            <p><strong>Relative test: 0–1000 m</strong> gives a first relief preview without altitude metadata. For real altitudes, select <strong>Known lowest / highest</strong> or <strong>Exporter scale / offset</strong> using your export settings. Pixels alone cannot recover real altitudes.</p>
+            <p>PNG dimensions come from its header. A square R16 can infer dimensions from file size. For rectangular raw data, open <strong>File encoding • advanced</strong> and enter at least one known side under <strong>Samples across / down</strong>. Select <strong>R16 big-endian</strong> only if your exporter used it.</p>
+            <p>PNG must be non-interlaced, 16-bit grayscale without alpha. An ordinary colour or 8-bit image needs a suitable new export. Width in metres is <code>(samples across − 1) × sample spacing</code>; use the exporter’s spacing rather than copying the practice value.</p>
+          </details>
+          <p class="checkpoint"><strong>Checkpoint:</strong> the practice import reports <strong>513 × 513 samples • 4096 × 4096 m</strong>. Click <strong>Fit map</strong> to see your whole terrain.</p>
+        </section>
+
+        <section id="sculpt" class="step">
+          <p class="step-number">STEP 03</p><h2>Navigate and shape the slopes</h2>
+          <p>Keep <strong>Source terrain</strong> selected above the viewport. This is the editable terrain.</p>
+          <div class="table-wrap"><table><thead><tr><th scope="col">Control</th><th scope="col">Action</th></tr></thead><tbody>
+            <tr><td>Right drag</td><td>Rotate the camera</td></tr>
+            <tr><td>Middle drag</td><td>Grab and move the terrain view</td></tr>
+            <tr><td>Mouse wheel</td><td>Zoom; over a panel, scroll that panel</td></tr>
+            <tr><td>Fit map / Overview</td><td>Show the full terrain / click to move to a part of it</td></tr>
+          </tbody></table></div>
+          <p>Choose <strong>Raise</strong> or <strong>Lower</strong> on the left, set a brush radius and left-drag on the terrain. For practice, start with <strong>60 m</strong> radius and <strong>1 m</strong> height per dab. Each brush dab changes the elevation; inspect the result from another angle before adding more.</p>
+          <p>Use <strong>Level</strong> for a small resort base. Leave <strong>Level height (m)</strong> blank to pick the elevation at stroke start, or enter a height. Use <strong>Smooth</strong> to soften its edges. <strong>Ctrl+Z / Ctrl+Y</strong> undo and redo entire strokes; <strong>Escape</strong> cancels a stroke. Choose <strong>Select</strong> when finished.</p>
+          <figure class="game-figure"><a href="images/source-terrain.png"><img src="images/source-terrain.png" width="1500" height="980" loading="lazy" alt="Imported Alpine Valley in Source terrain view with the Smooth brush selected and brush radius visible on the left."></a><figcaption>Source terrain is editable. The viewport uses elevation colours rather than the complete game materials.</figcaption></figure>
+          <details><summary>Optional smoothing and erosion at build time</summary>
+            <p>Start with the Terrain panel’s surface treatments off. To try one later, enable its group, adjust its settings and click <strong>Apply settings</strong>, then <strong>Build</strong>. Inspect <strong>Last built terrain</strong> for the result. Every build starts from the source, so erosion does not accumulate each time.</p>
+          </details>
+          <p class="checkpoint"><strong>Checkpoint:</strong> you can shape a small area, undo the stroke and redo it.</p>
+        </section>
+
+        <section id="save" class="step">
+          <p class="step-number">STEP 04</p><h2>Name and save the project</h2>
+          <p>Open the <strong>Map</strong> tab on the right. Set <strong>Name</strong>, <strong>Authors</strong>, <strong>Package ID</strong>, <strong>Version</strong>, <strong>Licence</strong> and <strong>Description</strong>. For your own map, use an ID such as <code>yourname.alpine-valley</code> and a version such as <code>0.1.0</code>. Keep the ID for future releases and credit imported resources.</p>
+          <p>Leave the location fields blank for an imaginary place. If you supply a location, enter both latitude and longitude. Leave dependencies empty for this first map.</p>
+          <p>Click <strong>Apply settings → Save</strong> or press <strong>Ctrl+S</strong>. The first save asks for an <strong>empty writable folder</strong>. Create one in the chooser if needed, select it and click <strong>Save map here</strong>. Later saves use the same folder.</p>
+          <p>The source folder contains your editable project. Keep it for future changes. The built <code>.skieomap</code> is the playable archive. To resume editing, click <strong>Open</strong> and choose the source folder containing <code>custom-map.json</code>, or use <strong>File → Recent maps</strong>.</p>
+          <p class="checkpoint"><strong>Checkpoint:</strong> the map has its new name and a saved source folder. You can reopen it with Open.</p>
+        </section>
+
+        <section id="trees" class="step">
+          <p class="step-number">STEP 05</p><h2>Add a forest</h2>
+          <p>Choose how you want to author trees. For a <strong>manual forest</strong>, select <strong>Plant trees</strong>, set the radius and <strong>Tree spacing</strong>, and paint. Use <strong>Erase trees</strong> to clear a route or the base area. Painting switches Nature to <strong>Manual</strong>.</p>
+          <p>For an <strong>automatic forest</strong>, open <strong>Nature</strong> and choose <strong>Automatic</strong>. In Alpine Valley, try <strong>Tree line (m): 1900</strong>, <strong>Trees / hectare: 12</strong> and <strong>Tree limit: 10000</strong>. Click <strong>Apply settings</strong>. Generated trees appear after Build in Last built terrain.</p>
+          <figure class="game-figure"><a href="images/nature-settings.png"><img src="images/nature-settings.png" width="1500" height="1280" loading="lazy" alt="The Nature panel with Automatic forest selected, a 1900 m tree line and density 12 trees per hectare."></a><figcaption>Automatic forest settings for the practice terrain. Build generates the trees; the source preview still shows only manual trees.</figcaption></figure>
+          <p>Adapt the tree line to your map’s elevations, especially if you used relative heights. Automatic clearings use exclusion rectangles; erasing with a brush switches to Manual.</p>
+          <details><summary>Clear the lower terminal area in the practice map</summary>
+            <p>The automatic exclusions box takes rectangles as <code>[west, north, east, south]</code> in metres. The downloadable project uses <code>[[-450, 880, 180, 1300]]</code> beside its lower terminal. Leave <code>[]</code> for no exclusions.</p>
+            <p><strong>Bake grass / rock ground colours</strong> is optional. It creates ground colour, not 3D grass blades.</p>
+          </details>
+          <p class="checkpoint"><strong>Checkpoint:</strong> manual trees are visible immediately, or Automatic is selected and ready for Build.</p>
+        </section>
+
+        <section id="objects" class="step">
+          <p class="step-number">STEP 06</p><h2>Place a small resort</h2>
+          <p>Switch to <strong>Source terrain</strong> and open the <strong>Objects tab on the right</strong>. Search for <strong>Ticket Office</strong>, choose it from the palette and click <strong>Place on terrain</strong>. Left-click a level area at the resort base. Press <strong>Escape</strong> afterwards so the next click does not place another building.</p>
+          <p>Search for a lift, such as <strong>Chair lift (one seat)</strong>, and click <strong>Place on terrain</strong> again. Click the <strong>lower terminal first</strong>, then the <strong>upper terminal</strong> uphill. Keep both inside the map. Press Escape to return to selection.</p>
+          <figure class="game-figure"><a href="images/place-objects.png"><img src="images/place-objects.png" width="1500" height="1100" loading="lazy" alt="A Ticket Office footprint and a Chair lift (one seat) connection in Alpine Valley, with the lift selected in Objects in this map and its terminal coordinates visible."></a><figcaption>A building takes one click, a lift two. Select an instance to change its name or position. The game displays and grounds the actual models.</figcaption></figure>
+          <p>Select an instance in <strong>Objects in this map</strong> or near its footprint in the viewport. Edit its name, position, rotation or height offset; lifts also have <strong>Upper terminal</strong> coordinates. Use <strong>Move…</strong> to pick a new position or <strong>Delete</strong> to remove it. Undo/Redo works for placements too.</p>
+          <p>The right-hand tab edits individual instances. The separate <strong>Objects toolbar button</strong> opens the Object Editor for defaults shared by an object type; you can leave those defaults alone for this exercise.</p>
+          <p class="checkpoint"><strong>Checkpoint:</strong> your object list contains a building and a lift. A heightmap or lift does not draw pistes; lay them out in the game while testing the resort.</p>
+        </section>
+
+        <section id="play" class="step">
+          <p class="step-number">STEP 07</p><h2>Build, validate and play</h2>
+          <ol>
+            <li><strong>Save → Build.</strong> Read the output below the terrain. A successful build selects <strong>Last built terrain</strong>, showing the compiled forest. Your playable <code>.skieomap</code> is in the source folder’s <code>bin/</code> directory.</li>
+            <li><strong>Test.</strong> Wait for <strong>Project validation passed</strong>. This checks the project without launching the game. Fix any reported problem in its panel; build again if you changed the map.</li>
+            <li><strong>Game → Configure Steam installation…</strong> For your first Play, close the game and choose the Steam game folder containing <code>SkiResortSimulator</code>. Setup installs Custom Map/UE4SS and remembers the paths. On Linux, launch the game through Steam once beforehand to prepare Proton.</li>
+            <li><strong>Play / F5.</strong> The editor saves, rebuilds, installs your map and starts a separate test instance. Check the slopes, forest, buildings and lift. Try making a piste and using the resort.</li>
+          </ol>
+          <p>Build, Test and Play save current editor changes before running. Play starts a fresh resort with your authored objects. After editing, press Play again to rebuild and reload the same test instance once loading has finished. Existing game saves retain their own buildings and removals; use the editor test for a changed starting layout.</p>
+          <p><strong>To edit after Build, return to Source terrain.</strong> Brushes and placement are disabled in Last built terrain. The workshop preview uses simplified terrain colours and tree geometry; check snow, game materials and gameplay in the game.</p>
+          <p>If an update is available, use <strong>Game → Update Custom Map loader</strong> with the game closed. Upgrade the tools separately through <strong>Game → Upgrade skieomod…</strong>.</p>
+          <p class="checkpoint"><strong>Checkpoint:</strong> Build produces the archive, Test passes, and Play lets you inspect the resort in the game.</p>
+        </section>
+
+        <section id="share" class="step">
+          <p class="step-number">STEP 08</p><h2>Share and continue</h2>
+          <p>Choose <strong>File → Show project folder</strong>, open <code>bin/</code> and send the versioned <code>.skieomap</code> to a tester with the matching Custom Map loader. Keep the source folder separately. Zip the source folder for a collaborator who will edit the map.</p>
+          <p>For an update, keep the <strong>Package ID</strong>, increase <strong>Version</strong> in the Map panel and build again. A local build creates the package; run <code>skieomod publish my-map</code> to publish it to the in-game web catalogue after setting <code>CUSTOM_MAP_TOKEN</code> from <a href="/account">your creator account</a>. See the <a href="/docs/custom-map-repository.md">web publication guide</a>. See the <a href="/docs/steam-workshop.md">Workshop guide</a> and <a href="../mapmods/#distribute">mapmod distribution guide</a> for publication routes.</p>
+          <div id="downloads" class="download-card">
+            <p class="eyebrow">EDITABLE PRACTICE PROJECT</p><h3>Alpine Valley Workshop source</h3>
+            <p>The imported CC0 terrain, automatic forest, clearing, Ticket Office and lift used in these captures. The source has been built and validated with the editor.</p>
+            <div class="download-links"><a class="button" href="files/alpine-valley-workshop.zip" download>Download source ZIP ↓</a><a href="/docs/editor-tutorial.md">Offline tutorial ↗</a></div>
+            <p class="small">Extract the ZIP, click Open and select the extracted <code>alpine-valley-workshop</code> folder. Change its identity before releasing your own derivative. Terrain and code licence details are in CREDITS.txt.</p>
+          </div>
+          <p>Continue with <a href="../scripts/">visual scripts and scenarios</a> to set starting money or add objectives, the <a href="../ticket-office/">Ticket Office model tutorial</a> to import a model, or <a href="../mapmods/">mapmods</a> for reusable behaviour.</p>
+        </section>
+
+        <section id="questions" class="step">
+          <h2>Troubleshooting</h2>
+          <div class="table-wrap"><table><thead><tr><th scope="col">Symptom</th><th scope="col">What to do</th></tr></thead><tbody>
+            <tr><td>Import heightmap stays grey</td><td>Read the dialog feedback. Check spacing, altitude range, raw dimensions and image format.</td></tr>
+            <tr><td>Save map here stays grey</td><td>Select an empty writable folder. Create a new folder in the chooser if needed.</td></tr>
+            <tr><td>Save, Build or Test is disabled</td><td>Finish the current operation or fix the inline settings error.</td></tr>
+            <tr><td>Brushes or placement are disabled</td><td>Switch from Last built terrain to Source terrain.</td></tr>
+            <tr><td>No automatic trees</td><td>Build, select Last built terrain, then check tree line, density, slope limit and exclusions.</td></tr>
+            <tr><td>An extra building appeared</td><td>Undo the extra placement and press Escape to leave placement mode.</td></tr>
+            <tr><td>Play is disabled</td><td>Configure the Steam installation from the Game menu. Wait if the test is still loading.</td></tr>
+            <tr><td>Build or Play fails</td><td>Read the output panel and fix the reported problem. Launch errors also give a log path.</td></tr>
+            <tr><td>A source file changed externally</td><td>Reopen the source project before saving again.</td></tr>
+            <tr><td>An old save shows old objects</td><td>Use Play with a fresh resort to test the updated starting layout.</td></tr>
+          </tbody></table></div>
+        </section>
+      </article>
+    </div>
+  </main>
+  <footer><p>Custom Map · Ski-E-O! · Albatar (Élie Millon)</p><p><a href="../heightmap/">Command-line tutorial</a> · <a href="/docs/editor.md">Editor reference</a></p></footer>
+  <p class="sr-only" id="copy-status" role="status" aria-live="polite"></p>
+</body>
+</html>

@@ -1,0 +1,34 @@
+name: Checks
+on: [push, pull_request]
+permissions:
+  contents: read
+jobs:
+  mod:
+    runs-on: ubuntu-24.04
+    env:
+      QT_QPA_PLATFORM: offscreen
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: sudo apt-get update && sudo apt-get install -y lua5.4
+      - run: python -m pip install 'setuptools>=77' wheel build
+      - run: python -m pip install -e . --no-deps numpy
+      - run: python tests/run_custom_map_checks.py
+      - run: python -m build --wheel --no-isolation --outdir build/wheels
+      - run: python tests/check_skieomod_distribution.py build/wheels/*.whl
+  website:
+    runs-on: ubuntu-24.04
+    defaults:
+      run:
+        working-directory: repository/web
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: repository/web/package-lock.json
+      - run: npm ci
+      - run: npm run build

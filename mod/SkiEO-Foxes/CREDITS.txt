@@ -1,0 +1,13 @@
+Fox Anatomy — npbehunin
+https://sketchfab.com/3d-models/fox-anatomy-bc5e3b0399784323a161005c74109578
+Creative Commons Attribution 4.0 International (CC BY 4.0)
+https://creativecommons.org/licenses/by/4.0/
+
+Changes for SkiEO: skin and eyes isolated; anatomical display meshes omitted;
+axis/scale conversion, sixteen-joint weighted rig, nine baked animation clips, removable snow coat,
+texture resizing to 512 px, independent behavioural aiming of the eyeballs,
+model-derived sole profiles and runtime two-bone leg/contact adaptation.
+Original archive SHA-256 is recorded in fox-rig.json.
+Rig, animations and behaviour: Albatar (Élie Millon) / SkiEO contributors.
+Example code: MIT. Derived fox model and textures: CC BY 4.0.
+No endorsement by the original model author is implied.

@@ -1,0 +1,23 @@
+{
+  "version": 1,
+  "seed": 17,
+  "character": "compact-limestone-beds-and-joints",
+  "reference": {
+    "photos": ["PL231203-02047-grand-veymont-hiver-1400x700.jpg", "20251207_082025.jpg"],
+    "features": "Massive upper pillars, irregular thinner lower beds, sparse vertical joints, pale compact stone.",
+    "metric_depths_measured": false
+  },
+  "horizontal_axis": [0.89, 0.456],
+  "bed_spacing_meters": 17,
+  "bed_recession_meters": 5.0,
+  "joint_spacing_meters": 47,
+  "joint_width_meters": 4.5,
+  "joint_recession_meters": 4.0,
+  "surface_scale_meters": 9,
+  "surface_recession_meters": 3.0,
+  "maximum_recession_meters": 8,
+  "massive_above_meters": 2130,
+  "massive_blend_meters": 80,
+  "outer_blend_meters": 80,
+  "edge_spacing_meters": 3
+}

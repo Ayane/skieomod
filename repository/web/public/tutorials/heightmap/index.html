@@ -1,0 +1,318 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>From heightmap to playable map · Ski-E-O! Custom Map</title>
+  <meta name="description" content="Create a Ski-E-O! map from a raw R16 or 16-bit PNG heightmap with skieomod. A step-by-step command-line tutorial with a practice heightmap, native heightmap import and troubleshooting.">
+  <meta name="theme-color" content="#102a27">
+  <link rel="canonical" href="https://skieomod.emillon.fr/tutorials/heightmap/">
+  <link rel="stylesheet" href="tutorial.css?v=1.12.0">
+  <script src="tutorial.js?v=1.12.0" defer></script>
+</head>
+<body>
+  <a class="skip" href="#guide">Skip to the tutorial</a>
+  <header class="site-header">
+    <a class="brand" href="/"><span aria-hidden="true">◭</span> Custom Map <small>FOR SKI-E-O!</small></a>
+    <nav aria-label="Main navigation"><a href="#downloads">Example files</a><a href="../editor/">Editor tutorial</a><a href="/downloads/getting-started.md">Installation guide ↗</a><a href="../mapmods/">Create a mapmod</a></nav>
+  </header>
+  <main id="guide">
+    <section class="hero" aria-labelledby="title">
+      <p class="eyebrow">THE MAP MAKER’S GUIDE · COMMAND LINE</p>
+      <h1 id="title">Your heightmap.<br><em>Your next mountain.</em></h1>
+      <p class="lead">Turn an elevation grid into a playable Ski-E-O! map with <code>skieomod</code>. Create a project, describe your source in JSON, bake optional erosion and vegetation, build a <code>.skieomap</code>, then try it in the game.</p>
+      <div class="hero-meta"><span>R16 or 16-bit grayscale PNG</span><span>No graphical map editor required</span><span>English · 8 October 2026</span></div>
+      <p class="checkpoint">Prefer the graphical workshop? Follow <a href="../editor/">Create a map with skieomod editor</a> for sculpting, heightmap import, trees, object placement and Build → Test → Play.</p>
+      <figure class="hero-figure">
+        <a href="images/heightmap-to-terrain.png"><img src="images/heightmap-to-terrain.png" width="1820" height="676" alt="The practice heightmap as a grayscale grid, beside a three-dimensional plot of the same alpine valley."></a>
+        <figcaption>Two views of the downloadable practice heightmap: grayscale samples on the left, the elevation surface on the right. This is a data illustration; the in-game example appears in step 6.</figcaption>
+      </figure>
+    </section>
+
+    <div class="guide-layout">
+      <aside class="contents">
+        <nav aria-label="Tutorial steps">
+          <p class="eyebrow">ON THIS PAGE</p>
+          <a href="#install"><span>01</span> Install the tools</a>
+          <a href="#heightmap"><span>02</span> Check your heightmap</a>
+          <a href="#project"><span>03</span> Create a project</a>
+          <a href="#import"><span>04</span> Configure the source</a>
+          <a href="#bake">Optional erosion &amp; vegetation</a>
+          <a href="#build"><span>05</span> Validate and build</a>
+          <a href="#play"><span>06</span> Test in the game</a>
+          <a href="#share"><span>07</span> Share and iterate</a>
+          <a href="#troubleshooting">Troubleshooting</a>
+        </nav>
+      </aside>
+
+      <article class="steps">
+        <section id="install" class="step">
+          <p class="step-number">STEP 01</p><h2>Install the tools once</h2>
+          <p>You need <strong>Python 3.10 or later</strong>, <strong>pipx</strong>, and the Windows edition of Ski-E-O! or its demo installed through Steam. Linux with Proton is also supported. You can prepare maps on macOS, but this tutorial’s game launch requires Windows or Linux with Proton.</p>
+          <p>Launch the game once through Steam, then close it. If you already use Custom Map, update the CLI with the command below and run <code>skieomod update</code> to update the installed loader.</p>
+          <details><summary>First time using Python or pipx?</summary>
+            <p>Install Python from <a href="https://www.python.org/downloads/">python.org</a>, then install pipx. On Windows, run these commands in PowerShell:</p>
+            <div class="command"><pre><code>py -m pip install --user pipx
+py -m pipx ensurepath</code></pre><button type="button" class="copy">Copy</button></div>
+            <p>On Debian or Ubuntu, install the distribution’s <code>pipx</code> package and run <code>pipx ensurepath</code>. For other systems, follow the <a href="https://pipx.pypa.io/latest/how-to/install-pipx.html">official pipx installation instructions</a>. Open a new terminal afterwards so the command is on your PATH.</p>
+          </details>
+          <p>Install the latest published tools and set up the game:</p>
+          <div class="command"><pre><code>pipx install --force --index-url https://skieomod.emillon.fr/downloads/pypi/ skieo-custom-map
+skieomod setup
+skieomod --version</code></pre><button type="button" class="copy">Copy</button></div>
+          <p><code>setup</code> installs UE4SS, the Custom Map loader and the Veymont example, and remembers the game directories. If it cannot find the game, use <code>skieomod setup --game-dir "PATH TO GAME"</code>. Choose the Steam installation folder that contains <code>SkiResortSimulator</code>.</p>
+          <p>Prefer a graphical interface? With CLI <strong>1.15 or later</strong>, run <code>skieomod editor</code> to create or open a source project, import your own heightmap, sculpt terrain in 3D and configure vegetation. The icon toolbar also opens graph/Lua triggers, resources and object properties. Its Build, Test and Play buttons use the same pipeline described below. See the <a href="/docs/editor.md">native editor guide and screenshots</a> and the <a href="../scripts/">visual scripts and scenarios tutorial</a>, or follow the <a href="/tutorials/ticket-office/">Ticket Office model tutorial</a>.</p>
+          <p class="checkpoint"><strong>Checkpoint:</strong> <code>skieomod --version</code> prints a version number. This walkthrough was checked with CLI <strong>1.16.0</strong>, a prepared release awaiting publication. The public download is currently <strong>1.15.0</strong>. Automatic raw dimensions and the relative test elevation range require 1.12 or later.</p>
+        </section>
+
+        <section id="heightmap" class="step">
+          <p class="step-number">STEP 02</p><h2>Know what your heightmap contains</h2>
+          <p><strong>Already have a heightmap? Start with your own file.</strong> Choose the answer that matches it below. Your choice also selects the configuration in step 4. The practice download is a separate option.</p>
+<div class="qa-tabs" data-tabs data-source-tabs>
+<div class="tab-list" role="tablist" aria-label="Which heightmap do you have?">
+<button type="button" role="tab" id="source-tab-r16" data-answer="r16" aria-controls="source-r16">I already have an R16 / RAW</button>
+<button type="button" role="tab" id="source-tab-png" data-answer="png" aria-controls="source-png">I already have a 16-bit PNG</button>
+<button type="button" role="tab" id="source-tab-practice" data-answer="practice" aria-controls="source-practice">I want to try the example</button>
+</div>
+<div class="tab-answer" id="source-r16" role="tabpanel" aria-labelledby="source-tab-r16" tabindex="0"><h3>I already have an R16 / RAW</h3><p>Use your existing headerless, unsigned 16-bit grid directly. You do not need to download a PNG or convert it first. Keep its original filename or copy it as <code>source-heightmap.r16</code> in step 4.</p>
+<p>Little-endian is the default. If your exporter wrote big-endian samples, add <code>"format": "r16be"</code>. A <code>.raw</code> extension is also accepted for the same unsigned 16-bit layout.</p>
+<p>Without <code>vertices</code>, the build counts the two-byte samples and <strong>assumes a square grid</strong> if possible. For a rectangular export, supply <code>"vertices": [width, height]</code>, or one known side and <code>null</code> for the other. Use sample counts, not metres. File size alone cannot prove that the grid is square.</p></div>
+<div class="tab-answer" id="source-png" role="tabpanel" aria-labelledby="source-tab-png" tabindex="0"><h3>I already have a 16-bit PNG</h3><p>Use your own PNG directly. It must be <strong>16-bit grayscale, non-interlaced and without alpha</strong>. The build reads both dimensions from its header, including rectangular images; you can omit <code>vertices</code>.</p>
+<p>Keep your existing source. There is no need to download the Alpine Valley example. A colour image, JPEG or 8-bit PNG needs a new export from your terrain tool; increasing its bit depth does not recover lost elevation detail.</p></div>
+<div class="tab-answer" id="source-practice" role="tabpanel" aria-labelledby="source-tab-practice" tabindex="0"><h3>I want to try the example</h3><div id="downloads" class="download-card">
+<p class="eyebrow">OPTIONAL PRACTICE DATA</p><h3>Alpine Valley practice files</h3>
+<p>Use this only if you want a known working example. It is a synthetic <strong>513 × 513</strong> grid with <strong>8 m</strong> spacing, a <strong>4,096 × 4,096 m</strong> extent and actual elevations of <strong>800 to 2,200 m</strong>. The raw version is little-endian, north-to-south and exactly <strong>526,338 bytes</strong>.</p>
+<div class="download-links"><a class="button" href="downloads/alpine-valley.png" download>Download 16-bit PNG ↓</a><a href="downloads/alpine-valley.r16" download>Raw R16 ↓</a></div>
+<p class="small">The practice terrain is <a href="downloads/practice-terrain-license.txt">CC0</a>. The numeric settings below belong to this example.</p></div></div>
+</div>
+          <h3>What you provide, and what the build calculates</h3>
+          <ul>
+            <li><strong>Source:</strong> the file you want to build, referenced by <code>build.heightmap.file</code>.</li>
+            <li><strong>Spacing:</strong> metres between neighbouring samples. Use the exporter’s value. If you know the intended width, spacing is <code>width_in_metres / (samples_x − 1)</code>. Both axes use the same spacing.</li>
+            <li><strong>Dimensions:</strong> automatic for PNG; assumed square from the sample count for raw R16 when possible. Known raw dimensions override that assumption.</li>
+            <li><strong>Elevation:</strong> optional for a first test. Without elevation settings, the lowest and highest actual samples become <strong>0 and 1,000 m</strong>. This is a relative test range; pixels alone do not reveal real altitudes. For accurate terrain, supply the actual altitude range or the exporter’s scale and offset.</li>
+          </ul>
+          <p>The build calculates the map extent, sample encoding, centred origin and menu preview, then updates the generated <code>terrain</code> fields. You do not need to calculate those fields yourself.</p>
+          <div class="formula"><code>map_width = (samples_x − 1) × spacing<br>map_length = (samples_y − 1) × spacing<br>raw_file_bytes = samples_x × samples_y × 2<br>elevation_metres = sample × height_scale + height_offset</code></div>
+          <details><summary>I have a GeoTIFF, DEM or another format</summary><p>Export a 16-bit grayscale PNG or headerless unsigned R16 from a GIS or terrain tool. Reproject geographic coordinates into a metric grid and resample to equal X/Y spacing first. Record the spacing, elevation encoding and row direction. Signed integers and floating-point grids are not unsigned R16.</p></details>
+          <p><strong>Do not rename a PNG to <code>.r16</code>.</strong> Renaming a compressed image does not turn it into raw samples.</p>
+        </section>
+
+        <section id="project" class="step">
+          <p class="step-number">STEP 03</p><h2>Create a map project</h2>
+          <p>Create a working folder, for example <code>SkiEO-maps</code>, and open a terminal in that folder. Keep your original heightmap available for step 4. On Windows, File Explorer’s <strong>Open in Terminal</strong> action opens PowerShell at the right location.</p>
+          <p>Create a project for your mountain:</p>
+          <div class="command"><pre><code>skieomod create map --output my-resort --name "My Mountain" --id author.my-mountain --author "Your name"</code></pre><button type="button" class="copy">Copy</button></div>
+          <p>Replace <code>Your name</code> and the <code>author</code> prefix with your own name or handle. Keep the ID lowercase and unique, such as <code>snowrider.my-mountain</code>. The starter terrain dimensions do not matter for this workflow: the build will replace them with values derived from your source.</p>
+          <div class="file-tree"><pre><code>SkiEO-maps/
+└── my-resort/
+    ├── custom-map.json        Map identity and terrain settings
+    ├── Terrain/heightmap.r16  Starter slope (regenerated by the build)
+    ├── Scripts/main.lua      Commented map script
+    ├── Vegetation/forest.json Example tree positions
+    ├── docs/                 Guides for terrain, scripts and trees
+    ├── README.md
+    ├── preview.png
+    └── workshop.json</code></pre></div>
+          <p><code>create map</code> generates a starter slope. <strong>It has not built your heightmap yet.</strong> Keep working from the parent <code>SkiEO-maps</code> folder for all commands below.</p>
+          <p class="checkpoint"><strong>Checkpoint:</strong> the <code>my-resort</code> directory contains <code>custom-map.json</code>. If the directory already contains a project, choose a fresh output folder.</p>
+        </section>
+
+        <section id="import" class="step">
+          <p class="step-number">STEP 04</p><h2>Describe your source in the JSON</h2>
+          <p>Copy <strong>your chosen source file</strong> into <code>my-resort/Terrain/</code>. Open <code>my-resort/custom-map.json</code> in a text editor. The <code>build</code> object belongs at the top level, alongside <code>metadata</code> and <code>terrain</code>.</p>
+          <p>The generated project already has a <code>build</code> object for example trees. <strong>Replace that object with the selected block below</strong> for a first terrain-only test, or add <code>heightmap</code> inside the existing object to keep your manual forest. Use one <code>build</code> key. Leave the other top-level properties in place, with commas between them; JSON does not allow comments.</p>
+<div class="qa-tabs" data-tabs data-source-tabs>
+<div class="tab-list" role="tablist" aria-label="Which source should the build use?">
+<button type="button" role="tab" id="config-tab-r16" data-answer="r16" aria-controls="config-r16">I already have an R16 / RAW</button>
+<button type="button" role="tab" id="config-tab-png" data-answer="png" aria-controls="config-png">I already have a 16-bit PNG</button>
+<button type="button" role="tab" id="config-tab-practice" data-answer="practice" aria-controls="config-practice">I want to try the example</button>
+</div>
+<div class="tab-answer" id="config-r16" role="tabpanel" aria-labelledby="config-tab-r16" tabindex="0"><h3>I already have an R16 / RAW</h3><p>Copy your R16 as <code>my-resort/Terrain/source-heightmap.r16</code>, or keep its own name and match that name in <code>file</code>. Start with:</p><div class="json-block"><pre><code>"build": {
+  "heightmap": {
+    "file": "Terrain/source-heightmap.r16",
+    "spacing_meters": 8
+  }
+}</code></pre><button type="button" class="copy">Copy</button></div><p>This imports <strong>your R16</strong>, assumes a square grid if dimensions are omitted, and uses the relative 0–1,000 m test range if no elevation encoding is supplied. The <code>8</code> above is an example spacing in metres: replace it with your exporter’s spacing for the correct horizontal size.</p>
+<p>For a known rectangular grid, add <code>"vertices": [2017, 3025]</code> inside <code>heightmap</code>, using your own sample counts. If you know only the width, <code>"vertices": [2017, null]</code> derives the number of rows from the byte count. For big-endian input, also add <code>"format": "r16be"</code>.</p></div>
+<div class="tab-answer" id="config-png" role="tabpanel" aria-labelledby="config-tab-png" tabindex="0"><h3>I already have a 16-bit PNG</h3><p>Copy your PNG as <code>my-resort/Terrain/source-heightmap.png</code>, or keep its own name and match that name in <code>file</code>. Start with:</p><div class="json-block"><pre><code>"build": {
+  "heightmap": {
+    "file": "Terrain/source-heightmap.png",
+    "spacing_meters": 8
+  }
+}</code></pre><button type="button" class="copy">Copy</button></div><p>The dimensions come from <strong>your PNG</strong>. Without altitude settings, the build maps its lowest and highest samples to a relative 0–1,000 m range. Replace the example <code>8</code> with your exporter’s spacing in metres for the correct horizontal size.</p></div>
+<div class="tab-answer" id="config-practice" role="tabpanel" aria-labelledby="config-tab-practice" tabindex="0"><h3>I want to try the example</h3><p>Copy the downloaded <code>alpine-valley.png</code> as <code>my-resort/Terrain/source-heightmap.png</code>. For this particular practice file, use:</p><div class="json-block"><pre><code>"build": {
+  "heightmap": {
+    "file": "Terrain/source-heightmap.png",
+    "spacing_meters": 8,
+    "elevation_meters": [800, 2200]
+  }
+}</code></pre><button type="button" class="copy">Copy</button></div><p>The build reads its 513 × 513 dimensions. These spacing and altitude values belong to Alpine Valley. If you downloaded the raw practice file instead, copy it as <code>source-heightmap.r16</code> and change only the <code>file</code> suffix above; its square dimensions can be inferred.</p></div>
+</div>
+          <p>Paths are relative to <code>my-resort</code> and use forward slashes. Keep the source separate from <code>Terrain/heightmap.r16</code>: that filename is reserved for the generated terrain. Every build reads your original source again.</p>
+          <details><summary>I know the real lowest and highest elevations</summary>
+            <p>Add <code>elevation_meters</code> inside your existing <code>build.heightmap</code>. It describes the altitudes of the <strong>actual lowest and highest samples</strong>. For example, only if your file spans 800 to 2,200 m:</p>
+<div class="json-block"><pre><code>"elevation_meters": [800, 2200]</code></pre><button type="button" class="copy">Copy</button></div>
+            <p>Use your own elevations. The build derives the sample scale and offset, preview and other terrain metadata.</p>
+          </details>
+          <details><summary>My exporter gives a sample scale and offset</summary>
+            <p>Use the complete exporter encoding instead of <code>elevation_meters</code>. For an export where one sample unit adds 0.025 m above an offset of 724 m, add these two fields inside your existing <code>heightmap</code>:</p>
+<div class="json-block"><pre><code>"height_scale_meters": 0.025,
+"height_offset_meters": 724</code></pre><button type="button" class="copy">Copy</button></div>
+            <p>These are example values; use your exporter’s numbers. The build reads the samples and calculates their actual elevation range. Supply both fields together.</p>
+            <p>If your exporter records the altitudes represented by pure black and pure white, its scale is <code>(white_altitude − black_altitude) / 65535</code> and its offset is <code>black_altitude</code>. Actual samples may cover only part of that range.</p>
+          </details>
+          <details><summary>My rows run south to north</summary><p>Add <code>"row_order": "south_to_north"</code> inside <code>build.heightmap</code>. The default is <code>north_to_south</code>. Columns must run west to east; reverse them in your source tool first if necessary.</p></details>
+          <div id="bake">
+            <h3>Optional: bake erosion, green ground cover and trees</h3>
+            <p>First build and test the original relief. Then add treatments without changing the source you selected above. The following values suit the practice terrain; adapt the biome to your own mountain and elevation range.</p>
+            <p><strong>Add <code>processing</code> inside your existing <code>build.heightmap</code></strong>, after its source settings. Keep its <code>file</code>, spacing and any dimensions or elevation encoding:</p>
+<div class="json-block"><pre><code>"processing": {
+  "resolution": 513,
+  "smoothing": {"iterations": 2, "strength": 0.15, "max_delta_meters": 1},
+  "thermal_erosion": {"iterations": 8, "talus_degrees": 35, "strength": 0.2, "max_delta_meters": 3},
+  "hydraulic_erosion": {"iterations": 4, "strength": 0.06, "rainfall": 1, "max_delta_meters": 1}
+}</code></pre><button type="button" class="copy">Copy</button></div>
+            <p><strong>Add <code>vegetation</code> beside <code>heightmap</code>, inside the same <code>build</code> object</strong>. Separate sibling properties with commas:</p>
+<div class="json-block"><pre><code>"vegetation": {
+  "biome": {
+    "tree_line_meters": 1900,
+    "alpine_line_meters": 2400,
+    "temperature_sea_level_celsius": 15,
+    "lapse_rate_celsius_per_km": 6.5,
+    "moisture": 0.65,
+    "wind_strength": 0.3,
+    "wind_direction_degrees": 270
+  },
+  "trees": {
+    "seed": 42,
+    "density_per_hectare": 90,
+    "min_spacing_meters": 5,
+    "max_slope_degrees": 32,
+    "tree_line_fade_meters": 150,
+    "patch_size_meters": 160,
+    "patchiness": 0.6,
+    "max_trees": 100000
+  },
+  "ground_cover": {"texture_size": 256, "max_slope_degrees": 45}
+}</code></pre><button type="button" class="copy">Copy</button></div>
+            <p>If you are using the relative 0–1,000 m test range, start with a <code>tree_line_meters</code> of 900 and an <code>alpine_line_meters</code> of 1,100, then tune them after checking the result. Known real elevations let you use the actual tree line.</p>
+            <p>The <a href="downloads/heightmap-build-preset.json" download>complete practice preset</a> is for the downloaded PNG. For your own heightmap, add the fragments above to your current settings so the source path stays correct.</p>
+            <div class="table-wrap"><table><caption>What each setting changes</caption><thead><tr><th>Setting</th><th>Effect</th></tr></thead><tbody>
+              <tr><td><code>smoothing</code></td><td>Softens local relief. <code>strength</code> controls each pass; <code>iterations</code> repeats it.</td></tr>
+              <tr><td><code>thermal_erosion</code></td><td>Moves material downhill where the slope exceeds <code>talus_degrees</code>.</td></tr>
+              <tr><td><code>hydraulic_erosion</code></td><td>Uses steepest-descent drainage and contributing area to move material downhill. <code>rainfall</code> is a dimensionless multiplier.</td></tr>
+              <tr><td><code>max_delta_meters</code></td><td>Bounds the total height change per vertex for that treatment, across all its iterations. Budgets from different treatments can add together.</td></tr>
+              <tr><td><code>resolution</code></td><td>Limits processing to 513 vertices on the longest axis here. Larger inputs retain fine source detail while receiving interpolated corrections. Allowed: 33–1025.</td></tr>
+              <tr><td><code>tree_line_meters</code>, <code>alpine_line_meters</code></td><td>Upper altitude for trees and green ground cover. The alpine line must be higher than the tree line.</td></tr>
+              <tr><td>Temperature, moisture and wind</td><td>Control static growth suitability. Moisture and wind strength range from 0 to 1. Wind comes from the specified compass direction: 0 north, 90 east, 270 west.</td></tr>
+              <tr><td><code>density_per_hectare</code>, <code>min_spacing_meters</code></td><td>Control candidate density and tree separation. Habitat filters reduce the actual tree count.</td></tr>
+              <tr><td><code>max_slope_degrees</code>, <code>tree_line_fade_meters</code></td><td>Exclude steep ground and thin the forest as it approaches the tree line.</td></tr>
+              <tr><td><code>seed</code>, <code>patch_size_meters</code>, <code>patchiness</code></td><td>Give reproducible forest patches. Use another seed for a different arrangement.</td></tr>
+              <tr><td><code>max_trees</code></td><td>Caps the forest. At the cap, the build retains a seeded uniform subset across the map.</td></tr>
+              <tr><td><code>ground_cover.texture_size</code></td><td>Resolution of the grass/rock albedo. Use a power of two from 16 to 512; the build supplies all mip levels and the material mapping.</td></tr>
+            </tbody></table></div>
+            <p>These are bounded terrain-authoring approximations. They do not reproduce the official developer’s complete erosion and climate bake. Drainage does not fill depressions or create rivers. Wind affects vegetation exposure; weather and snow remain managed by the game. Ground cover is <strong>grass/rock colour on the terrain</strong>, not 3D grass blades.</p>
+            <p>The drainage routing follows the <a href="https://www.weather.gov/owp/oh_hrl_gis_data">D8 steepest-descent principle</a>; thermal erosion uses a critical slope, a common <a href="https://www-sop.inria.fr/reves/Basilic/2024/TGSC24/Analytical_Terrains_EG.pdf">heightfield modelling technique</a>. The implementation and budgets here are specific to these community tools.</p>
+            <figure><a href="images/terrain-bake.png"><img src="images/terrain-bake.png" width="1800" height="640" loading="lazy" alt="Build outputs for the practice heightmap: erosion height changes, the generated grass and rock albedo, and automatically placed trees below the tree line."></a><figcaption>Actual outputs of the preset above on the practice heightmap: height changes in metres, the baked ground colour, and generated tree positions. These are build-data previews, not an in-game screenshot.</figcaption></figure>
+            <details><summary>Disable a treatment or add fine detail</summary>
+              <p>Omit an individual processing method to disable it; omit <code>processing</code> for the original relief. Add <code>"noise": {"amplitude_meters": 0.25, "wavelength_meters": 64, "seed": 42}</code> inside <code>processing</code> for reproducible detail. The wavelength must span at least two processing grid intervals. The boundary is preserved.</p>
+              <p>Use <code>"enabled": false</code> inside <code>trees</code> or <code>ground_cover</code> to disable that component. Removing <code>vegetation</code> restores the authored terrain material. With automatic trees off, any configured <code>build.forest</code> supplies the manual forest; otherwise the generated forest is empty.</p>
+            </details>
+            <details><summary>Reserve a clearing or place trees manually</summary>
+              <p>Add <code>"exclude": [[-60, -40, 60, 40]]</code> inside <code>trees</code> to keep a 120 × 80 m clearing around the centred origin. Each rectangle is <code>[west, north, east, south]</code> in world metres: X east, Y south. <code>min_elevation_meters</code> can also set a lower altitude limit.</p>
+              <p>For manual trees, keep <code>"forest": {"file": "Vegetation/forest.json"}</code> alongside <code>heightmap</code> inside <code>build</code> and edit the source array of <code>{"x": 10, "y": -20}</code> points. Automatic trees take precedence when enabled. The build converts manual JSON to <strong>SKXY float32 centimetres</strong>; automatic trees are written directly in SKXY. The game reads only the compiled binary. JSON is an authoring format.</p>
+            </details>
+            <p>Inspect <code>Terrain/Generated/build-report.json</code> for height-change and tree-count statistics, <code>Terrain/Generated/albedo.png</code> for ground colour, and <code>Vegetation/Generated/ground-cover.png</code> for the growth mask. The forest is <code>Vegetation/Generated/forest.skxy</code>. Generated rendering overrides and the importer entry point live in the package; your original script and manual JSON remain editable.</p>
+          </div>
+          <p class="checkpoint"><strong>Checkpoint:</strong> the JSON points to your chosen original source, with spacing and any known dimensions or altitude encoding. No separate import or conversion command is required.</p>
+        </section>
+
+        <section id="build" class="step">
+          <p class="step-number">STEP 05</p><h2>Build and validate the map</h2>
+          <p>From the parent <code>SkiEO-maps</code> folder, run:</p>
+          <div class="command"><pre><code>skieomod build my-resort
+skieomod test my-resort
+skieomod test my-resort/bin/author.my-mountain-0.1.0.skieomap</code></pre><button type="button" class="copy">Copy</button></div>
+          <p><strong>Check the terrain summary before launching the game.</strong> Its dimensions and extent must match your source, rather than the starter slope. The heightmap path and settings come from the JSON. If you chose another ID, substitute it in the last filename. A successful build creates <code>my-resort/bin/author.my-mountain-0.1.0.skieomap</code>.</p>
+          <div class="output"><p>Example output only — the practice file with known elevations</p><pre><code>Terrain: 513 x 513 samples; 4096 x 4096 m; 800 to 2200 m elevation; portable R16LE</code></pre></div>
+          <p>Without altitude settings, the summary shows 0 to 1,000 m and explains that real altitudes are unknown. Any square-grid assumption is also printed and saved in <code>Terrain/Generated/build-report.json</code>.<br><br>The build updates <code>terrain.source</code>, <code>size_meters</code>, <code>elevation_meters</code>, the centred origin and <code>preview.samples</code> in your project JSON. It writes the generated terrain to <code>Terrain/heightmap.r16</code> and backs up the replaced manifest and terrain under <code>.heightmap-backups/</code>. The original <code>source-heightmap.png</code> or <code>source-heightmap.r16</code> stays intact.</p>
+          <p>You can inspect the calculated values after building, but you do not need to enter them. The package contains the portable R16, map metadata, script and referenced resources; the development-only <code>build</code> section and original PNG are omitted. The loader constructs the terrain in the game.</p>
+          <p><code>test my-resort</code> checks a freshly prepared package using the same JSON settings without changing the source project. Validation does not prove that the slopes, snow or gameplay feel right. If you change Lua scripts, install Lua 5.4 and additionally use <code>skieomod test my-resort --check-scripts</code>.</p>
+          <p class="checkpoint"><strong>Checkpoint:</strong> the terrain summary matches your source, and both the project and the exported archive are reported as valid.</p>
+        </section>
+
+        <section id="play" class="step">
+          <p class="step-number">STEP 06</p><h2>Try the terrain in Ski-E-O!</h2>
+          <p>Close the game, then run:</p>
+          <div class="command"><pre><code>skieomod run my-resort</code></pre><button type="button" class="copy">Copy</button></div>
+          <p><code>run</code> rebuilds your project, installs it into the saved map directory and opens the game through Steam. If the map selection screen appears, choose <strong>New Game → Custom Map → My Mountain</strong>. Use a new session to check the imported terrain before working with an existing save.</p>
+          <ul>
+            <li>Move around the terrain. Check that ridges and valleys face the expected directions.</li>
+            <li>Check the elevation readout at a known high or low point. A recognisable shape can still have the wrong scale.</li>
+            <li>Try a trail, building placement and snow tools to check the surface and collision.</li>
+            <li>Inspect tree roots up close and check forest coverage across the full map, including both ends of rectangular terrain. Forests follow the biome, elevation and slope limits.</li>
+          </ul>
+          <p>The optional bake supplies green ground cover and trees. A heightmap still does not specify ski lifts, buildings or a complete resort; add those after the terrain behaves correctly. Start a new session when comparing build settings.</p>
+          <figure class="game-figure"><a href="images/veymont-grounded-forest.webp"><img src="images/veymont-grounded-forest.webp" width="2664" height="1500" loading="lazy" alt="Close in-game view of Veymont’s forest, with tree trunks anchored to the terrain after the 1.11.1 grounding correction."></a><figcaption>A new in-game capture of <strong>Veymont 0.6.1</strong> by Albatar (Élie Millon), using Custom Maps <strong>1.11.1</strong>. Tree roots follow the rendered terrain triangles. The previous interpolation placed one tree in this area 7.37 m too high.</figcaption></figure>
+          <figure class="game-figure"><a href="images/veymont-full-map.webp"><img src="images/veymont-full-map.webp" width="2664" height="1500" loading="lazy" alt="In-game overview of the entire rectangular Veymont map, with forest in the northern, central and southern regions."></a><figcaption>The full <strong>8.064 × 12.096 km</strong> map, viewed from above with the view distance extended for this capture. All <strong>383,500 trees</strong> loaded: 129,616 in the northern third, 120,780 in the middle and 133,104 in the south. Veymont’s OpenStreetMap forest is authored separately; this is not the Alpine Valley practice map.</figcaption></figure>
+          <details><summary>I prefer to install the built file manually</summary><p>After <code>skieomod setup</code>, run <code>skieomod config</code> and find <code>maps_dir</code>. Copy the built <code>.skieomap</code> into that folder, normally <code>SkiResortSimulator/Content/Paks/~mods/</code> inside the Steam game installation. Keep the package as one file. Start the game through Steam and choose it from <strong>New Game → Custom Map</strong>.</p></details>
+          <p class="checkpoint"><strong>Checkpoint:</strong> you can start a session on your terrain, with the intended size, elevation and orientation.</p>
+        </section>
+
+        <section id="share" class="step">
+          <p class="step-number">STEP 07</p><h2>Keep the project, share the package</h2>
+          <p>Send the file in <code>my-resort/bin/</code> to a tester who has Custom Map installed. They can copy it to their <code>maps_dir</code> and select it in the game. Keep the source project so you can edit and rebuild the map later.</p>
+          <p>Before sharing your own map, update the name, description, authors and licence in <code>custom-map.json</code>. Credit your elevation data provider and respect its redistribution terms. For a new release, increase <code>metadata.version</code> (for example, <code>0.1.0</code> to <code>0.1.1</code>) and build again. Keep the map ID stable.</p>
+          <p>To publish your map in the in-game web catalogue, create a token at <a href="/account">your creator account</a>, set <code>CUSTOM_MAP_TOKEN</code> in your terminal and run <code>skieomod publish my-resort</code>. See the <a href="/docs/custom-map-repository.md">web publication guide</a>. Browse published maps in <strong>New Game → Custom Map → Web</strong>.</p><p>Workshop preparation is a later step: <code>skieomod publish my-resort --prepare</code> stages an unpacked article, but it does not upload it. Actual publication requires the game’s Workshop integration and a native Steamworks client. You can share the local <code>.skieomap</code> while that integration is unavailable.</p>
+          <div class="download-card"><h3>Compare with a completed example</h3><p>These downloads use the optional erosion and vegetation preset in step 4, built with CLI 1.11.1. The built package passed CLI validation; gameplay still needs checking on your own game installation.</p><div class="download-links"><a class="button" href="downloads/author.alpine-valley-0.1.0.skieomap" download>Built map ↓</a><a href="downloads/alpine-valley-project.zip" download>Source project ZIP ↓</a></div><p class="small">The practice terrain is CC0; generated project scripts use the template’s MIT licence. The build keeps backups inside the working project, but they are not part of the map package.</p></div>
+        </section>
+
+        <section id="troubleshooting" class="step">
+          <p class="step-number">WHEN SOMETHING LOOKS WRONG</p><h2>Troubleshooting</h2>
+<div class="qa-tabs" data-tabs>
+<div class="tab-list" role="tablist" aria-label="What is getting in the way?">
+<button type="button" role="tab" id="help-tab-slope" data-answer="slope" aria-controls="help-slope">Why do I see a simple slope?</button>
+<button type="button" role="tab" id="help-tab-dimensions" data-answer="dimensions" aria-controls="help-dimensions">I do not know the R16 dimensions</button>
+<button type="button" role="tab" id="help-tab-elevation" data-answer="elevation" aria-controls="help-elevation">I do not know the altitudes</button>
+</div>
+<div class="tab-answer" id="help-slope" role="tabpanel" aria-labelledby="help-tab-slope" tabindex="0"><h3>Why do I see a simple slope?</h3><p><code>skieomod create map</code> makes a placeholder slope. Your own relief appears only after a build using <code>build.heightmap</code>.</p>
+<ol><li>Open <code>my-resort/custom-map.json</code>. In its single top-level <code>build</code> object, check that <code>heightmap.file</code> points to <strong>your original R16 or PNG</strong>, not the practice download or generated <code>Terrain/heightmap.r16</code>. Select your format in step 4 above.</li>
+<li>Save the JSON and run <code>skieomod build my-resort</code> from the parent folder. Resolve any error before continuing. Check the printed sample dimensions and extent.</li>
+<li>Close the game and run <code>skieomod run my-resort</code>. Choose <strong>New Game → Custom Map → My Mountain</strong>, or the name you gave your project. Use a new session so you see the rebuilt map.</li></ol>
+<p>If you followed an older version of this guide, replace its example PNG path with your own source path. Adding erosion should preserve that path. You do not need the practice PNG when you already have a heightmap.</p></div>
+<div class="tab-answer" id="help-dimensions" role="tabpanel" aria-labelledby="help-tab-dimensions" tabindex="0"><h3>I do not know the R16 dimensions</h3><p>With CLI 1.12 or later, omit <code>vertices</code> for an intended square export. The build computes <code>sample_count = file_bytes / 2</code> and uses <code>sqrt(sample_count)</code> only if that is an integer.</p>
+<p>For example, 526,338 bytes contain 263,169 samples, compatible with 513 × 513. This is an assumption: some rectangular grids have the same sample count as a square. If you know the export dimensions, supply them.</p>
+<p>For a rectangle, provide both sample counts or one side: <code>"vertices": [2017, null]</code> derives the height; <code>"vertices": [null, 3025]</code> derives the width. If the byte count is not divisible by the supplied side, the build stops with an error. A PNG carries both dimensions in its header.</p></div>
+<div class="tab-answer" id="help-elevation" role="tabpanel" aria-labelledby="help-tab-elevation" tabindex="0"><h3>I do not know the altitudes</h3><p>Omit <code>elevation_meters</code> and both exporter encoding fields for a first test. The build keeps the shape and maps the lowest and highest samples to a <strong>relative 0–1,000 m</strong> range. It reports that assumption in the terminal and build report.</p>
+<p>This does not recover your mountain’s real height or elevation. Retrieve the exporter’s settings or the actual low and high altitudes, add them to <code>build.heightmap</code>, then rebuild. Spacing is still needed; an arbitrary spacing also changes the apparent slopes.</p>
+<p>Do not copy the practice terrain’s 800–2,200 m range for an unrelated source. A partial scale/offset pair or partial altitude range is rejected rather than treated as a test default.</p></div>
+</div>
+          <div class="table-wrap"><table><thead><tr><th>Symptom</th><th>Check</th></tr></thead><tbody>
+            <tr><td><code>skieomod</code> is not recognised</td><td>Run <code>pipx ensurepath</code>, reopen the terminal and try <code>skieomod --version</code>.</td></tr>
+            <tr><td>Build says the byte count is wrong</td><td>Use sample dimensions, not metres. Raw R16 must contain exactly <code>width × height × 2</code> bytes with no header. Check that the input is not a PNG or a 32-bit grid.</td></tr>
+            <tr><td>PNG is rejected</td><td>Export a true 16-bit grayscale PNG without alpha. RGB, palette and 8-bit PNG files are not accepted by the build. Interlaced PNG must be exported again without interlacing.</td></tr>
+            <tr><td>Random spikes or noisy ridges</td><td>Check raw byte order, width and sample type. Set <code>"format": "r16be"</code> in <code>build.heightmap</code> if the exporter used R16BE. Signed or floating-point samples must be converted first.</td></tr>
+            <tr><td>Terrain is too flat or too tall</td><td>Check the actual altitude range or exporter scale and offset. Do not reuse the template’s default scale for an unrelated heightmap. Correct the values in <code>build.heightmap</code> and build again.</td></tr>
+            <tr><td>Terrain is stretched or too large</td><td>Check the spacing and the <code>(samples − 1) × spacing</code> formula. The source format uses one spacing for both axes.</td></tr>
+            <tr><td>Terrain faces the wrong direction</td><td>Check row order. Set <code>"row_order": "south_to_north"</code> in <code>build.heightmap</code> when needed; columns must run west to east.</td></tr>
+
+            <tr><td>Loading is slow or terrain looks coarse</td><td>The build chooses an initial mesh stride to limit loading work. Override it with <code>"sample_step": 1</code> inside <code>build.heightmap</code> for every sample, or 2 for every second sample. Increasing it reduces detail and collision resolution; lowering it adds work. Test each change.</td></tr>
+            <tr><td>Trees float above the ground</td><td>Update the Custom Maps loader to 1.11.1 or later with <code>skieomod update</code> while the game is closed, then start a new session. Tree roots now follow the rendered triangles at any <code>sample_step</code>.</td></tr>
+            <tr><td>Forest stops at a square boundary on a rectangular map</td><td>Check that you installed the latest built package, whose forest uses the full heightmap extent. An old forest file or old map installation may still describe the previous square. The biome intentionally leaves steep or high terrain bare.</td></tr>
+            <tr><td>Tree generation exceeds the candidate limit</td><td>Reduce <code>density_per_hectare</code> or split the map. The bake permits at most 2,000,000 candidates and 1,000,000 trees; habitat filtering may produce fewer trees than the nominal density.</td></tr>
+            <tr><td>Forest importer is missing</td><td>Update both the CLI and loader to 1.11 or later and rebuild. The loader now reads SKXY only; JSON forests must pass through the build.</td></tr>
+            <tr><td>The map is absent from the game</td><td>Close the game, check <code>skieomod config</code>, run <code>skieomod update</code>, then <code>skieomod run my-resort</code>. Make sure you launch the same game/demo installation that setup configured.</td></tr>
+          </tbody></table></div>
+          <p>The build accepts up to 32 MiB of raw samples and 16,384 samples per axis. For larger inputs, resample in your terrain tool first. World extent is not capped at 8 km; choose spacing and rendering detail to suit the size of your map.</p>
+          <h3>Where to go next</h3>
+          <p>Your project’s <code>docs/terrain.md</code>, <code>docs/vegetation.md</code> and <code>docs/scripting.md</code> explain the terrain format, tree positions and Lua API. The terrain guide describes template defaults; the calculated <code>terrain</code> values written by your build describe your own map.</p>
+          <p>Project reference: <a href="/downloads/getting-started.md">getting started</a>, <a href="/docs/custom-map-cli.md">CLI documentation</a> and <a href="/docs/custom-map-format.md">map format specification</a>. The versioned guide bundled with your installed tools contains the matching release documentation.</p>
+        </section>
+      </article>
+    </div>
+  </main>
+  <footer><p><a href="/">◭ Custom Map</a> · Community tools for Ski-E-O!</p><p>By Albatar (Élie Millon) · <a href="#title">Back to top ↑</a></p></footer>
+  <div id="copy-status" class="sr-only" role="status" aria-live="polite"></div>
+</body>
+</html>

@@ -1,0 +1,40 @@
+{
+  "version": 1,
+  "model": "sculpted-implicit-rock",
+  "seed": 39,
+  "core_recession_meters": 2.2,
+  "maximum_outset_meters": 1.2,
+  "detail_amplitude_meters": 0.05,
+  "detail_scale_meters": 0.75,
+  "photographic_detail_scale_meters": 5,
+  "photographic_displacement_limit_meters": 0,
+  "edge_fade_meters": 2.4,
+  "voxel_spacing_meters": 0.15,
+  "max_grid_samples": 2000000,
+  "max_vertices": 100000,
+  "max_triangles": 200000,
+  "sculpture": {
+    "mass_offset_meters": 0.2,
+    "edge_rounding_meters": 0.035,
+    "root_depth_meters": 2.6,
+    "protrusion_meters": 0.8,
+    "protruding_fraction": 0.55,
+    "max_volumes": 512,
+    "maximum_detached_volume_m3": 1.0,
+    "maximum_detached_component_volume_m3": 0.5,
+    "maximum_sealed_cavity_volume_m3": 0.2,
+    "levels": [
+      {"spacing_meters": 3.1, "density": 1.1, "radii_meters": [1.4, 2.1, 1.0], "cut_depth_meters": 0.9},
+      {"spacing_meters": 1.25, "density": 0.8, "radii_meters": [0.5, 0.85, 0.4], "cut_depth_meters": 0.36},
+      {"spacing_meters": 0.65, "density": 0.35, "radii_meters": [0.26, 0.37, 0.22], "cut_depth_meters": 0.18}
+    ]
+  },
+  "provenance": {
+    "status": "local-sculpture-prototype",
+    "material": "pale compact limestone",
+    "style": "Angular projecting masses, broken faces and finite chips, informed by the user's close-up references.",
+    "dimensions": "Procedural style parameters, not metric reconstruction from photographs.",
+    "photographic_fracture_candidates_used": false,
+    "photographic_normal_displacement_used": false
+  }
+}

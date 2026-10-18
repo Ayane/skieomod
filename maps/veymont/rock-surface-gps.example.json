@@ -1,0 +1,22 @@
+{
+  "version": 1,
+  "calibration": "Template for GPS-referenced daylight photography; camera and exposure need calibration",
+  "size": [128, 128],
+  "channel": "green",
+  "procedural_seed": 0,
+  "views": [{"file": "20250118_103053.jpg", "light_direction": [0.5, 0.3, 0.8], "ambient_linear": 0.015}],
+  "rock_polygons_uv": [[[0, 0], [1, 0], [1, 1], [0, 1]]],
+  "rock_color_gate": {"red_over_blue_min": 0.56, "red_over_green_min": 0.85},
+  "snow_cue": {"weight": 0.35, "minimum_up_cosine": 0.6,
+               "min_brightness_srgb": 0.85, "max_red_over_blue": 1.15},
+  "surface": {
+    "extent_meters": [80, 100],
+    "reference_albedo": 0.75,
+    "max_angle_degrees": 15,
+    "max_displacement_meters": 0.3,
+    "detail_scale_meters": 25,
+    "edge_fade_meters": 2,
+    "albedo_srgb": [0.90, 0.90, 0.87],
+    "roughness": 0.85
+  }
+}

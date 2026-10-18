@@ -1,0 +1,92 @@
+{
+  "schema_version": 1,
+  "id": "veymont",
+  "title": "Veymont",
+  "unreal_package": "/Game/Maps/Generated/Map_veymont",
+  "projection": "EPSG:2154",
+  "center": {
+    "easting": 901000.0,
+    "northing": 6424000.0,
+    "latitude": 44.88601663,
+    "longitude": 5.54604349
+  },
+  "terrain": {
+    "vertices_x": 2017,
+    "vertices_y": 3025,
+    "spacing_meters": 4.0,
+    "extent_meters": [
+      8064.0,
+      12096.0
+    ],
+    "bounds_east_north": [
+      896968.0,
+      6417952.0,
+      905032.0,
+      6430048.0
+    ],
+    "sections": 32,
+    "section_size_quads": 63,
+    "heightmap_orientation": "row 0 is north; columns run west to east",
+    "sections_note": "Native cache topology: 32 x 32 sections, resampled over the full rectangular extent."
+  },
+  "points_of_interest": {
+    "front_de_neige": {
+      "latitude": 44.901304,
+      "longitude": 5.566192
+    },
+    "village_hydrometric_reference": {
+      "easting": 902788.566,
+      "northing": 6428576.374
+    },
+    "mont_aiguille": {
+      "latitude": 44.8417918,
+      "longitude": 5.5522225,
+      "osm_node": "410304217",
+      "elevation_meters": 2087,
+      "source": "https://www.openstreetmap.org/node/410304217"
+    }
+  },
+  "source": {
+    "dataset": "MNT LiDAR HD Isere 2021-2022",
+    "raster": "LHD_Isere_2021-2022_MNT_50cm_L93.cog.tif",
+    "source_spacing_meters": 0.5,
+    "working_spacing_meters": 4.0,
+    "horizontal_reference": "EPSG:2154",
+    "vertical_reference": "NGF-IGN69",
+    "licence": "Licence Ouverte v2.0",
+    "attribution": "IGN / LiDAR HD, Aerodata - CRAIG - CD 38 - DDT 38 - 2023 (releves 2021-2022 ; fichier 24/06/2024)",
+    "repair_input_sha256": "9eadeade8221441e5ed57257dc814c740d9d01fca6d16e81991d407556075b05",
+    "repairs": [
+      {
+        "name": "Les Deux / Col des Deux",
+        "reason": "Four 500 m CRAIG source tiles contain large interpolation facets. Replace this 1 km square with the IGN MNT reclassified on 2025-02-20.",
+        "bounds_east_north": [
+          902000,
+          6429000,
+          903000,
+          6430000
+        ],
+        "blend_meters": 32,
+        "file": "veymont-les-deux-ign-2025.tif",
+        "sha256": "e6b6d6a0dcb85703aca19b7e64ed2b8f20ecba42cfa19fddf17df0279600448c",
+        "url": "https://data.geopf.fr/wms-r?SERVICE=WMS&VERSION=1.3.0&EXCEPTIONS=text%2Fxml&REQUEST=GetMap&LAYERS=IGNF_LIDAR-HD_MNT_ELEVATION.ELEVATIONGRIDCOVERAGE.LAMB93&FORMAT=image%2Fgeotiff&STYLES=&CRS=EPSG%3A2154&BBOX=901965.75%2C6428965.75%2C903034.25%2C6430050.25&WIDTH=2137&HEIGHT=2169&FILENAME=veymont-les-deux-ign-2025.tif",
+        "dataset": "IGN LiDAR HD MNT, mission 21LHD7PN, acquisition 2021-10-14, classification Avineon, edition 2025-02-20",
+        "licence": "Licence Ouverte v2.0"
+      }
+    ]
+  },
+  "resort_layout": {
+    "dataset": "OpenStreetMap",
+    "retrieved": "2026-09-27",
+    "features": [
+      "pistes",
+      "aerialways",
+      "forests",
+      "ticket_office",
+      "named_places"
+    ],
+    "licence": "ODbL 1.0",
+    "attribution": "OpenStreetMap contributors",
+    "expanded_retrieved": "2026-10-07"
+  }
+}

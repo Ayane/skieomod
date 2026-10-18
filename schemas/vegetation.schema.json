@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "SkiEO JSON forest",
+  "description": "Authoring-only JSON positions in world metres. skieomod build compiles them to SKXY float32 centimetres; the game reads only SKXY and calculates Z from terrain.",
+  "type": "array",
+  "maxItems": 1000000,
+  "items": {
+    "type": "object",
+    "required": [
+      "x",
+      "y"
+    ],
+    "properties": {
+      "x": {
+        "type": "number",
+        "description": "World X in metres; east is positive."
+      },
+      "y": {
+        "type": "number",
+        "description": "World Y in metres; south is positive."
+      }
+    },
+    "additionalProperties": false
+  }
+}

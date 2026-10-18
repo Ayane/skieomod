@@ -1,0 +1,234 @@
+{
+  "version": 1,
+  "photo": "IMG-20250927-WA0009.jpg",
+  "heightmap_manifest": "../../mod/SkiEO-Veymont/custom-map.json",
+  "provenance": {
+    "viewpoint": "Author: sentier avant Sous le Pas de la Ville; corrected position 44°52'58.3\"N 5°31'44.9\"E, identified using the foreground tree",
+    "location_hint": {
+      "latitude": 44.88286111111111,
+      "longitude": 5.529138888888889,
+      "radius_meters": 25,
+      "source": "author corrected map position using the foreground tree; not EXIF"
+    },
+    "skyline": "Warm rock / blue sky boundary, visually reviewed; fog and vegetation excluded from the selected upper skyline",
+    "lighting": "Unknown UTC and exposure; no radiometric extraction from this camera alone",
+    "coordinate_system": "map metres: east, south, up; NGF-IGN69 elevations"
+  },
+  "camera_search": {
+    "height_above_ground_meters": 1.7,
+    "aim_meters": [
+      -1500,
+      1800,
+      2100
+    ],
+    "yaw_offset_degrees": [
+      -30,
+      30
+    ],
+    "pitch_degrees": [
+      0,
+      40
+    ],
+    "terrain_window_meters": [
+      -2300,
+      1000,
+      -750,
+      3300
+    ],
+    "grid_step": 2,
+    "iterations": 60,
+    "seed": 5,
+    "roll_degrees": [
+      -4,
+      4
+    ],
+    "position_xy_bounds_meters": [
+      [
+        -1347.8691000000108,
+        -1297.8691000000108
+      ],
+      [
+        368.1871999995783,
+        418.1871999995783
+      ]
+    ],
+    "focal_pixels": [
+      650,
+      2200
+    ]
+  },
+  "skyline_pixels": [
+    [
+      620,
+      595
+    ],
+    [
+      640,
+      580
+    ],
+    [
+      660,
+      552
+    ],
+    [
+      680,
+      529
+    ],
+    [
+      700,
+      517
+    ],
+    [
+      720,
+      521
+    ],
+    [
+      740,
+      514
+    ],
+    [
+      760,
+      465
+    ],
+    [
+      780,
+      461
+    ],
+    [
+      800,
+      480
+    ],
+    [
+      820,
+      486
+    ],
+    [
+      840,
+      490
+    ],
+    [
+      860,
+      426
+    ],
+    [
+      880,
+      417
+    ],
+    [
+      900,
+      424
+    ],
+    [
+      920,
+      429
+    ],
+    [
+      940,
+      419
+    ],
+    [
+      960,
+      432
+    ],
+    [
+      980,
+      445
+    ],
+    [
+      1000,
+      448
+    ],
+    [
+      1020,
+      400
+    ],
+    [
+      1040,
+      388
+    ],
+    [
+      1060,
+      384
+    ],
+    [
+      1080,
+      382
+    ],
+    [
+      1100,
+      368
+    ],
+    [
+      1120,
+      360
+    ],
+    [
+      1140,
+      358
+    ],
+    [
+      1160,
+      362
+    ],
+    [
+      1180,
+      379
+    ],
+    [
+      1200,
+      397
+    ],
+    [
+      1220,
+      393
+    ],
+    [
+      1240,
+      400
+    ],
+    [
+      1260,
+      407
+    ],
+    [
+      1280,
+      408
+    ],
+    [
+      1300,
+      410
+    ],
+    [
+      1320,
+      414
+    ],
+    [
+      1340,
+      423
+    ],
+    [
+      1360,
+      411
+    ],
+    [
+      1380,
+      392
+    ],
+    [
+      1400,
+      387
+    ],
+    [
+      1420,
+      384
+    ],
+    [
+      1440,
+      384
+    ],
+    [
+      1460,
+      382
+    ]
+  ]
+}

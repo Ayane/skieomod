@@ -1,0 +1,311 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "skieomod Steamworks client protocol version 1",
+  "oneOf": [
+    {
+      "type": "object",
+      "required": [
+        "format",
+        "version",
+        "app_id",
+        "method"
+      ],
+      "properties": {
+        "format": {
+          "const": "skieomod-workshop"
+        },
+        "version": {
+          "const": 1
+        },
+        "app_id": {
+          "type": "string",
+          "pattern": "^[1-9][0-9]{0,9}$"
+        },
+        "method": {
+          "enum": [
+            "query",
+            "install",
+            "play",
+            "publish"
+          ]
+        },
+        "kind": {
+          "enum": [
+            "map",
+            "mod",
+            null
+          ]
+        },
+        "page": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "search": {
+          "type": "string"
+        },
+        "published_file_id": {
+          "type": "string",
+          "pattern": "^(0|[1-9][0-9]{0,19})$"
+        },
+        "include_required_items": {
+          "const": true
+        },
+        "content_folder": {
+          "type": "string"
+        },
+        "preview_file": {
+          "type": "string"
+        },
+        "title": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "tags": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "metadata": {
+          "type": "string"
+        },
+        "visibility": {
+          "enum": [
+            "public",
+            "friends",
+            "private",
+            "unlisted"
+          ]
+        },
+        "changenote": {
+          "type": "string"
+        },
+        "required_items": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "pattern": "^[1-9][0-9]{0,19}$"
+          }
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "method": {
+                "const": "publish"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "published_file_id",
+              "content_folder",
+              "preview_file",
+              "title",
+              "description",
+              "tags",
+              "metadata",
+              "visibility",
+              "changenote",
+              "required_items"
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "method": {
+                "enum": [
+                  "install",
+                  "play"
+                ]
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "published_file_id",
+              "include_required_items"
+            ],
+            "properties": {
+              "published_file_id": {
+                "type": "string",
+                "pattern": "^[1-9][0-9]{0,19}$"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "method": {
+                "const": "query"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "page",
+              "search"
+            ]
+          }
+        }
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "required": [
+        "format",
+        "version",
+        "app_id",
+        "ok"
+      ],
+      "properties": {
+        "format": {
+          "const": "skieomod-workshop"
+        },
+        "version": {
+          "const": 1
+        },
+        "app_id": {
+          "type": "string",
+          "pattern": "^[1-9][0-9]{0,9}$"
+        },
+        "ok": {
+          "type": "boolean"
+        },
+        "error": {
+          "type": "string"
+        },
+        "message": {
+          "type": "string"
+        },
+        "published_file_id": {
+          "type": "string",
+          "pattern": "^[1-9][0-9]{0,19}$"
+        },
+        "needs_legal_agreement": {
+          "type": "boolean"
+        },
+        "items": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/item"
+          }
+        },
+        "has_more": {
+          "type": "boolean"
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "ok": {
+                "const": false
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "error"
+            ]
+          }
+        }
+      ],
+      "additionalProperties": false
+    }
+  ],
+  "$defs": {
+    "item": {
+      "type": "object",
+      "required": [
+        "published_file_id",
+        "app_id",
+        "kind",
+        "result",
+        "title",
+        "description"
+      ],
+      "properties": {
+        "published_file_id": {
+          "type": "string",
+          "pattern": "^[1-9][0-9]{0,19}$"
+        },
+        "app_id": {
+          "type": "string",
+          "pattern": "^[1-9][0-9]{0,9}$"
+        },
+        "kind": {
+          "enum": [
+            "map",
+            "mod"
+          ]
+        },
+        "result": {
+          "const": 1
+        },
+        "title": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "owner_steam_id": {
+          "type": "string",
+          "pattern": "^[1-9][0-9]{0,19}$"
+        },
+        "owner_name": {
+          "type": "string"
+        },
+        "avatar_url": {
+          "type": "string"
+        },
+        "updated_at": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "votes_up": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "votes_down": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "size_bytes": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "tags": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "required_items": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[1-9][0-9]{0,19}$"
+          }
+        },
+        "metadata": {
+          "type": [
+            "object",
+            "string"
+          ]
+        },
+        "banned": {
+          "type": "boolean"
+        }
+      },
+      "additionalProperties": true
+    }
+  }
+}

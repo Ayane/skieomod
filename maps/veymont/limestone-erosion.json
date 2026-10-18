@@ -1,0 +1,16 @@
+{
+  "version": 1,
+  "model": "exposure-curvature-erosion",
+  "depth_meters": 0.22,
+  "curvature_radius_meters": 0.35,
+  "iterations": 24,
+  "face_rate": 0.12,
+  "exposure_floor": 0.45,
+  "weather_direction_local": [0.2, 0.75, 1.0],
+  "maximum_removed_volume_m3": 25,
+  "provenance": {
+    "status": "procedural-post-sculpture-weathering",
+    "calibrated_geological_simulation": false,
+    "purpose": "Wear convex exposed edges while retaining the main broken faces and undersides."
+  }
+}

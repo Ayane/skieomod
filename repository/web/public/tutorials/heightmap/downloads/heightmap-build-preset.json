@@ -1,0 +1,57 @@
+{
+  "build": {
+    "heightmap": {
+      "file": "Terrain/source-heightmap.png",
+      "spacing_meters": 8,
+      "elevation_meters": [
+        800,
+        2200
+      ],
+      "processing": {
+        "resolution": 513,
+        "smoothing": {
+          "iterations": 2,
+          "strength": 0.15,
+          "max_delta_meters": 1
+        },
+        "thermal_erosion": {
+          "iterations": 8,
+          "talus_degrees": 35,
+          "strength": 0.2,
+          "max_delta_meters": 3
+        },
+        "hydraulic_erosion": {
+          "iterations": 4,
+          "strength": 0.06,
+          "rainfall": 1,
+          "max_delta_meters": 1
+        }
+      }
+    },
+    "vegetation": {
+      "biome": {
+        "tree_line_meters": 1900,
+        "alpine_line_meters": 2400,
+        "temperature_sea_level_celsius": 15,
+        "lapse_rate_celsius_per_km": 6.5,
+        "moisture": 0.65,
+        "wind_strength": 0.3,
+        "wind_direction_degrees": 270
+      },
+      "trees": {
+        "seed": 42,
+        "density_per_hectare": 90,
+        "min_spacing_meters": 5,
+        "max_slope_degrees": 32,
+        "tree_line_fade_meters": 150,
+        "patch_size_meters": 160,
+        "patchiness": 0.6,
+        "max_trees": 100000
+      },
+      "ground_cover": {
+        "texture_size": 256,
+        "max_slope_degrees": 45
+      }
+    }
+  }
+}

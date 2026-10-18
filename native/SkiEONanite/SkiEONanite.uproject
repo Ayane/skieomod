@@ -1,0 +1,7 @@
+{
+  "FileVersion": 3,
+  "Category": "Tools",
+  "Description": "Build derived Nanite cliff assets from portable rock geometry.",
+  "DisableEnginePluginsByDefault": true,
+  "Modules": [{"Name": "SkiEONanite", "Type": "Editor", "LoadingPhase": "Default"}]
+}

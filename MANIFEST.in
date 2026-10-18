@@ -1,0 +1,27 @@
+include README.md
+include LICENSE THIRD_PARTY_NOTICES.md
+include mod/SkiEO-CustomMaps/LICENSE mod/SkiEO-CustomMaps/LICENSE-miniz.txt
+include CHANGELOG.md docs/discord-releases.md
+include docs/custom-map-repository.md
+include docs/custom-map-cli.md docs/custom-map-format.md docs/steam-workshop.md
+include docs/getting-started.md
+include docs/large-maps.md
+include docs/terrain-repairs.md
+include tools/repair_heightmap.py maps/veymont/map.json
+include docs/vegetation.md
+include docs/editor.md
+include docs/editor-tutorial.md
+include docs/scripts-and-scenarios.md docs/mapmods.md docs/mapmod-tutorial.md
+include schemas/*.json
+include mod/SkiEO-CustomMaps/README.md
+include mod/SkiEO-CustomMaps/LICENSE-MINHOOK.md
+include mod/SkiEO-CustomMaps/Scripts/*.lua
+include mod/SkiEO-CustomMaps/Scripts/skieo_repository.dll
+include mod/SkiEO-CustomMaps/Scripts/skieo_native_terrain.dll
+include mod/SkiEO-CustomMaps/Scripts/skieo_trail_ratings.dll
+include native/SkiEORepository/LICENSE
+include tools/build_custom_map_release.py
+include tests/check_skieomod_distribution.py
+include deployment/publish_loader_updates.py
+include deployment/release_custom_map.py
+include deployment/discord_releases.py

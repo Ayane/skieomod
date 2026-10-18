@@ -1,0 +1,264 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://skieomod.emillon.fr/schemas/custom-mod.schema.json",
+  "title": "Custom Map mod manifest",
+  "type": "object",
+  "required": [
+    "format",
+    "id",
+    "metadata",
+    "files"
+  ],
+  "properties": {
+    "format": {
+      "type": "object",
+      "required": [
+        "name",
+        "version"
+      ],
+      "properties": {
+        "name": {
+          "const": "skieo-mod"
+        },
+        "version": {
+          "type": "string",
+          "pattern": "^1\\.[0-9]+\\.[0-9]+$"
+        }
+      }
+    },
+    "id": {
+      "type": "string",
+      "minLength": 3,
+      "maxLength": 96,
+      "pattern": "^[a-z0-9]+(?:[._-][a-z0-9]+)+$"
+    },
+    "metadata": {
+      "type": "object",
+      "required": [
+        "name",
+        "version",
+        "authors",
+        "description"
+      ],
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 80
+        },
+        "version": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 32
+        },
+        "authors": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 80
+          }
+        },
+        "description": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1200
+        },
+        "language": {
+          "type": "string",
+          "default": "en",
+          "pattern": "^[a-z]{2,3}(?:-[A-Z][a-z]{3})?(?:-[A-Z]{2}|-[0-9]{3})?$"
+        },
+        "localizations": {
+          "type": "object",
+          "propertyNames": {
+            "pattern": "^[a-z]{2,3}(?:-[A-Z][a-z]{3})?(?:-[A-Z]{2}|-[0-9]{3})?$"
+          },
+          "additionalProperties": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 80
+              },
+              "description": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 1200
+              },
+              "license": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 120
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        "players": {
+          "type": "object",
+          "required": [
+            "min",
+            "max"
+          ],
+          "properties": {
+            "min": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "max": {
+              "type": "integer",
+              "minimum": 1
+            }
+          },
+          "additionalProperties": true
+        },
+        "tags": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 32
+          }
+        },
+        "license": {
+          "type": "string",
+          "maxLength": 120
+        },
+        "homepage": {
+          "type": "string",
+          "format": "uri"
+        }
+      },
+      "additionalProperties": true
+    },
+    "runtime": {
+      "enum": [
+        "map-api",
+        "ue4ss"
+      ],
+      "default": "map-api"
+    },
+    "install_directory": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9_-]{1,80}$"
+    },
+    "files": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 4095,
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "script": {
+      "type": "object",
+      "required": [
+        "language",
+        "api",
+        "entry"
+      ],
+      "properties": {
+        "language": {
+          "const": "lua"
+        },
+        "api": {
+          "type": "string",
+          "pattern": "^1\\.[0-9]+$"
+        },
+        "entry": {
+          "type": "string",
+          "minLength": 1
+        },
+        "permissions": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "enum": [
+              "gameplay",
+              "skieo.unrestricted"
+            ]
+          }
+        }
+      },
+      "additionalProperties": true
+    },
+    "content": {
+      "type": "object",
+      "properties": {
+        "assets": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "dependencies": {
+      "$ref": "#/$defs/dependencies"
+    }
+  },
+  "$defs": {
+    "dependencies": {
+      "type": "array",
+      "maxItems": 32,
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "version"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-z0-9]+(?:[._-][a-z0-9]+)+$"
+          },
+          "version": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120
+          },
+          "optional": {
+            "type": "boolean",
+            "default": false
+          },
+          "workshop_id": {
+            "type": "string",
+            "pattern": "^[1-9][0-9]{0,19}$",
+            "description": "Steam PublishedFileId_t as a decimal string; required for required dependencies when publishing to Workshop."
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "runtime": {
+            "const": "ue4ss"
+          }
+        },
+        "required": [
+          "runtime"
+        ]
+      },
+      "then": {
+        "required": [
+          "install_directory"
+        ]
+      },
+      "else": {
+        "required": [
+          "script"
+        ]
+      }
+    }
+  ]
+}

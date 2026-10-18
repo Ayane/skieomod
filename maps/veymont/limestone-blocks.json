@@ -1,0 +1,33 @@
+{
+  "version": 1,
+  "model": "fractured-implicit-blocks",
+  "seed": 17,
+  "poisson_separation_meters": 0.6,
+  "poisson_attempts": 22000,
+  "connectivity_radius_meters": 1.5,
+  "maximum_block_diameter_meters": 48,
+  "sample_back_meters": 3,
+  "sample_front_meters": 0.3,
+  "core_recession_meters": 0.6,
+  "front_offset_meters": 0.2,
+  "maximum_outset_meters": 0.3,
+  "rounding_meters": 0.08,
+  "detail_amplitude_meters": 0.18,
+  "detail_scale_meters": 1.6,
+  "fracture_zone_meters": 2.5,
+  "photographic_detail_scale_meters": 5,
+  "photographic_displacement_limit_meters": 0.3,
+  "edge_fade_meters": 3,
+  "voxel_spacing_meters": 0.25,
+  "max_grid_samples": 2000000,
+  "max_blocks": 128,
+  "max_vertices": 100000,
+  "max_triangles": 200000,
+  "provenance": {
+    "status": "local-geometric-prototype",
+    "material": "pale compact limestone",
+    "fracture_depths": "procedural, not measured from photographs",
+    "microrelief": "procedural 3D gradient warping, not reconstructed from photographs",
+    "camera_correspondences": "candidate, independently unverified"
+  }
+}

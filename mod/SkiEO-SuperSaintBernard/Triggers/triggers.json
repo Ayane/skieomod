@@ -1,0 +1,114 @@
+{
+  "version": 1,
+  "triggers": [
+    {
+      "id": "starting-economy",
+      "name": "Starting economy · 2003",
+      "event": "map.ready",
+      "enabled": true,
+      "before_script": true,
+      "mode": "graph",
+      "graph": {
+        "nodes": [
+          {
+            "id": "event",
+            "kind": "entry",
+            "position": [
+              40,
+              40
+            ],
+            "params": {}
+          },
+          {
+            "id": "setup",
+            "kind": "scenario_configure",
+            "position": [
+              410,
+              40
+            ],
+            "params": {
+              "rules_module": "economy"
+            }
+          },
+          {
+            "id": "currency",
+            "kind": "text",
+            "position": [
+              40,
+              180
+            ],
+            "params": {
+              "value": "CHF"
+            }
+          },
+          {
+            "id": "start_year",
+            "kind": "number",
+            "position": [
+              40,
+              305
+            ],
+            "params": {
+              "value": 2003
+            }
+          },
+          {
+            "id": "starting_balance",
+            "kind": "number",
+            "position": [
+              40,
+              430
+            ],
+            "params": {
+              "value": 250000
+            }
+          },
+          {
+            "id": "ticket_price",
+            "kind": "number",
+            "position": [
+              40,
+              555
+            ],
+            "params": {
+              "value": 38
+            }
+          }
+        ],
+        "edges": [
+          {
+            "source": "event",
+            "port": "then",
+            "target": "setup",
+            "input": "in"
+          },
+          {
+            "source": "currency",
+            "port": "value",
+            "target": "setup",
+            "input": "currency"
+          },
+          {
+            "source": "start_year",
+            "port": "value",
+            "target": "setup",
+            "input": "start_year"
+          },
+          {
+            "source": "starting_balance",
+            "port": "value",
+            "target": "setup",
+            "input": "starting_balance"
+          },
+          {
+            "source": "ticket_price",
+            "port": "value",
+            "target": "setup",
+            "input": "ticket_price"
+          }
+        ]
+      },
+      "lua": "local rules = require('economy')\napi.game:configure({\n    currency = 'CHF', start_year = 2003,\n    starting_balance = 250000, ticket_price = 38,\n    costs = rules.costs, class_costs = rules.class_costs,\n    loans = rules.loans, track_lift_rides = rules.track_lift_rides\n})"
+    }
+  ]
+}

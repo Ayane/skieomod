@@ -1,0 +1,22 @@
+diff --git a/retoc/src/legacy_asset.rs b/retoc/src/legacy_asset.rs
+index 03f2e01..ff81774 100644
+--- a/retoc/src/legacy_asset.rs
++++ b/retoc/src/legacy_asset.rs
+@@ -683,7 +683,7 @@ impl FObjectImport {
+ 
+         // Used to support imports that live in their own packages for One File Per Actor in UE5
+         // Such imports cannot exist in cooked data, and as such, we should never encounter them
+-        if !summary.is_filter_editor_only() {
++        if !summary.is_filter_editor_only() || summary.versioning_info.package_file_version.file_version_ue5 >= EUnrealEngineObjectUE5Version::ImportTypeHierarchies as i32 {
+             let _package_name: FMinimalName = s.de()?;
+         }
+ 
+@@ -707,7 +707,7 @@ impl FObjectImport {
+         s.ser(&self.object_name)?;
+ 
+         // We should never be serializing uncooked packages, might be worth to assert here instead of writing an empty name
+-        if !summary.is_filter_editor_only() {
++        if !summary.is_filter_editor_only() || summary.versioning_info.package_file_version.file_version_ue5 >= EUnrealEngineObjectUE5Version::ImportTypeHierarchies as i32 {
+             let package_name: FMinimalName = FMinimalName::default();
+             s.ser(&package_name)?;
+         }

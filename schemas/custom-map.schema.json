@@ -1,0 +1,1144 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://skieo.community/schemas/custom-map-1.json",
+  "title": "Ski-E-O! custom map manifest",
+  "type": "object",
+  "required": [
+    "format",
+    "id",
+    "metadata",
+    "terrain",
+    "content"
+  ],
+  "properties": {
+    "$schema": {
+      "type": "string"
+    },
+    "build": {
+      "type": "object",
+      "description": "Local CLI build settings, removed from the portable package.",
+      "properties": {
+        "heightmap": {
+          "type": "object",
+          "required": [
+            "file",
+            "spacing_meters"
+          ],
+          "properties": {
+            "file": {
+              "type": "string",
+              "description": "Original source path relative to the project; distinct from generated Terrain/heightmap.r16."
+            },
+            "format": {
+              "enum": [
+                "png16",
+                "r16le",
+                "r16be"
+              ]
+            },
+            "vertices": {
+              "type": "array",
+              "items": {
+                "type": [
+                  "integer",
+                  "null"
+                ],
+                "minimum": 2,
+                "maximum": 16384
+              },
+              "minItems": 2,
+              "maxItems": 2,
+              "description": "Optional: PNG dimensions are read from its header. Raw R16 assumes a square grid when the sample count is a perfect square; supply both dimensions for rectangular terrain, or one dimension and null to derive the other."
+            },
+            "spacing_meters": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            "elevation_meters": {
+              "type": "array",
+              "items": {
+                "type": "number"
+              },
+              "minItems": 2,
+              "maxItems": 2,
+              "description": "Actual elevations of the lowest and highest stored samples. If this and both exporter encoding fields are omitted, build uses an explicitly reported relative 0 to 1000 m test relief."
+            },
+            "height_scale_meters": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            "height_offset_meters": {
+              "type": "number"
+            },
+            "row_order": {
+              "enum": [
+                "north_to_south",
+                "south_to_north"
+              ],
+              "default": "north_to_south"
+            },
+            "sample_step": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 64
+            },
+            "processing": {
+              "type": "object",
+              "properties": {
+                "smoothing": {
+                  "type": "object",
+                  "properties": {
+                    "iterations": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 50,
+                      "default": 2
+                    },
+                    "strength": {
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 1,
+                      "default": 0.2
+                    },
+                    "max_delta_meters": {
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 100,
+                      "default": 2
+                    }
+                  },
+                  "additionalProperties": false
+                },
+                "thermal_erosion": {
+                  "type": "object",
+                  "properties": {
+                    "iterations": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 50,
+                      "default": 8
+                    },
+                    "strength": {
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 1,
+                      "default": 0.2
+                    },
+                    "max_delta_meters": {
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 100,
+                      "default": 5
+                    },
+                    "talus_degrees": {
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 89,
+                      "default": 35
+                    }
+                  },
+                  "additionalProperties": false
+                },
+                "hydraulic_erosion": {
+                  "type": "object",
+                  "properties": {
+                    "iterations": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 50,
+                      "default": 8
+                    },
+                    "strength": {
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 1,
+                      "default": 0.2
+                    },
+                    "max_delta_meters": {
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 100,
+                      "default": 5
+                    },
+                    "rainfall": {
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 10,
+                      "default": 1
+                    }
+                  },
+                  "additionalProperties": false
+                },
+                "resolution": {
+                  "type": "integer",
+                  "minimum": 33,
+                  "maximum": 1025,
+                  "default": 513
+                },
+                "noise": {
+                  "type": "object",
+                  "properties": {
+                    "amplitude_meters": {
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 20,
+                      "default": 0.25
+                    },
+                    "wavelength_meters": {
+                      "type": "number",
+                      "minimum": 0.01,
+                      "maximum": 1000000,
+                      "default": 64
+                    },
+                    "seed": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 4294967295,
+                      "default": 1
+                    }
+                  },
+                  "additionalProperties": false
+                }
+              },
+              "additionalProperties": false,
+              "description": "Optional bounded processing at up to resolution vertices on the longest axis; original fine detail is retained. Fixed order: smoothing, thermal erosion, hydraulic erosion, noise. Every build starts from the original."
+            }
+          },
+          "oneOf": [
+            {
+              "required": [
+                "elevation_meters"
+              ],
+              "not": {
+                "anyOf": [
+                  {
+                    "required": [
+                      "height_scale_meters"
+                    ]
+                  },
+                  {
+                    "required": [
+                      "height_offset_meters"
+                    ]
+                  }
+                ]
+              }
+            },
+            {
+              "required": [
+                "height_scale_meters",
+                "height_offset_meters"
+              ],
+              "not": {
+                "required": [
+                  "elevation_meters"
+                ]
+              }
+            },
+            {
+              "not": {
+                "anyOf": [
+                  {
+                    "required": [
+                      "elevation_meters"
+                    ]
+                  },
+                  {
+                    "required": [
+                      "height_scale_meters"
+                    ]
+                  },
+                  {
+                    "required": [
+                      "height_offset_meters"
+                    ]
+                  }
+                ]
+              }
+            }
+          ],
+          "additionalProperties": false
+        },
+        "forest": {
+          "type": "object",
+          "required": [
+            "file"
+          ],
+          "properties": {
+            "file": {
+              "type": "string",
+              "description": "Editable JSON array of world-metre x/y positions; compiled to Vegetation/Generated/forest.skxy by build."
+            }
+          },
+          "additionalProperties": false
+        },
+        "vegetation": {
+          "type": "object",
+          "properties": {
+            "biome": {
+              "type": "object",
+              "properties": {
+                "tree_line_meters": {
+                  "type": "number",
+                  "minimum": -1000,
+                  "maximum": 20000,
+                  "default": 2000
+                },
+                "alpine_line_meters": {
+                  "type": "number",
+                  "minimum": -1000,
+                  "maximum": 20000,
+                  "default": 2600
+                },
+                "temperature_sea_level_celsius": {
+                  "type": "number",
+                  "minimum": -50,
+                  "maximum": 60,
+                  "default": 15
+                },
+                "lapse_rate_celsius_per_km": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 15,
+                  "default": 6.5
+                },
+                "moisture": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1,
+                  "default": 0.6
+                },
+                "wind_strength": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1,
+                  "default": 0.3
+                },
+                "wind_direction_degrees": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 360,
+                  "default": 270,
+                  "description": "Compass direction where the wind comes from: 0 north, 90 east."
+                }
+              },
+              "additionalProperties": false
+            },
+            "trees": {
+              "type": "object",
+              "properties": {
+                "enabled": {
+                  "type": "boolean",
+                  "default": true
+                },
+                "seed": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 4294967295,
+                  "default": 1
+                },
+                "density_per_hectare": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 2000,
+                  "default": 100
+                },
+                "min_spacing_meters": {
+                  "type": "number",
+                  "minimum": 0.1,
+                  "maximum": 1000,
+                  "default": 4
+                },
+                "max_trees": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 1000000,
+                  "default": 100000
+                },
+                "max_slope_degrees": {
+                  "type": "number",
+                  "minimum": 0.1,
+                  "maximum": 89,
+                  "default": 32
+                },
+                "min_elevation_meters": {
+                  "type": "number",
+                  "minimum": -1000,
+                  "maximum": 20000,
+                  "default": -1000
+                },
+                "tree_line_fade_meters": {
+                  "type": "number",
+                  "minimum": 0.01,
+                  "maximum": 5000,
+                  "default": 150
+                },
+                "patch_size_meters": {
+                  "type": "number",
+                  "minimum": 0.1,
+                  "maximum": 1000000,
+                  "default": 160
+                },
+                "patchiness": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1,
+                  "default": 0.6
+                },
+                "exclude": {
+                  "type": "array",
+                  "maxItems": 1000,
+                  "items": {
+                    "type": "array",
+                    "items": {
+                      "type": "number"
+                    },
+                    "minItems": 4,
+                    "maxItems": 4
+                  },
+                  "description": "[west, north, east, south] rectangles in world metres: X east, Y south."
+                }
+              },
+              "additionalProperties": false
+            },
+            "ground_cover": {
+              "type": "object",
+              "properties": {
+                "enabled": {
+                  "type": "boolean",
+                  "default": true
+                },
+                "texture_size": {
+                  "type": "integer",
+                  "enum": [
+                    16,
+                    32,
+                    64,
+                    128,
+                    256,
+                    512
+                  ],
+                  "default": 256
+                },
+                "max_slope_degrees": {
+                  "type": "number",
+                  "minimum": 0.1,
+                  "maximum": 89,
+                  "default": 45
+                },
+                "grass_color": {
+                  "type": "array",
+                  "items": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 255
+                  },
+                  "minItems": 3,
+                  "maxItems": 3,
+                  "default": [
+                    77,
+                    101,
+                    49
+                  ]
+                },
+                "rock_color": {
+                  "type": "array",
+                  "items": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 255
+                  },
+                  "minItems": 3,
+                  "maxItems": 3,
+                  "default": [
+                    125,
+                    119,
+                    107
+                  ]
+                }
+              },
+              "additionalProperties": false,
+              "description": "Bake an sRGB grass/rock albedo with a complete mip chain. This creates ground coloration, not 3D grass blades."
+            },
+            "analysis_resolution": {
+              "type": "integer",
+              "minimum": 33,
+              "maximum": 1025,
+              "default": 513
+            }
+          },
+          "additionalProperties": false,
+          "description": "Static vegetation bake from final processed heightmap; requires build.heightmap. Automatic trees take precedence over build.forest."
+        },
+        "triggers": {
+          "type": "object",
+          "required": [
+            "file"
+          ],
+          "properties": {
+            "file": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "additionalProperties": false,
+          "description": "Compile version 1 graph/Lua trigger JSON to the generated map entry script."
+        },
+        "resources": {
+          "type": "object",
+          "required": [
+            "file"
+          ],
+          "properties": {
+            "file": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "additionalProperties": false,
+          "description": "Compile an asset library JSON; portable OBJ geometry becomes Lua and image/sound sources become content assets."
+        },
+        "objects": {
+          "type": "object",
+          "required": [
+            "file"
+          ],
+          "properties": {
+            "file": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "additionalProperties": false,
+          "description": "Compile map-scoped object differences from UTF-8 CSV: object,field,type,value; values use JSON literals."
+        },
+        "scene": {
+          "type": "object",
+          "required": [
+            "file"
+          ],
+          "properties": {
+            "file": {
+              "type": "string",
+              "description": "Project-relative Scene/objects.json source compiled during build."
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": true,
+      "dependentRequired": {
+        "vegetation": [
+          "heightmap"
+        ]
+      }
+    },
+    "format": {
+      "type": "object",
+      "required": [
+        "name",
+        "version"
+      ],
+      "properties": {
+        "name": {
+          "const": "skieo-map"
+        },
+        "version": {
+          "type": "string",
+          "pattern": "^1\\.[0-9]+\\.[0-9]+(?:[-+][0-9A-Za-z.-]+)?$"
+        }
+      },
+      "additionalProperties": true
+    },
+    "id": {
+      "type": "string",
+      "minLength": 3,
+      "maxLength": 96,
+      "pattern": "^[a-z0-9]+(?:[._-][a-z0-9]+)+$"
+    },
+    "metadata": {
+      "type": "object",
+      "required": [
+        "name",
+        "version",
+        "authors",
+        "description"
+      ],
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 80
+        },
+        "version": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 32
+        },
+        "authors": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 80
+          }
+        },
+        "description": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1200
+        },
+        "language": {
+          "type": "string",
+          "default": "en",
+          "pattern": "^[a-z]{2,3}(?:-[A-Z][a-z]{3})?(?:-[A-Z]{2}|-[0-9]{3})?$"
+        },
+        "localizations": {
+          "type": "object",
+          "propertyNames": {
+            "pattern": "^[a-z]{2,3}(?:-[A-Z][a-z]{3})?(?:-[A-Z]{2}|-[0-9]{3})?$"
+          },
+          "additionalProperties": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 80
+              },
+              "description": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 1200
+              },
+              "license": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 120
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        "players": {
+          "type": "object",
+          "required": [
+            "min",
+            "max"
+          ],
+          "properties": {
+            "min": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "max": {
+              "type": "integer",
+              "minimum": 1
+            }
+          },
+          "additionalProperties": true
+        },
+        "tags": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 32
+          }
+        },
+        "license": {
+          "type": "string",
+          "maxLength": 120
+        },
+        "homepage": {
+          "type": "string",
+          "format": "uri"
+        }
+      },
+      "additionalProperties": true
+    },
+    "game": {
+      "type": "object",
+      "properties": {
+        "build": {
+          "type": "string",
+          "minLength": 1
+        },
+        "template_level": {
+          "type": "string",
+          "pattern": "^/Game/[A-Za-z0-9_./]+$",
+          "deprecated": true,
+          "description": "Legacy metadata, ignored by the loader."
+        }
+      },
+      "additionalProperties": true
+    },
+    "terrain": {
+      "type": "object",
+      "required": [
+        "size_meters",
+        "elevation_meters",
+        "origin_centimeters",
+        "source",
+        "preview"
+      ],
+      "properties": {
+        "size_meters": {
+          "type": "array",
+          "prefixItems": [
+            {
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            {
+              "type": "number",
+              "exclusiveMinimum": 0
+            }
+          ],
+          "minItems": 2,
+          "maxItems": 2
+        },
+        "elevation_meters": {
+          "type": "array",
+          "prefixItems": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "number"
+            }
+          ],
+          "minItems": 2,
+          "maxItems": 2
+        },
+        "origin_centimeters": {
+          "type": "array",
+          "prefixItems": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "number"
+            },
+            {
+              "type": "number"
+            }
+          ],
+          "minItems": 3,
+          "maxItems": 3
+        },
+        "source": {
+          "type": "object",
+          "required": [
+            "file",
+            "format",
+            "vertices",
+            "spacing_meters",
+            "height_scale_meters",
+            "height_offset_meters"
+          ],
+          "properties": {
+            "file": {
+              "type": "string",
+              "minLength": 1
+            },
+            "format": {
+              "enum": [
+                "r16le",
+                "r16be"
+              ]
+            },
+            "vertices": {
+              "type": "array",
+              "prefixItems": [
+                {
+                  "type": "integer",
+                  "minimum": 2
+                },
+                {
+                  "type": "integer",
+                  "minimum": 2
+                }
+              ],
+              "minItems": 2,
+              "maxItems": 2
+            },
+            "spacing_meters": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            "row_order": {
+              "enum": [
+                "north_to_south",
+                "south_to_north"
+              ]
+            },
+            "height_scale_meters": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            "height_offset_meters": {
+              "type": "number"
+            }
+          },
+          "additionalProperties": true
+        },
+        "textures": {
+          "type": "object",
+          "propertyNames": {
+            "pattern": "^[a-z][a-z0-9_]*$"
+          },
+          "additionalProperties": {
+            "type": "object",
+            "required": [
+              "file",
+              "mips"
+            ],
+            "properties": {
+              "file": {
+                "type": "string",
+                "pattern": ".+\\.png$"
+              },
+              "mips": {
+                "type": "array",
+                "maxItems": 9,
+                "items": {
+                  "type": "string",
+                  "pattern": ".+\\.png$"
+                }
+              },
+              "color_space": {
+                "enum": [
+                  "srgb",
+                  "linear"
+                ],
+                "default": "srgb"
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        "runtime": {
+          "type": "object",
+          "properties": {
+            "sample_step": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 64
+            },
+            "tile_quads": {
+              "type": "integer",
+              "minimum": 8,
+              "maximum": 127
+            },
+            "uv_tile_meters": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            "material": {
+              "type": "string",
+              "pattern": "^/(Game|Engine)/[A-Za-z0-9_./]+$"
+            },
+            "texture_parameters": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string",
+                "pattern": "^[A-Za-z][A-Za-z0-9_]*$"
+              },
+              "description": "Maps portable terrain texture channels to exposed material texture parameters. albedo defaults to Albedo."
+            },
+            "material_color": {
+              "type": "array",
+              "items": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
+              },
+              "minItems": 3,
+              "maxItems": 4
+            },
+            "snow_material": {
+              "type": "string",
+              "pattern": "^/(Game|Engine)/[A-Za-z0-9_./]+$"
+            },
+            "snow_color": {
+              "type": "array",
+              "items": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
+              },
+              "minItems": 3,
+              "maxItems": 4
+            },
+            "snow_offset_centimeters": {
+              "type": "number",
+              "minimum": 0
+            },
+            "skirt_material": {
+              "type": "string",
+              "pattern": "^/(Game|Engine)/[A-Za-z0-9_./]+$"
+            },
+            "skirt_color": {
+              "type": "array",
+              "items": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
+              },
+              "minItems": 3,
+              "maxItems": 4
+            },
+            "skirt_depth_meters": {
+              "type": "number",
+              "exclusiveMinimum": 0,
+              "description": "Optional manual wall depth below the lowest source perimeter point; calculated from map size and edge relief when omitted."
+            },
+            "skirt_enabled": {
+              "type": "boolean"
+            },
+            "placeable_below_ground_tolerance_centimeters": {
+              "type": "number",
+              "minimum": 0
+            },
+            "placeable_clearance_centimeters": {
+              "type": "number"
+            }
+          },
+          "additionalProperties": true
+        },
+        "preview": {
+          "type": "object",
+          "required": [
+            "samples"
+          ],
+          "properties": {
+            "samples": {
+              "type": "array",
+              "minItems": 3,
+              "maxItems": 33,
+              "items": {
+                "type": "array",
+                "minItems": 3,
+                "maxItems": 33,
+                "items": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1
+                }
+              }
+            }
+          },
+          "additionalProperties": true
+        }
+      },
+      "additionalProperties": true
+    },
+    "location": {
+      "type": "object",
+      "required": [
+        "latitude",
+        "longitude"
+      ],
+      "properties": {
+        "latitude": {
+          "type": "number",
+          "minimum": -90,
+          "maximum": 90
+        },
+        "longitude": {
+          "type": "number",
+          "minimum": -180,
+          "maximum": 180
+        },
+        "world_map_uv": {
+          "type": "array",
+          "prefixItems": [
+            {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            },
+            {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            }
+          ],
+          "minItems": 2,
+          "maxItems": 2
+        },
+        "label": {
+          "type": "string",
+          "maxLength": 120
+        }
+      },
+      "additionalProperties": true
+    },
+    "content": {
+      "type": "object",
+      "properties": {
+        "containers": false,
+        "assets": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      },
+      "additionalProperties": true
+    },
+    "script": {
+      "type": "object",
+      "required": [
+        "language",
+        "api",
+        "entry"
+      ],
+      "properties": {
+        "language": {
+          "const": "lua"
+        },
+        "api": {
+          "type": "string",
+          "pattern": "^1\\.[0-9]+$"
+        },
+        "entry": {
+          "type": "string",
+          "minLength": 1
+        },
+        "permissions": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "enum": [
+              "gameplay",
+              "skieo.unrestricted"
+            ]
+          }
+        }
+      },
+      "additionalProperties": true
+    },
+    "editor": {
+      "type": "object",
+      "properties": {
+        "coordinate_system": {
+          "type": "object",
+          "properties": {
+            "horizontal": {
+              "type": "string"
+            },
+            "vertical": {
+              "type": "string"
+            },
+            "axis_order": {
+              "type": "string"
+            }
+          },
+          "additionalProperties": true
+        },
+        "layers": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "kind",
+              "format"
+            ],
+            "properties": {
+              "kind": {
+                "type": "string",
+                "minLength": 1
+              },
+              "format": {
+                "type": "string",
+                "minLength": 1
+              },
+              "file": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "additionalProperties": true
+          }
+        },
+        "asset_catalog": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "id",
+              "type"
+            ],
+            "properties": {
+              "id": {
+                "type": "string",
+                "minLength": 1
+              },
+              "type": {
+                "type": "string",
+                "minLength": 1
+              },
+              "file": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "additionalProperties": true
+          }
+        }
+      },
+      "additionalProperties": true
+    },
+    "dependencies": {
+      "$ref": "#/$defs/dependencies"
+    },
+    "extensions": {
+      "type": "object",
+      "propertyNames": {
+        "pattern": "^[a-z0-9]+(?:[.-][a-z0-9]+)+$"
+      },
+      "additionalProperties": true
+    }
+  },
+  "$defs": {
+    "dependencies": {
+      "type": "array",
+      "maxItems": 32,
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "version"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-z0-9]+(?:[._-][a-z0-9]+)+$"
+          },
+          "version": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120
+          },
+          "workshop_id": {
+            "type": "string",
+            "pattern": "^[1-9][0-9]{0,19}$",
+            "description": "Steam PublishedFileId_t as a decimal string; required for required dependencies when publishing to Workshop."
+          },
+          "optional": {
+            "type": "boolean",
+            "default": false
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": true
+}

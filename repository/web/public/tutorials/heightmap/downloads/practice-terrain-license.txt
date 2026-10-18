@@ -1,0 +1,3 @@
+The synthetic Alpine Valley practice R16 and PNG heightmaps are dedicated to the public domain under CC0 1.0: https://creativecommons.org/publicdomain/zero/1.0/
+Generated project code uses the template MIT licence.
+The in-game image shows Veymont, a separate map by Albatar (Élie Millon). It is not a capture of the practice terrain.

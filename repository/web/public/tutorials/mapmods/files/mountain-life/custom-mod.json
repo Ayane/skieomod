@@ -1,0 +1,22 @@
+{
+  "format": {"name": "skieo-mod", "version": "1.0.0"},
+  "id": "tutorial.mountain-life",
+  "metadata": {
+    "name": "Mountain life",
+    "version": "0.1.0",
+    "authors": ["Albatar (Élie Millon)"],
+    "description": "A first mapmod: configurable field reports and a saved counter.",
+    "language": "en",
+    "license": "MIT"
+  },
+  "runtime": "map-api",
+  "dependencies": [],
+  "script": {
+    "language": "lua",
+    "api": "1.4",
+    "entry": "Scripts/main.lua",
+    "permissions": ["gameplay"]
+  },
+  "files": ["Scripts/main.lua", "Data/welcome.txt", "LICENSE"],
+  "content": {"assets": ["Data/welcome.txt"]}
+}

@@ -1,0 +1,164 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Create a mapmod · Ski-E-O! Custom Map</title>
+<meta name="description" content="Build a reusable Ski-E-O! mapmod, attach it to a map without embedding its files, and learn from the animated fox example. Source projects, Lua, saves and versioned downloads.">
+<link rel="canonical" href="https://skieomod.emillon.fr/tutorials/mapmods/">
+<link rel="stylesheet" href="../heightmap/tutorial.css?v=1.20.7">
+<link rel="stylesheet" href="mapmods.css?v=1.20.7">
+<script src="../heightmap/tutorial.js?v=1.20.7" defer></script>
+</head>
+<body>
+<a class="skip" href="#guide">Skip to the tutorial</a>
+<header class="site-header"><a class="brand" href="/"><span aria-hidden="true">◭</span> Custom Map <small>FOR SKI-E-O!</small></a><nav aria-label="Main navigation"><a href="../editor/">Create a map</a><a href="../scripts/">Scripts &amp; scenarios</a><a href="/docs/mapmods.md">API reference ↗</a></nav></header>
+<main id="guide">
+<section class="hero"><p class="eyebrow">THE MAP MAKER’S GUIDE · MAPMODS</p><h1>A little life.<br><em>On every mountain.</em></h1>
+<p class="lead">Write a behaviour once, let several maps use it, and distribute its resources separately. Start with a small Lua exercise, then explore the animated foxes that live in Veymont.</p>
+<div class="hero-meta"><span>Tools &amp; game loader · 1.20.6+</span><span>Two downloadable source projects</span><span>English · 13 October 2026</span></div>
+<figure class="hero-figure"><a href="images/fox-veymont-1.20.7.png"><img src="images/fox-veymont-1.20.7.png" width="1280" height="720" alt="A fox in the snowy Veymont forest, captured in the current game through UE4SS."></a><figcaption>Forest foxes 0.4.0 on Veymont 0.7.6, with Custom Map 1.20.7. A new engine capture requested through UE4SS in an offscreen game session. Model: npbehunin, CC BY 4.0; adapted by Albatar (Élie Millon).</figcaption></figure>
+</section>
+<div class="guide-layout"><aside class="contents"><nav aria-label="Tutorial steps"><p class="eyebrow">ON THIS PAGE</p><a href="#prepare"><span>01</span> Prepare your projects</a><a href="#manifest"><span>02</span> Declare files &amp; assets</a><a href="#behaviour"><span>03</span> Write the behaviour</a><a href="#dependency"><span>04</span> Connect a map</a><a href="#test"><span>05</span> Build &amp; test</a><a href="#foxes"><span>06</span> Add the fox example</a><a href="#animation"><span>07</span> Understand animation</a><a href="#distribute"><span>08</span> Distribute versions</a><a href="#questions">Troubleshooting</a></nav></aside>
+<article class="steps">
+<section class="step" id="prepare"><p class="step-number">STEP 01</p><h2>Two projects, one experience</h2>
+<p>A <strong>mapmod</strong> is a <code>custom-mod.json</code> project with <code>runtime: "map-api"</code>. The loader runs it inside a dependent map’s session. The mod owns its scripts and assets; the map session owns the lifetime of its callbacks, timers, actors and saves.</p>
+<div class="package-flow" role="img" aria-label="The map archive declares a versioned dependency on a separate mod archive. The loader installs both before starting one map session."><div><small>MAP PACKAGE</small><strong>practice-mountain.skieomap</strong><span>Terrain · station · map script</span></div><p>requires an ID + version <span aria-hidden="true">→</span></p><div><small>MOD PACKAGE</small><strong>mountain-life.skieomod</strong><span>Shared behaviour · own assets</span></div></div>
+<p>You need Python 3.10+, pipx and matching tools/game loader <strong>1.20.6 or later</strong>. Install Lua 5.4 with <code>luac</code> for syntax checks. Authoring needs no running game; Play needs Ski-E-O! or its Steam demo on Windows or Linux/Proton.</p>
+<p>In the workshop, <strong>Help → Mapmod tutorial</strong> opens this guide (editor 1.20.8 or later).</p>
+<div class="command"><pre><code>pipx install --force --index-url https://skieomod.emillon.fr/downloads/pypi/ skieo-custom-map
+skieomod --version
+skieomod setup</code></pre><button type="button" class="copy">Copy</button></div>
+<p>If setup is already complete, close the game and use <code>skieomod update</code> instead. If the public feed is older than the required version, install the matching prepared wheel and use <code>skieomod update --archive CustomMap-Mod-VERSION.zip</code>.</p>
+<div class="download-card"><h3>Practice: Mountain life</h3><p>A small mapmod with a configurable message and a saved field-report counter, plus a starter map that depends on it. This exercise writes to the log; it does not create animals. Extract both folders and work from their shared parent directory.</p><div class="download-links"><a class="button" href="files/first-mapmod-project.zip" download>Download practice projects</a><a href="/docs/mapmod-tutorial.md">Offline tutorial</a></div></div>
+<details><summary>Recreate the projects in empty folders</summary><div class="command"><pre><code>skieomod create mapmod --output mountain-life --id tutorial.mountain-life --name "Mountain life" --author "Your name"
+skieomod create map --output practice-mountain --id tutorial.practice-mountain --name "Practice mountain" --author "Your name"</code></pre><button type="button" class="copy">Copy</button></div><p><code>create mod</code> creates a startup UE4SS mod. Choose <code>create mapmod</code> for this map-scoped workflow. The template creates commented scripts and local authoring guides.</p></details>
+<p>Before publishing your own derivative, replace <code>tutorial.mountain-life</code> with a stable namespaced ID such as <code>yourname.mountain-life</code>. Update dependency and extension keys wherever they refer to it.</p>
+</section>
+<section class="step" id="manifest"><p class="step-number">STEP 02</p><h2>Tell the loader what belongs to your mod</h2>
+<p>Open <code>mountain-life/custom-mod.json</code>. This complete minimal manifest selects Lua API 1.4 and gives the script access to its own welcome text. The download also declares a licence file.</p>
+<div class="command"><pre><code>{
+  "format": {"name": "skieo-mod", "version": "1.0.0"},
+  "id": "tutorial.mountain-life",
+  "metadata": {
+    "name": "Mountain life", "version": "0.1.0",
+    "authors": ["Your name"],
+    "description": "Configurable field reports for a living mountain.",
+    "language": "en", "license": "MIT"
+  },
+  "runtime": "map-api",
+  "dependencies": [],
+  "script": {
+    "language": "lua", "api": "1.4", "entry": "Scripts/main.lua",
+    "permissions": ["gameplay"]
+  },
+  "files": ["Scripts/main.lua", "Data/welcome.txt"],
+  "content": {"assets": ["Data/welcome.txt"]}
+}</code></pre><button type="button" class="copy">Copy</button></div>
+<div class="table-wrap"><table><caption>Three versions, three purposes</caption><thead><tr><th scope="col">Field</th><th scope="col">Meaning</th></tr></thead><tbody><tr><td><code>format.version</code></td><td>The package format.</td></tr><tr><td><code>script.api</code></td><td>The Lua API used by the script.</td></tr><tr><td><code>metadata.version</code></td><td>Your mod’s release version. Increase this when you distribute a change.</td></tr></tbody></table></div>
+<p><code>files</code> lists everything packaged, including the entry point. <code>content.assets</code> allows the script to read selected resources. Extra data, textures and Lua modules must appear in <strong>both</strong> lists. Paths are relative, use <code>/</code> and must match exact spelling.</p>
+<p>Create <code>Data/welcome.txt</code> containing:</p><div class="command"><pre><code>The mountain is alive: listen for wildlife between the trees.</code></pre><button type="button" class="copy">Copy</button></div>
+<p>Only declared content enters the runtime archive. Authoring guides, editable model sources and the preview map can stay in the source project.</p>
+</section>
+<section class="step" id="behaviour"><p class="step-number">STEP 03</p><h2>Wait for the map, then register your behaviour</h2>
+<p>Replace <code>mountain-life/Scripts/main.lua</code> with this entry point, also available as a <a href="files/mountain-life/Scripts/main.lua" download>downloadable Lua file</a>. The loader calls the returned function once per map session.</p>
+<div class="command"><pre><code>return function(api)
+    local options = api:mapmod_options()
+    if options.enabled == false then return end
+    local label = type(options.label) == 'string' and options.label:sub(1, 80)
+        or 'Mountain life'
+    local welcome = api:read_asset('Data/welcome.txt'):gsub('%s+$', '')
+
+    api:on('map.ready', function()
+        local state = api:mod_state({reports = 0})
+        api:log(label .. ': ' .. welcome)
+        api:log('Saved field reports: ' .. state.reports)
+
+        -- Timers follow the map session; explicitly respect the game's pause.
+        api:every(30000, function()
+            local environment = api:environment()
+            if environment.paused or environment.ready == false then return end
+            state.reports = state.reports + 1
+            api:log(string.format('%s: field report %d, local hour %.1f',
+                label, state.reports, environment.hour or 0))
+        end)
+    end)
+end</code></pre><button type="button" class="copy">Copy</button></div>
+<p><code>map.ready</code> runs after terrain/station initialization, including save restoration. <code>api:every</code> uses real milliseconds; this callback skips reports while the game is paused or not ready. Messages appear in <code>UE4SS.log</code>, in the installed UE4SS directory; they do not open a player-facing notification.</p>
+<p><code>api:mod_state</code> stores JSON data under this mod’s ID in the map’s native save. Loading that save restores the counter. Starting a new game begins at zero. Keep functions and actor handles out of saved state; fill missing fields when you change its schema. Reserve the map’s main <code>api:state</code> for map data.</p>
+<p>The loader cancels these timers and callbacks on unload. Register <code>map.unloading</code> for additional cleanup your own resources need, and use the API for session work.</p>
+</section>
+<section class="step" id="dependency"><p class="step-number">STEP 04</p><h2>Let a map request your mod</h2>
+<p>In <code>practice-mountain/custom-map.json</code>, replace the empty <code>dependencies</code> array and add this top-level <code>extensions</code> object. These are <strong>fragments to merge</strong>; preserve the map’s terrain, scripts, build settings and other dependencies.</p>
+<div class="command"><pre><code>"dependencies": [
+  {"id": "tutorial.mountain-life", "version": "=0.1.0"}
+],
+"extensions": {
+  "tutorial.mountain-life": {
+    "enabled": true,
+    "label": "Practice mountain"
+  }
+}</code></pre><button type="button" class="copy">Copy</button></div>
+<p>Dependency scripts register before the map’s script. <code>api:mapmod_options()</code> gives the mod a copy of the extension named after its ID. Each map can set a different label or disable reports. Validate your options and provide defaults because a map may omit its extension.</p>
+<p>The dependency connects the packages. Keep the mod’s scripts and assets in its <code>.skieomod</code>; do not copy them into the map or declare them in the map’s <code>content.assets</code>.</p>
+</section>
+<section class="step" id="test"><p class="step-number">STEP 05</p><h2>Build separately, test together</h2>
+<p>Run these commands from the parent of both project folders:</p>
+<div class="command"><pre><code>skieomod build mountain-life --check-scripts
+skieomod build practice-mountain --dependency mountain-life --check-scripts
+skieomod test practice-mountain --dependency mountain-life --check-dependencies --check-scripts
+skieomod run practice-mountain --dependency mountain-life</code></pre><button type="button" class="copy">Copy</button></div>
+<p>Remove <code>--check-scripts</code> if <code>luac</code> is unavailable. Build validates and packages files. Test validates the package and dependency closure; runtime behaviour still needs a game session.</p>
+<p class="checkpoint"><strong>Checkpoint:</strong> the mod’s <code>bin/</code> contains <code>tutorial.mountain-life-0.1.0.skieomod</code>, and the map’s contains <code>tutorial.practice-mountain-0.1.0.skieomap</code>. The map archive has no <code>Data/welcome.txt</code>. The game log prints the welcome, <code>Saved field reports: 0</code>, then a first field report after roughly 30 unpaused seconds.</p>
+<ol><li>Pause for more than 30 seconds: no new report should be counted while paused.</li><li>Save, leave and reload that save: the counter resumes.</li><li>Set <code>enabled</code> to <code>false</code>, rebuild and start a new session: no reports are registered.</li></ol>
+<p><code>--dependency</code> accepts a local mod project or archive and can be repeated. Build/Test dependency checks are offline. <code>run</code> installs the packages separately; it can acquire missing published mapmods from the project Featured catalogue.</p>
+<details><summary>Test just the mod</summary><div class="command"><pre><code>skieomod run mountain-life</code></pre><button type="button" class="copy">Copy</button></div><p>The CLI generates a private test map in <code>mountain-life/obj/mapmod-preview</code>, with an exact dependency on this mod. Its default options use the “Mountain life” label. Distribute the mod, rather than this generated preview.</p></details>
+</section>
+<section class="step" id="foxes"><p class="step-number">STEP 06</p><h2>Put a fox on your mountain</h2>
+<div class="download-card"><h3>Forest foxes · source project 0.4.0</h3><p>The real example: behaviour, gaze, baked animations, paw contacts, textures, source rig and converter. It includes credits and licences; the original anatomy download stays external.</p><div class="download-links"><a class="button" href="files/foxes-0.4.0-project.zip" download>Download fox source project</a><a href="/docs/mapmods.md">Runtime &amp; SKAN reference</a></div></div>
+<p>Extract <code>foxes/</code> beside the practice map. Add <code>{"id":"community.foxes","version":"=0.4.0"}</code> to the map’s dependency array, keeping Mountain life if you want both. Merge this object into its existing <code>extensions</code>:</p>
+<div class="command"><pre><code>"community.foxes": {
+  "count": 1,
+  "seed": 7521,
+  "habitats": [{
+    "forest": {"x": -6000, "y": 0, "radius": 1800},
+    "meadow": {"x": 6000, "y": 0, "radius": 1800},
+    "crossing": [{"x": -2500, "y": 0}, {"x": 2500, "y": 0}]
+  }]
+}</code></pre><button type="button" class="copy">Copy</button></div>
+<div class="command"><pre><code>skieomod build foxes --check-scripts
+skieomod run practice-mountain --dependency mountain-life --dependency foxes</code></pre><button type="button" class="copy">Copy</button></div>
+<p>These coordinates and radii are <strong>centimetres</strong>, unlike the vegetation JSON’s metres. This example fits the starter terrain. On your map, choose forest and meadow habitat away from busy lifts, buildings and cliffs. Put the first crossing bank on the forest side, the second on the meadow side, both outside a piste. A forest circle does not create trees or a piste.</p>
+<p class="checkpoint"><strong>Checkpoint:</strong> press <strong>F7</strong> to centre on a fox; press it again to visit the next one. Click the fox for its discovery panel. Check snow, slopes, running, nighttime and pause. Start with one animal, then spread habitats across the map.</p>
+</section>
+<section class="step" id="animation"><p class="step-number">STEP 07</p><h2>Learn from the animated example</h2>
+<div class="table-wrap"><table><caption>Where to make a change</caption><thead><tr><th scope="col">Source</th><th scope="col">Responsibility</th></tr></thead><tbody><tr><td><code>Scripts/behaviour.lua</code></td><td>Goals, solitary territories, hunting, fear, play, dispersal and gait timing.</td></tr><tr><td><code>Scripts/gaze.lua</code></td><td>Nearby eye targets and smooth return to neutral.</td></tr><tr><td><code>Scripts/main.lua</code></td><td>API registration, saved checkpoints, rendering, F7 and selection.</td></tr><tr><td><code>Assets/fox.skan</code></td><td>Mesh sections and baked vertex-animation clips.</td></tr><tr><td><code>Assets/fox-ground.json</code></td><td>Paw soles, leg anchors and gait/contact data.</td></tr><tr><td><code>Assets/fox-eyes.json</code></td><td>Eyeball groups and aiming limits.</td></tr><tr><td><code>tools/prepare_fox.py</code></td><td>Source geometry conversion, weighted rig, poses, snow textures and runtime rig generation.</td></tr></tbody></table></div>
+<p>The original Fox Anatomy model has anatomical display meshes, but no usable animation armature or clips. The converter keeps skin and eyeballs and adds a sixteen-joint weighted rig with hips, spine, legs, head and a segmented tail. Pupils are texture details; gaze rotates the separate eyeball geometry.</p>
+<details><summary>Refine the fox’s baked poses</summary><p>Obtain the credited original Collada ZIP. Inside the downloaded <code>foxes/</code> folder, run:</p><div class="command"><pre><code>python3 -m pip install numpy Pillow
+python3 tools/prepare_fox.py /path/to/fox-anatomy.zip --output Assets
+skieomod build . --check-scripts</code></pre><button type="button" class="copy">Copy</button></div><p>Edit the converter’s rig and pose functions, then regenerate. <code>Assets/fox-rig.json</code> records pivots, weights and source SHA-256. This converter expects this particular model; another species needs its own geometry conversion, weights, clips and eye/contact groups. It is not a generic FBX/GLB importer. SKAN uses baked poses rather than an Unreal skeletal animation asset; no Unreal Editor is required.</p></details>
+<p><code>main.lua</code> calls <code>api:spawn_animated</code>, simulates behaviour at 10 Hz and interpolates nearby rendering at 30 Hz through <code>api:on_frame</code>. Distant animals cost less work. Clip transitions crossfade over 0.16 seconds, walk/trot phase follows travelled distance, and jumps follow ballistic flight. Rodents stay invisible under the snow.</p>
+<p>Ground support uses the model’s paw soles and fresh/packed snow. Contacts stamp paw-shaped prints and play local snow crunches. The fox stays upright on sideways slopes. Tracks use a bounded visual fallback: this demo has no reflected method for writing the skiers’ private snow-track pages. Heavy snowfall builds a soft coat; shaking removes it. Movement, transitions, gaze, particles and contact sound stop during pause.</p>
+<p>For your own animal, declare the SKAN, textures and rigs in both mod lists; wait for <code>map.ready</code> and <code>environment().ready</code>; measure elapsed seconds; separate AI from rendering; interpolate; and periodically checkpoint JSON behaviour state. Frame callbacks do not automatically serialize saves. Use <code>handle:inspect</code> for a discovery panel and the loader’s F7 API for debug focus. The <a href="/docs/mapmods.md">API reference</a> provides signatures and limits.</p>
+<p>Code is MIT. The model and derived textures are <strong>CC BY 4.0</strong>: preserve <code>CREDITS.txt</code>, npbehunin’s attribution, source/licence links and a description of your changes.</p>
+</section>
+<section class="step" id="distribute"><p class="step-number">STEP 08</p><h2>Release the mod, then the maps</h2><p>For web publication, create a token at <a href="/account">your creator account</a> and set <code>CUSTOM_MAP_TOKEN</code> in your terminal. Run <code>skieomod publish mountain-life</code> first, then <code>skieomod publish my-mountain</code>. Published maps appear in <strong>New Game → Custom Map → Web</strong>. See the <a href="/docs/custom-map-repository.md">publication guide</a>.</p>
+<p>Distribute the map and each required mod separately. Sending a ZIP does not make it automatically discoverable: the distribution catalogue must advertise its ID, version and verified download.</p>
+<div class="qa-tabs" data-tabs><div class="tab-list" role="tablist" aria-label="Distribution route"><button type="button" role="tab" id="distribution-tab-featured" data-answer="featured" aria-controls="distribution-featured">Featured · current route</button><button type="button" role="tab" id="distribution-tab-workshop" data-answer="workshop" aria-controls="distribution-workshop">Steam Workshop · preparation</button></div>
+<div class="tab-answer" id="distribution-featured" role="tabpanel" aria-labelledby="distribution-tab-featured" tabindex="0"><h3>Versioned independent downloads</h3><p>The project maintainer lists map and mod releases in <code>featured-maps.json</code>, with manifests, sizes, SHA-256 digests and HTTPS URLs. Release tooling verifies the dependency graph. Publish the required mod first and keep earlier versions available for maps that still pin them.</p><p>On Play, the loader resolves dependencies, reuses installed compatible versions, downloads missing ones and verifies them before starting the map. With all packages installed, the map works offline. The CLI downloads from the project’s Featured catalogue; it is not a general-purpose publisher for arbitrary hosting.</p></div>
+<div class="tab-answer" id="distribution-workshop" role="tabpanel" aria-labelledby="distribution-tab-workshop" tabindex="0"><h3>Prepare each article independently</h3><div class="command"><pre><code>skieomod publish mountain-life --prepare</code></pre><button type="button" class="copy">Copy</button></div><p>This stages unpacked content and a publication request in <code>bin/workshop/</code>; it does not upload. Replace <code>preview.png</code> and review the private article settings. Actual publication needs a configured native Steamworks client, which is not included.</p><p>Once the mod has a real Workshop article, add its decimal-string <code>workshop_id</code> to the map’s dependency before preparing that map. Steam serves the current article content and does not promise arbitrary older semantic releases. See the <a href="/docs/steam-workshop.md">Workshop contract</a>.</p></div></div>
+<p>Keep the package ID and increase <code>metadata.version</code> for each update. Rebuild the mod, update dependent maps and test the full set. <code>=0.1.0</code> pins a tested version; <code>^0.1.0</code> allows compatible <code>0.1.x</code> releases. Published immutable archives stay unchanged. Changed save schemas need migration or explicit defaults.</p>
+</section>
+<section class="step" id="questions"><h2>When something does not work</h2>
+<details><summary>No message or animal appears</summary><p>Check <code>runtime: "map-api"</code>, the returned registration function, the map’s dependency, the loader version and UE4SS.log. Mountain life is a log-only exercise; animals require the fox dependency and habitat.</p></details>
+<details><summary>Reading an asset is rejected</summary><p>List the exact path in both <code>files</code> and <code>content.assets</code>. Lua modules are assets too. Keep paths relative with <code>/</code>.</p></details>
+<details><summary>The dependency cannot be resolved</summary><p>Check matching IDs and versions. Supply <code>--dependency</code> for local unpublished mods. Remote Play requires a published compatible catalogue entry, not merely a link to an archive.</p></details>
+<details><summary>The edited script is not running</summary><p>Rebuild and start or reload a map session. Editing a source file does not replace a running Lua closure.</p></details>
+<details><summary>Foxes are hard to find or move in pause</summary><p>Use F7 and begin with one fox. Check centimetres and terrain bounds. Custom behaviour must check <code>environment().paused</code> before simulation, animation, particles and audio.</p></details>
+<details><summary>The saved counter resets</summary><p>Use <code>api:mod_state</code>, preserve restored values and checkpoint changes outside frame callbacks. A new game intentionally begins with fresh state.</p></details>
+<details><summary>Workshop preparation rejects the dependent map</summary><p>Required Workshop dependencies need real <code>workshop_id</code> values. Local/Featured dependencies alone do not identify a Steam article.</p></details>
+</section>
+</article></div>
+</main>
+<p class="sr-only" id="copy-status" role="status" aria-live="polite"></p>
+<footer><span>Custom Map for Ski-E-O! · Albatar (Élie Millon)</span><a href="/docs/mapmods.md">Read the complete mapmod reference ↗</a></footer>
+</body></html>

@@ -1,0 +1,514 @@
+{
+  "format": "skieo-compatibility-contract",
+  "version": 1,
+  "reference_build": "25996759",
+  "reference_executable_sha256": "219f73ee4ca1413b04464effe09b6f9a3cb242f8a4745a452f5d523a167657bd",
+  "native_helper_sha256": "de3d7de6b1897aca0e9327bcc23baed1b1a981e38487788b447234727bf59594",
+  "native_sources": {
+    "native/SkiEONativeTerrain/native_terrain.c": "b28a7f6fe8f1bd84e41bf07bb63b60f2f7c28680263934667cd662063a224fc2",
+    "native/SkiEONativeTerrain/navigation_layout.h": "ae84782dc0a6c010481db6139bd2d66634b9bf1d1f30b840f2fe759a665ac6ba",
+    "native/SkiEONativeTerrain/render_mapping_layout.h": "5cf8d6da07c19a575f2d6a93c54156f4f0af3e6a1a8d4f0e04e7fc654f112ff9",
+    "native/SkiEOTrailRatings/trail_ratings.c": "c4d23bbaad05bf966ec018e7ed3204fa683683ea1c2de8ae1e85d5ebb31796b7",
+    "native/SkiEOTrailRatings/rating_profile.h": "9eaa2379de2eada7eb4fb69dbab868632eb2033062ed131881fa8b004273a900",
+    "native/SkiEOTrailRatings/rating_policy.h": "12dd77ef679f0f10b40090338fb358630f4694918a7c97b9d16d82b1f52c4c2e",
+    "native/SkiEOTrailRatings/build.sh": "3ecb2dc53779ef849a8557f2ec4a2b5609be588601e63e3b466d8f8702064fd8",
+    "native/SkiEOTrailRatings/README.md": "5eebfeb3bd995a62ba073e3ffe7a18fb5123502ecfc4888d1850c2c139b0c98e",
+    "native/SkiEOTrailRatings/vendor/minhook/LICENSE.txt": "d5c2224982b0b95a16b098a561335fa93f3eaf4d0aa964b7843edb986df78dc8",
+    "native/SkiEOTrailRatings/vendor/minhook/include/MinHook.h": "62dff05e63155c6bf8135c36a0d79dedbdcaaede9da26fe38daf0bea34323e38",
+    "native/SkiEOTrailRatings/vendor/minhook/src/trampoline.c": "f13a169f803ff5a8e45c58ce668b4377a9878c0fc4452369b8a1325065186b2b",
+    "native/SkiEOTrailRatings/vendor/minhook/src/trampoline.h": "53ed9934492320617a27bfd952ffe7f5b7a4a1d09963d4512447082fe7b727b4",
+    "native/SkiEOTrailRatings/vendor/minhook/src/buffer.h": "9769702bd625249e59a19ede05c84365fcc7707e1fa0e5df08df42227cee13e3",
+    "native/SkiEOTrailRatings/vendor/minhook/src/buffer.c": "0ab484d7870c3a8e7a3a1ee61e2070072cf445ed85b619d4c4207fed34356d99",
+    "native/SkiEOTrailRatings/vendor/minhook/src/hook.c": "edcce4c81985d7dd5b73feae96d6498c8f749b1bca4c3d2d9926ea9a17a84755",
+    "native/SkiEOTrailRatings/vendor/minhook/src/hde/hde64.h": "e99aa4997bda14b534c614c3d8cb78a72c4aca91a1212c8b03ec605d1d75e36e",
+    "native/SkiEOTrailRatings/vendor/minhook/src/hde/table64.h": "b774446d2f110ce954fb0a710f4693c5562ddbd8d56fe84106f2ee80db8b50a2",
+    "native/SkiEOTrailRatings/vendor/minhook/src/hde/hde64.c": "824eafa315322e6da105a7ce4ec1fc0e0adeee0106d32152fbb0b59e709bd15c",
+    "native/SkiEOTrailRatings/vendor/minhook/src/hde/pstdint.h": "604d1cdf45c5a95bc9cf1bbf39ca05ef83013541101d34971c5cd7577e3d5247",
+    "native/SkiEOTrailRatings/rating_colors.h": "da51c09434b7c0bd8e582a56744f2ff059ec28a8c2857bb97e604ec0dc0e26d0",
+    "native/SkiEOTrailRatings/rating_resolver.h": "6584711c98840bdaa275e022bc6fd9e84a5e917d6c9734b874ba3be8dcf41eab",
+    "tools/trail_rating_profile.py": "7d8eb60d92a0c5e2b09c4ec28375cfe614b5785647efb62b1608bd5dabfe0428"
+  },
+  "guards": [
+    {
+      "id": "hubs.building",
+      "rva": "0x4faec80",
+      "bytes": "48895c242055488d6c24a94881ecc0000000",
+      "mode": "rva"
+    },
+    {
+      "id": "hubs.lift",
+      "rva": "0x4faee40",
+      "bytes": "40555657488dac2450ffffff4881ecb0010000488bf9",
+      "mode": "rva"
+    },
+    {
+      "id": "hubs.rebuild",
+      "rva": "0x5048280",
+      "bytes": "40574883ec2083b9080b000000488bf9",
+      "mode": "rva"
+    },
+    {
+      "id": "hubs.deferred",
+      "rva": "0x503f780",
+      "bytes": "83b9080b0000000f8ef38a0000c3cccc",
+      "mode": "rva"
+    },
+    {
+      "id": "staff.regenerate",
+      "rva": "0x5314480",
+      "bytes": "4c8bdc41564881eca0050000",
+      "mode": "rva"
+    },
+    {
+      "id": "staff.settings",
+      "rva": "0x531449e",
+      "bytes": "4883b908050000004c8bf10f8472020000",
+      "mode": "rva"
+    },
+    {
+      "id": "skiability.query",
+      "rva": "0x5390430",
+      "bytes": "40555356488d6c24b94881ecb0000000",
+      "mode": "rva"
+    },
+    {
+      "id": "skiability.memo",
+      "rva": "0x5390712",
+      "bytes": "443bbeb401000075270f28c6f30f5c86b8010000",
+      "mode": "rva"
+    },
+    {
+      "id": "hub_names.get",
+      "rva": "0x503e520",
+      "bytes": "48895c240848896c24104889742418574883ec20488bfa488db1d0010000",
+      "mode": "rva"
+    },
+    {
+      "id": "hub_names.insert",
+      "rva": "0x501f560",
+      "bytes": "48895c241048896c24184889742420574883ec40",
+      "mode": "rva"
+    },
+    {
+      "id": "hub_names.text",
+      "rva": "0x1349600",
+      "bytes": "488bc45741564883ec5848895810",
+      "mode": "rva"
+    },
+    {
+      "id": "navigation.tick",
+      "rva": "0x52432e0",
+      "bytes": "48895c24184889742420574883ec60488d71c80f29742450488bd9",
+      "mode": "unique"
+    },
+    {
+      "id": "navigation.changed",
+      "rva": "0x52360e0",
+      "bytes": "c6814808000001c6416901c3",
+      "mode": "unique"
+    },
+    {
+      "id": "snow_cpu.validity",
+      "rva": "0x4f5a315",
+      "bytes": "0fb681a5010000418800",
+      "mode": "rva"
+    },
+    {
+      "id": "snow_cpu.lookup",
+      "rva": "0x52ea970",
+      "bytes": "4963c0486bd0384903d2488b0a413bc9",
+      "mode": "rva"
+    },
+    {
+      "id": "snow_cpu.mapping",
+      "rva": "0x52e8900",
+      "bytes": "f20f1089f80000000f57d2f20f5c89e8000000",
+      "mode": "rva"
+    },
+    {
+      "id": "snow_cpu.ready",
+      "rva": "0x52eabb6",
+      "bytes": "41385424200f84e3fdffff",
+      "mode": "rva"
+    },
+    {
+      "id": "trail_ratings.classifier",
+      "rva": "0x53b9dd0",
+      "bytes": "0f2f0551d7ea027203b003c30f2f05f9d7eb027203b002c30f2f05a975e0020f93c0c3",
+      "mode": "rating_semantic"
+    },
+    {
+      "id": "trail_ratings.palette",
+      "rva": "0x50d26c0",
+      "bytes": "0fb6d184c9742f83ea01741d83ea01741583fa017403b004c3803df8d14605020f94c00405c3b003c3803de8d14605010f95c0fec0c3803ddbd14605020f94c0c3",
+      "mode": "rating_semantic"
+    },
+    {
+      "id": "trail_ratings.color",
+      "rva": "0x53bd020",
+      "bytes": "40534883ec20488bd90fb6cae88f56d1ff0fb6c083f8060f879d000000488d0dbc2fc4fa8b9481f0d03b054803d1ffe233c048c743040000803f8903488bc3c7430c0000803f4883c4205bc333c0c743080000803f488903488bc3c7430c0000803f4883c4205bc333c048c7030000803f894308488bc3c7430c0000803f4883c4205bc333c0c7430c0000803f488903894308488bc34883c4205bc3c7030000803f488bc348c74304ae47613ec7430c0000803f4883c4205bc30f1005fffbdd02488bc30f11034883c4205bc3",
+      "mode": "rating_semantic"
+    }
+  ],
+  "classes": {
+    "PlaceableActor": {
+      "fields": {
+        "PlaceableComponent": "ObjectProperty",
+        "HubId": "StructProperty",
+        "bIsPreview": "BoolProperty"
+      },
+      "functions": [
+        "FinalizePlacement",
+        "SetPreviewMode",
+        "SetInstanceName",
+        "GetPlaceableId"
+      ],
+      "function_parameters": {
+        "SetPreviewMode": {
+          "bPreview": "BoolProperty",
+          "bValid": "BoolProperty"
+        },
+        "SetInstanceName": {
+          "InName": "TextProperty"
+        },
+        "GetPlaceableId": {
+          "ReturnValue": "StructProperty"
+        }
+      }
+    },
+    "BuildingActor": {
+      "fields": {
+        "VariantId": "NameProperty",
+        "MeshComponent": "ObjectProperty"
+      },
+      "functions": [
+        "ApplyVariant",
+        "GetSaveData",
+        "LoadFromSaveData"
+      ],
+      "function_parameters": {
+        "ApplyVariant": {
+          "InId": "NameProperty"
+        },
+        "GetSaveData": {
+          "ReturnValue": "StructProperty"
+        },
+        "LoadFromSaveData": {
+          "SaveData": "StructProperty",
+          "bSnapToTerrain": "BoolProperty"
+        }
+      }
+    },
+    "LiftActor": {
+      "fields": {
+        "TopHubId": "StructProperty"
+      },
+      "functions": [
+        "LoadFromSaveData",
+        "IsLiftRunning",
+        "HasOperatingLifties"
+      ],
+      "function_parameters": {
+        "IsLiftRunning": {
+          "ReturnValue": "BoolProperty"
+        },
+        "LoadFromSaveData": {
+          "SaveData": "StructProperty"
+        }
+      }
+    },
+    "HubConnectivitySubsystem": {
+      "fields": {},
+      "functions": [
+        "HandleTrailRegistered",
+        "HandleTrailUnregistered"
+      ]
+    },
+    "StaffSubsystem": {
+      "fields": {},
+      "functions": [
+        "GetSettings",
+        "GetRoster",
+        "GetHiringPool"
+      ]
+    },
+    "TrailMapSubsystem": {
+      "fields": {
+        "RegisteredTrails": "MapProperty"
+      },
+      "functions": [
+        "GetRegisteredTrails",
+        "NotifyPaintComplete"
+      ],
+      "function_parameters": {
+        "GetRegisteredTrails": {
+          "ReturnValue": "MapProperty"
+        }
+      }
+    },
+    "TimeSubsystem": {
+      "fields": {},
+      "functions": [
+        "PauseTime",
+        "GetTimeRate",
+        "SetTimeRate",
+        "GetTargetTimeMultiplier"
+      ],
+      "function_parameters": {
+        "SetTimeRate": {
+          "Rate": "FloatProperty"
+        },
+        "GetTargetTimeMultiplier": {
+          "ReturnValue": "FloatProperty"
+        }
+      }
+    },
+    "GameSessionSubsystem": {
+      "fields": {
+        "PendingInitialSave": "ObjectProperty",
+        "PendingScenario": "ObjectProperty"
+      },
+      "functions": []
+    },
+    "SkiResortSaveGame": {
+      "fields": {
+        "MapPath": "StrProperty",
+        "SlotName": "StrProperty",
+        "PlaythroughId": "StructProperty",
+        "Buildings": "ArrayProperty",
+        "Lifts": "ArrayProperty"
+      },
+      "functions": []
+    },
+    "TrailUtilities": {
+      "fields": {},
+      "functions": [
+        "CalculateDifficultyFromSlope",
+        "GetDifficultyColor",
+        "GetDifficultySymbol"
+      ],
+      "function_parameters": {
+        "CalculateDifficultyFromSlope": {
+          "P90SlopeAngle": "FloatProperty",
+          "ReturnValue": "EnumProperty"
+        },
+        "GetDifficultyColor": {
+          "Difficulty": "EnumProperty",
+          "ReturnValue": "StructProperty"
+        }
+      }
+    },
+    "TrailVisualizationSubsystem": {
+      "fields": {
+        "TrailMapSubsystem": "ObjectProperty",
+        "SpawnedTrailLines": "MapProperty"
+      },
+      "functions": [
+        "OnTrailRegistered",
+        "OnTrailUnregistered",
+        "RefreshLabels"
+      ]
+    }
+  },
+  "assets": [
+    "/Game/Blueprints/Buildings/BP_ArtGallery.uasset",
+    "/Game/Blueprints/Buildings/BP_BBQSmokehouse.uasset",
+    "/Game/Blueprints/Buildings/BP_Bakery.uasset",
+    "/Game/Blueprints/Buildings/BP_BavarianBeerHall.uasset",
+    "/Game/Blueprints/Buildings/BP_Bookstore.uasset",
+    "/Game/Blueprints/Buildings/BP_BootFittingStudio.uasset",
+    "/Game/Blueprints/Buildings/BP_BratwurstGrill.uasset",
+    "/Game/Blueprints/Buildings/BP_Brewery.uasset",
+    "/Game/Blueprints/Buildings/BP_Building_Base.uasset",
+    "/Game/Blueprints/Buildings/BP_BurgerTruck.uasset",
+    "/Game/Blueprints/Buildings/BP_Cafe.uasset",
+    "/Game/Blueprints/Buildings/BP_CandyShop.uasset",
+    "/Game/Blueprints/Buildings/BP_ChickenTruck.uasset",
+    "/Game/Blueprints/Buildings/BP_CoffeeStand.uasset",
+    "/Game/Blueprints/Buildings/BP_ConvenienceStore.uasset",
+    "/Game/Blueprints/Buildings/BP_CounterBar.uasset",
+    "/Game/Blueprints/Buildings/BP_CrepeCart.uasset",
+    "/Game/Blueprints/Buildings/BP_DistilleryTastingRoom.uasset",
+    "/Game/Blueprints/Buildings/BP_FrenchChaletRestaurant.uasset",
+    "/Game/Blueprints/Buildings/BP_GearBoutique.uasset",
+    "/Game/Blueprints/Buildings/BP_GiftShop.uasset",
+    "/Game/Blueprints/Buildings/BP_GrandLodge.uasset",
+    "/Game/Blueprints/Buildings/BP_HolidayStore.uasset",
+    "/Game/Blueprints/Buildings/BP_HotCocoaCart.uasset",
+    "/Game/Blueprints/Buildings/BP_IceCreamStand.uasset",
+    "/Game/Blueprints/Buildings/BP_IrishPub.uasset",
+    "/Game/Blueprints/Buildings/BP_JapaneseTeaHouse.uasset",
+    "/Game/Blueprints/Buildings/BP_JewelryBoutique.uasset",
+    "/Game/Blueprints/Buildings/BP_KaraokeBar.uasset",
+    "/Game/Blueprints/Buildings/BP_LargeHotel.uasset",
+    "/Game/Blueprints/Buildings/BP_LogoApparelStore.uasset",
+    "/Game/Blueprints/Buildings/BP_Maintenance.uasset",
+    "/Game/Blueprints/Buildings/BP_MassageHut.uasset",
+    "/Game/Blueprints/Buildings/BP_MichelinBistro.uasset",
+    "/Game/Blueprints/Buildings/BP_NightClub.uasset",
+    "/Game/Blueprints/Buildings/BP_Onsen.uasset",
+    "/Game/Blueprints/Buildings/BP_Pharmacy.uasset",
+    "/Game/Blueprints/Buildings/BP_PierogiWindow.uasset",
+    "/Game/Blueprints/Buildings/BP_PoutineShack.uasset",
+    "/Game/Blueprints/Buildings/BP_PretzelHut.uasset",
+    "/Game/Blueprints/Buildings/BP_QuebecoisSugarShack.uasset",
+    "/Game/Blueprints/Buildings/BP_RacletteFondueHut.uasset",
+    "/Game/Blueprints/Buildings/BP_RamenBar.uasset",
+    "/Game/Blueprints/Buildings/BP_ScandinavianHyggeLodge.uasset",
+    "/Game/Blueprints/Buildings/BP_SkiPatrolHut.uasset",
+    "/Game/Blueprints/Buildings/BP_SkiRental.uasset",
+    "/Game/Blueprints/Buildings/BP_SkiSchool.uasset",
+    "/Game/Blueprints/Buildings/BP_SkiSnowboardProShop.uasset",
+    "/Game/Blueprints/Buildings/BP_SkiTuningShack.uasset",
+    "/Game/Blueprints/Buildings/BP_SmallCabin.uasset",
+    "/Game/Blueprints/Buildings/BP_Snowblower.uasset",
+    "/Game/Blueprints/Buildings/BP_SnowcatShed.uasset",
+    "/Game/Blueprints/Buildings/BP_SpaSauna.uasset",
+    "/Game/Blueprints/Buildings/BP_Speakeasy.uasset",
+    "/Game/Blueprints/Buildings/BP_SunglassesKiosk.uasset",
+    "/Game/Blueprints/Buildings/BP_SushiCounter.uasset",
+    "/Game/Blueprints/Buildings/BP_SwissGrandHotel.uasset",
+    "/Game/Blueprints/Buildings/BP_TacoStand.uasset",
+    "/Game/Blueprints/Buildings/BP_TicketOffice.uasset",
+    "/Game/Blueprints/Buildings/BP_WaffleStand.uasset",
+    "/Game/Blueprints/Buildings/BP_WarmingHut.uasset",
+    "/Game/Blueprints/Buildings/BP_WineBar.uasset",
+    "/Game/Blueprints/Buildings/BP_YogaStudio.uasset",
+    "/Game/Blueprints/Decorations/BP_BlackCatStandee.uasset",
+    "/Game/Blueprints/Decorations/BP_CarvedAnimalTotems.uasset",
+    "/Game/Blueprints/Decorations/BP_FeatureSpotlight.uasset",
+    "/Game/Blueprints/Decorations/BP_FestoonLights.uasset",
+    "/Game/Blueprints/Decorations/BP_Flags.uasset",
+    "/Game/Blueprints/Decorations/BP_Fountain.uasset",
+    "/Game/Blueprints/Decorations/BP_FrenchTable.uasset",
+    "/Game/Blueprints/Decorations/BP_Gravestone.uasset",
+    "/Game/Blueprints/Decorations/BP_HangingGhost.uasset",
+    "/Game/Blueprints/Decorations/BP_HangingLanterns.uasset",
+    "/Game/Blueprints/Decorations/BP_IceFountain.uasset",
+    "/Game/Blueprints/Decorations/BP_IceLanterns.uasset",
+    "/Game/Blueprints/Decorations/BP_JackOLantern.uasset",
+    "/Game/Blueprints/Decorations/BP_LampPost.uasset",
+    "/Game/Blueprints/Decorations/BP_Luminaria.uasset",
+    "/Game/Blueprints/Decorations/BP_ParkBench.uasset",
+    "/Game/Blueprints/Decorations/BP_PicnicTable.uasset",
+    "/Game/Blueprints/Decorations/BP_Planter.uasset",
+    "/Game/Blueprints/Decorations/BP_Pumpkin.uasset",
+    "/Game/Blueprints/Decorations/BP_PumpkinPile.uasset",
+    "/Game/Blueprints/Decorations/BP_ScenicOverlook.uasset",
+    "/Game/Blueprints/Decorations/BP_SeasonalDecor.uasset",
+    "/Game/Blueprints/Decorations/BP_SkiRack.uasset",
+    "/Game/Blueprints/Decorations/BP_SnowSculptures.uasset",
+    "/Game/Blueprints/Decorations/BP_TikiTorches.uasset",
+    "/Game/Blueprints/Decorations/BP_TowerLight.uasset",
+    "/Game/Blueprints/Decorations/BP_TrailMarkers.uasset",
+    "/Game/Blueprints/Decorations/BP_TrashPile.uasset",
+    "/Game/Blueprints/Decorations/BP_UmbrellaTable.uasset",
+    "/Game/Blueprints/Decorations/BP_WitchStandee.uasset",
+    "/Game/Blueprints/Lifts/BP_AerialTram.uasset",
+    "/Game/Blueprints/Lifts/BP_Carrier_AerialTram_Gondola.uasset",
+    "/Game/Blueprints/Lifts/BP_Carrier_Gondola_Cab.uasset",
+    "/Game/Blueprints/Lifts/BP_FixedChair1.uasset",
+    "/Game/Blueprints/Lifts/BP_FixedChair2.uasset",
+    "/Game/Blueprints/Lifts/BP_FixedChair4.uasset",
+    "/Game/Blueprints/Lifts/BP_Gondola.uasset",
+    "/Game/Blueprints/Lifts/BP_HighSpeedQuad.uasset",
+    "/Game/Blueprints/Lifts/BP_HighSpeedSix.uasset",
+    "/Game/Blueprints/Lifts/BP_Lift.uasset",
+    "/Game/Blueprints/Systems/BP_DJStand.uasset",
+    "/Game/Blueprints/Systems/BP_FirePit.uasset",
+    "/Game/Blueprints/Systems/BP_PropaneHeater.uasset",
+    "/Game/Blueprints/TerrainPark/BP_ParkFlatBox.uasset",
+    "/Game/Blueprints/TerrainPark/BP_ParkHalfpipeEntryCap.uasset",
+    "/Game/Blueprints/TerrainPark/BP_ParkHalfpipeExitCap.uasset",
+    "/Game/Blueprints/TerrainPark/BP_ParkHalfpipeSection.uasset",
+    "/Game/Blueprints/TerrainPark/BP_ParkHipJump.uasset",
+    "/Game/Blueprints/TerrainPark/BP_ParkLargeKicker.uasset",
+    "/Game/Blueprints/TerrainPark/BP_ParkMediumKicker.uasset",
+    "/Game/Blueprints/TerrainPark/BP_ParkMiniPipeEntryCap.uasset",
+    "/Game/Blueprints/TerrainPark/BP_ParkMiniPipeExitCap.uasset",
+    "/Game/Blueprints/TerrainPark/BP_ParkMiniPipeSection.uasset",
+    "/Game/Blueprints/TerrainPark/BP_ParkRail.uasset",
+    "/Game/Blueprints/TerrainPark/BP_ParkRainbowRail.uasset",
+    "/Game/Blueprints/TerrainPark/BP_ParkSmallKicker.uasset",
+    "/Game/Blueprints/TerrainPark/BP_ParkSuperpipeEntryCap.uasset",
+    "/Game/Blueprints/TerrainPark/BP_ParkSuperpipeExitCap.uasset",
+    "/Game/Blueprints/TerrainPark/BP_ParkSuperpipeSection.uasset",
+    "/Game/Blueprints/TerrainPark/BP_ParkTabletop.uasset",
+    "/Game/Blueprints/TerrainPark/BP_ParkWallRide.uasset",
+    "/Game/Blueprints/Vehicles/BP_Snowblower.uasset",
+    "/Game/Blueprints/Vehicles/BP_Snowcat.uasset",
+    "/Game/Blueprints/Vehicles/BP_Snowmobile.uasset",
+    "/Game/Core/BP_SkiResortGameMode.uasset",
+    "/Game/Data/DA_PathStyles.uasset",
+    "/Game/Materials/M_Prop_albtex.uasset",
+    "/Game/Materials/M_TrailLine.uasset"
+  ],
+  "maps": [
+    {
+      "id": "community.super-saint-bernard",
+      "version": "0.2.4",
+      "archive": "mod/SkiEO-SuperSaintBernard/bin/community.super-saint-bernard-0.2.4.skieomap",
+      "expected": {
+        "buildings": 5,
+        "decorations": 14,
+        "lifts": 2,
+        "trails": 4,
+        "hubs": 3,
+        "staff": 10,
+        "trees": 0
+      },
+      "expected_variants": {
+        "Beginner": 2,
+        "Intermediate": 2,
+        "Expert": 4,
+        "TwoSided": 2,
+        "None": 4
+      },
+      "expected_markers": 8
+    },
+    {
+      "id": "community.veymont",
+      "version": "0.7.7",
+      "archive": "mod/SkiEO-Veymont/bin/community.veymont-0.7.7.skieomap",
+      "expected": {
+        "buildings": 13,
+        "decorations": 54,
+        "lifts": 9,
+        "trails": 20,
+        "hubs": 11,
+        "staff": 22,
+        "trees": 383500
+      },
+      "expected_variants": {
+        "Beginner": 8,
+        "Intermediate": 26,
+        "Expert": 6,
+        "TwoSided": 4,
+        "None": 8,
+        "LowBox": 2
+      },
+      "expected_markers": 40
+    }
+  ],
+  "manual_checks": [
+    "rendering",
+    "native_save_roundtrip"
+  ],
+  "known_issues": [
+    "Trail ribbons can appear black on snow in build 25970577; do not use that rendering as a passing visual baseline."
+  ],
+  "ue4ss_sha256": "b6c3833120285cb49e90849dbca39d658573c4b8bac07ab2b62f78428cf3b1d3",
+  "reference_inventory": "compatibility/reference-assets-25996759.json",
+  "reference_inventory_sha256": "fab89831c054328b644786a2d9d4bd34559cf4ac0cdd2403ef4c74eef424daf1",
+  "dependencies": [
+    {
+      "id": "community.foxes",
+      "version": "0.4.0",
+      "kind": "mod",
+      "archive": "mod/SkiEO-Foxes/bin/community.foxes-0.4.0.skieomod"
+    }
+  ],
+  "native_helpers": {
+    "mod/SkiEO-CustomMaps/Scripts/skieo_trail_ratings.dll": "ac623e3e82ac9497c244366498f6894c77cca48f95600c919257d8786e5075a9"
+  }
+}

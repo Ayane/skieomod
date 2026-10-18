@@ -1,0 +1,38 @@
+{
+  "version": 1,
+  "photo": "20250118_103053.jpg",
+  "heightmap_manifest": "../../mod/SkiEO-Veymont/custom-map.json",
+  "provenance": {
+    "viewpoint": "GPS coordinates from the map author's own photograph",
+    "skyline": "Cliff/blue-sky boundary traced on the supplied 4032 x 2268 image; approximate observations",
+    "coordinate_system": "map metres: east, south, up; NGF-IGN69 elevations"
+  },
+  "camera_search": {
+    "from_exif": {"map_georeference": "map.json", "gps_radius_meters": 40, "focal_relative_uncertainty": 0.2},
+    "height_above_ground_meters": 1.7,
+    "aim_meters": [-1500, 700, 2100],
+    "yaw_offset_degrees": [-25, 25],
+    "pitch_degrees": [-10, 30],
+    "terrain_window_meters": [-2400, -700, -500, 3300],
+    "grid_step": 2,
+    "iterations": 100,
+    "seed": 5
+  },
+  "patch": {
+    "surface_template": "rock-surface-gps.example.json",
+    "photo_pixel": [1830, 775],
+    "extent_meters": [80, 100],
+    "light_direction_from_exif": true
+  },
+  "skyline_pixels": [
+    [1090, 892], [1115, 819], [1140, 790], [1165, 777], [1190, 760],
+    [1215, 743], [1240, 733], [1265, 720], [1290, 709], [1315, 688],
+    [1340, 688], [1365, 698], [1390, 703], [1415, 709], [1440, 678],
+    [1465, 675], [1490, 690], [1515, 722], [1540, 749], [1565, 732],
+    [1590, 681], [1615, 684], [1640, 697], [1665, 700], [1690, 713],
+    [1715, 736], [1740, 749], [1765, 710], [1790, 710], [1815, 715],
+    [1840, 718], [1865, 718], [1890, 728], [1915, 746], [1940, 759],
+    [1965, 775], [1990, 792], [2015, 808], [2040, 826], [2065, 820],
+    [2090, 819], [2115, 825], [2140, 835], [2165, 846]
+  ]
+}
