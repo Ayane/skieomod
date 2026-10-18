@@ -16,6 +16,16 @@ field addresses through UE4SS `ContainerPtrToValuePtr` on default objects, witho
 reading a guessed FProperty layout. These extra checks protect the existing
 private bridges; changed hub/staff/snow/engine layouts still need profile review.
 
+Terrain-pad registration uses the native placement method after final source
+alignment. `terrain_pads_layout.h` guards all 2,088 bytes of the reviewed
+function and all 267 bytes of its preceding component cleanup for builds
+25996759 and 26019240, including their call displacements.
+The Lua caller checks reflected placement fields and live actor ownership;
+the helper validates every actor in a batch before invoking the first method.
+It does not clear the brush render target, sculpt layers or snowpack. See the
+[snow investigation](../../docs/buildings-snow-26019240.md) for the reproduced
+save/restore rendering defect.
+
 ## Scripted scenario saves
 
 `skieo_sync_scenario_state` synchronizes script state with the current world's `ScenarioSubsystem` before the native manual or asynchronous save copies its state. Native C++ saves bypass the `GameplayStatics` UFunction hooks, so those hooks cannot provide reliable persistence.

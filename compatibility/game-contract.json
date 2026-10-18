@@ -3,9 +3,9 @@
   "version": 1,
   "reference_build": "26019240",
   "reference_executable_sha256": "209da968636fc41034da8e74805c9419636d446c0a13a2e70dbc706835e9a3e6",
-  "native_helper_sha256": "6e64722cf6867b663678fcec6799e4c91d70414c08d816efae34204c6ec7ff3b",
+  "native_helper_sha256": "5fe4384c008ad92f50aab98eab29ff4097aec03972820eb852807f501265d043",
   "native_sources": {
-    "native/SkiEONativeTerrain/native_terrain.c": "fd7183e426be3a37e31758c976104bd2c8498dfdb82448d3f02aaad9a7056d51",
+    "native/SkiEONativeTerrain/native_terrain.c": "4e72c5cb1ddc4ddcf01cec3ecdaa994070df784118c4dce1bf529a05f28c06b0",
     "native/SkiEONativeTerrain/navigation_layout.h": "ae84782dc0a6c010481db6139bd2d66634b9bf1d1f30b840f2fe759a665ac6ba",
     "native/SkiEONativeTerrain/render_mapping_layout.h": "5cf8d6da07c19a575f2d6a93c54156f4f0af3e6a1a8d4f0e04e7fc654f112ff9",
     "native/SkiEOTrailRatings/trail_ratings.c": "c4d23bbaad05bf966ec018e7ed3204fa683683ea1c2de8ae1e85d5ebb31796b7",
@@ -26,7 +26,8 @@
     "native/SkiEOTrailRatings/vendor/minhook/src/hde/pstdint.h": "604d1cdf45c5a95bc9cf1bbf39ca05ef83013541101d34971c5cd7577e3d5247",
     "native/SkiEOTrailRatings/rating_colors.h": "da51c09434b7c0bd8e582a56744f2ff059ec28a8c2857bb97e604ec0dc0e26d0",
     "native/SkiEOTrailRatings/rating_resolver.h": "6584711c98840bdaa275e022bc6fd9e84a5e917d6c9734b874ba3be8dcf41eab",
-    "tools/trail_rating_profile.py": "7d8eb60d92a0c5e2b09c4ec28375cfe614b5785647efb62b1608bd5dabfe0428"
+    "tools/trail_rating_profile.py": "7d8eb60d92a0c5e2b09c4ec28375cfe614b5785647efb62b1608bd5dabfe0428",
+    "native/SkiEONativeTerrain/terrain_pads_layout.h": "320cff9e0518fb140dbec2e5391c8639678713e20e67525cc1f9d8588be31d1d"
   },
   "guards": [
     {
@@ -148,6 +149,18 @@
       "rva": "0x53a3b80",
       "bytes": "40534883ec20488bd90fb6cae88f56d1ff0fb6c083f8060f879d000000488d0dbc2fc4fa8b9481f0d03b054803d1ffe233c048c743040000803f8903488bc3c7430c0000803f4883c4205bc333c0c743080000803f488903488bc3c7430c0000803f4883c4205bc333c048c7030000803f894308488bc3c7430c0000803f4883c4205bc333c0c7430c0000803f488903894308488bc34883c4205bc3c7030000803f488bc348c74304ae47613ec7430c0000803f4883c4205bc30f1005fffbdd02488bc30f11034883c4205bc3",
       "mode": "rating_semantic"
+    },
+    {
+      "id": "terrain.pads",
+      "rva": "0x4fe0c00",
+      "bytes": "40555657488dac2460feffff4881eca0020000",
+      "mode": "rva"
+    },
+    {
+      "id": "terrain.pads_cleanup",
+      "rva": "0x4fcbe40",
+      "bytes": "48895c240848896c2410488974241848897c242041564883ec30488b9988030000",
+      "mode": "rva"
     }
   ],
   "classes": {
@@ -155,7 +168,12 @@
       "fields": {
         "PlaceableComponent": "ObjectProperty",
         "HubId": "StructProperty",
-        "bIsPreview": "BoolProperty"
+        "bIsPreview": "BoolProperty",
+        "TerraformInteriorPaddingCm": "FloatProperty",
+        "TerraformEdgeFalloffCm": "FloatProperty",
+        "TerraformMaxEdgeFalloffCm": "FloatProperty",
+        "TerraformPadComponents": "ArrayProperty",
+        "PlacementBlockerComponents": "ArrayProperty"
       },
       "functions": [
         "FinalizePlacement",
@@ -495,7 +513,7 @@
     "native_save_roundtrip"
   ],
   "known_issues": [
-    "Trail ribbons can appear black on snow in build 25970577; do not use that rendering as a passing visual baseline."
+    "Dark hub outlines and Expert trail markers are native colors; distinguish their geometry/occlusion from a material failure with a labeled color diagnostic."
   ],
   "ue4ss_sha256": "b6c3833120285cb49e90849dbca39d658573c4b8bac07ab2b62f78428cf3b1d3",
   "reference_inventory": "compatibility/reference-assets-26019240.json",

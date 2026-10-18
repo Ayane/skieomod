@@ -12,15 +12,37 @@ have their own package versions. Download the
 - Prepare optional Discord release announcements after HTTPS publication checks,
   with a preview mode and receipts for confirmed messages.
 
+## [1.24.2] - 2026-10-18
+
+- Re-register native terrain pads after source terrain and saved placeables
+  reach their final transforms. Prevent restored pads from pushing the snow
+  surface over buildings while preserving the saved snowpack and native
+  sculpt layers. Refresh pads after correcting a player-built building too.
+- Run the matching native cleanup before reconstruction so temporary terrain
+  pads and placement blockers stay stable across repeated calls.
+- Guard pad registration with reflected placement fields and exact native
+  code fingerprints for builds 25996759 and 26019240.
+- Refresh the native skiability memo across terrain/snow readbacks so restored
+  pad work does not leave lifts reporting an obsolete lack of snow.
+- Count live world actors in compatibility snapshots, excluding destroyed
+  UObject shells without relaxing object identity or position checks.
+- Detect an already running Steam client even when its startup marker has
+  scrolled beyond the last 64 KiB of its log.
+- Correct the earlier interpretation of black hub outlines: a native color
+  diagnostic identifies them as hub rings, rather than broken snow materials.
+- Qualify demo build 26019240 with 45 passing checks, both strict native save
+  roundtrips, active rendering, snow-depth cycles and repeated pad rebuilding.
+
 ## [1.24.1] - 2026-10-18
 
 - Add reviewed native profiles for Steam demo build 26019240, retaining the
   previous signatures and structure guards for older builds.
 - Preserve empty furniture labels and saved lift origins when restoring a
   custom map. Keep grounded lift components at their world transforms.
-- Record the updated asset inventory and compatibility results. Full
-  qualification remains blocked by the snow surface and black trail ribbons;
-  this build is not announced as fully compatible.
+- Record the updated asset inventory and initial compatibility results.
+  Qualification failed on the restored snow surface and a destroyed-actor
+  counting artifact; the black hub outlines were subsequently identified
+  as native colors (see 1.24.2).
 
 ## [1.24.0] - 2026-10-18
 

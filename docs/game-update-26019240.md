@@ -1,5 +1,10 @@
 # Mise à jour du jeu 26019240
 
+La [revue des bâtiments sous la neige](buildings-snow-26019240.md) complète
+ce premier essai avec le correctif **1.24.2**. Elle identifie les contours
+noirs des hubs et la cause du recouvrement après reprise. Les résultats
+ci-dessous décrivent la qualification initiale de **1.24.1**.
+
 Le correctif skieomod **1.24.1** adapte les ponts natifs au build Steam de la
 démo **26019240**. Le verdict de qualification reste **incompatible** tant que
 le contrôle visuel échoue. Le démarrage réussi ne suffit pas à annoncer cette
@@ -101,9 +106,11 @@ fait réapparaître les parties inférieures des bâtiments. Ce diagnostic n'est
 pas un correctif : supprimer la couche sans vérifier les effets sur la neige,
 les pistes et leur simulation ne permettrait pas de valider le rendu.
 
-Les rubans noirs autour des pistes/hubs restent également visibles.
-Les captures et mesures sont conservées sous `build/compatibility/` ; elles
-ne constituent pas une référence de rendu acceptable.
+Le premier diagnostic regroupait aussi ces défauts avec des « rubans noirs ».
+La revue suivante démontre que les larges bandes sont les contours natifs des
+hubs : changer leur couleur dans une copie de diagnostic les rend magenta.
+Leur couleur noire ne prouve donc pas un défaut de matériau. Les captures et
+mesures initiales restent conservées sous `build/compatibility/`.
 
 Le [protocole](game-compatibility-testing.md) exige une revue visuelle positive
 et deux reprises natives complètes avant le verdict `compatible`. Les seuils

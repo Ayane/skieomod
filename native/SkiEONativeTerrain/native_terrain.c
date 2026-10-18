@@ -8,6 +8,7 @@
 #include <string.h>
 #include "render_mapping_layout.h"
 #include "navigation_layout.h"
+#include "terrain_pads_layout.h"
 
 #pragma pack(push, 1)
 typedef struct SkiEOHeightJob {
@@ -2879,6 +2880,85 @@ __declspec(dllexport) int skieo_refresh_navigation(void *lua_state)
     typedef void (*TerrainChanged)(void *);
     ((TerrainChanged)handler)(owner);
     write_status("ok: source terrain navigation invalidated through native handler");
+    return 0;
+}
+
+/* Native restore registers pads before the portable terrain and actor roots
+   are finalized. Re-register at the final transforms, through the same native
+   method used during placement. It replaces the existing per-id pad and keeps
+   the brush's player sculpt layers, CPU terrain and snow simulation intact. */
+__declspec(dllexport) int skieo_refresh_placeable_pads(void *lua_state)
+{
+    (void)lua_state;
+    wchar_t path[MAX_PATH];
+    if (!sibling_path(path, MAX_PATH, L"native_pads.job")) return 0;
+    FILE *file = _wfopen(path, L"rb");
+    if (!file) { write_status("error: missing terrain pads job"); return 0; }
+    struct { char magic[4]; uint32_t version, count, reserved; } job = {0};
+    size_t read = fread(&job, 1, sizeof(job), file);
+    if (read != sizeof(job) || memcmp(job.magic, "SKPD", 4) || job.version != 1
+        || !job.count || job.count > 4096 || job.reserved) {
+        fclose(file); write_status("error: invalid terrain pads job"); return 0;
+    }
+    struct { uint64_t actor, actor_class; } *actors = calloc(job.count, sizeof(*actors));
+    if (!actors) { fclose(file); write_status("error: terrain pads allocation failed"); return 0; }
+    read = fread(actors, sizeof(*actors), job.count, file);
+    int trailing = fgetc(file); fclose(file);
+    const char *error = NULL;
+    if (read != job.count || trailing != EOF) error = "error: truncated terrain pads actors";
+    /* Validate every actor before invoking the first native mutation. */
+    for (uint32_t i = 0; !error && i < job.count; ++i) {
+        uint8_t *actor = (uint8_t *)(uintptr_t)actors[i].actor;
+        uint64_t cls = 0;
+        if (!actor || !actors[i].actor_class || !readable_range(actor, 0x3D8)) {
+            error = "error: terrain pads actor is unreadable"; break;
+        }
+        memcpy(&cls, actor + 0x10, 8);
+        if (cls != actors[i].actor_class) error = "error: terrain pads actor class changed";
+    }
+    uint8_t *module = (uint8_t *)GetModuleHandleW(L"skieogame.exe");
+    uint8_t *handler = NULL, *cleanup = NULL;
+    if (!error && module && readable_range(module, sizeof(IMAGE_DOS_HEADER))) {
+        IMAGE_DOS_HEADER *dos = (IMAGE_DOS_HEADER *)module;
+        if (dos->e_magic == IMAGE_DOS_SIGNATURE && dos->e_lfanew > 0
+            && dos->e_lfanew < 0x100000 && readable_range(module + dos->e_lfanew, sizeof(IMAGE_NT_HEADERS64))) {
+            IMAGE_NT_HEADERS64 *nt = (IMAGE_NT_HEADERS64 *)(module + dos->e_lfanew);
+            const uint32_t profiles[][2] = {{0x4FE0C00, 0x4FCBE40}, {0x4FDF110, 0x4FCA360}};
+            if (nt->Signature == IMAGE_NT_SIGNATURE && nt->OptionalHeader.Magic == IMAGE_NT_OPTIONAL_HDR64_MAGIC) {
+                for (size_t i = 0; i < sizeof(profiles)/sizeof(*profiles); ++i) {
+                    uint32_t rva = profiles[i][0], clear_rva = profiles[i][1];
+                    if (rva <= nt->OptionalHeader.SizeOfImage
+                        && SKIEO_TERRAIN_PADS_BYTES <= nt->OptionalHeader.SizeOfImage - rva
+                        && readable_range(module + rva, SKIEO_TERRAIN_PADS_BYTES)
+                        && skieo_terrain_pads_matches(module + rva, SKIEO_TERRAIN_PADS_BYTES, rva)
+                        && clear_rva <= nt->OptionalHeader.SizeOfImage
+                        && SKIEO_TERRAIN_PADS_CLEANUP_BYTES <= nt->OptionalHeader.SizeOfImage - clear_rva
+                        && readable_range(module + clear_rva, SKIEO_TERRAIN_PADS_CLEANUP_BYTES)
+                        && skieo_terrain_pads_cleanup_matches(module + clear_rva,
+                            SKIEO_TERRAIN_PADS_CLEANUP_BYTES, clear_rva)) {
+                        handler = module + rva; cleanup = module + clear_rva; break;
+                    }
+                }
+            }
+        }
+    }
+    if ((!handler || !cleanup) && !error) error = "error: unsupported native terrain pads code";
+    if (!error) {
+        typedef void (*RegisterTerrainPads)(void *);
+        for (uint32_t i = 0; i < job.count; ++i) {
+            /* Match native LoadFromSaveData: destroy the old transient pad
+               and placement-blocker components before registering new ones. */
+            ((RegisterTerrainPads)cleanup)((void *)(uintptr_t)actors[i].actor);
+            ((RegisterTerrainPads)handler)((void *)(uintptr_t)actors[i].actor);
+        }
+    }
+    free(actors);
+    if (error) write_status(error);
+    else {
+        char message[128];
+        snprintf(message, sizeof(message), "ok: refreshed %u native terrain pad owner(s)", job.count);
+        write_status(message);
+    }
     return 0;
 }
 

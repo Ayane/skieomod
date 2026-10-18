@@ -645,6 +645,7 @@ host.loading_finished = function(api, success, message)
             local ok, failure = pcall(function()
                 local world = UEHelpers.GetWorld()
                 local restored_lifts, restored_buildings = {}, {}
+                local pad_owners = {}
                 for _, class in ipairs({ "BuildingActor", "LiftActor" }) do
                     -- FindAllOf also returns destroyed template objects
                     -- until GC; Unreal's world iterator excludes them.
@@ -656,6 +657,7 @@ host.loading_finished = function(api, success, message)
                         if valid(actor) and not actor:IsActorBeingDestroyed() then
                             Terrain.align_building(actor)
                             Terrain.align_lift(actor)
+                            if not actor.bIsPreview then pad_owners[#pad_owners+1] = actor end
                             if api._restoring then
                                 Saves.restore_placeable(actor, api._saved_placeables)
                                 if class == "LiftActor" then
@@ -666,6 +668,14 @@ host.loading_finished = function(api, success, message)
                             end
                         end
                     end
+                end
+                if map.terrain.source then
+                    -- Native restoration created these pads before source
+                    -- reconstruction/grounding. Stale pad heights displace
+                    -- the snow shell even with an unchanged saved snowpack.
+                    local refreshed, detail = NativeTerrain.refresh_placeable_pads(pad_owners)
+                    assert(refreshed, detail)
+                    log(detail)
                 end
                 if api._restoring and #restored_lifts + #restored_buildings > 0 then
                     -- Native restore registers entrances before the portable
@@ -691,13 +701,21 @@ host.loading_finished = function(api, success, message)
         if success then
             World.finish_loading(map)
             if map.terrain.source then
-                local attempts=0
+                local attempts,ready_passes=0,0
                 local function refresh_skiability()
                     if Runtime.active_api~=api then return end
                     attempts=attempts+1
                     local ok,message=NativeTerrain.refresh_skiability()
-                    if ok then log(message)
-                    elseif attempts<20 and message=='snow readback is not ready' then api:after(500,refresh_skiability)
+                    ready_passes=ok and ready_passes+1 or 0
+                    -- Pad registration queues terrain/snow GPU work. The
+                    -- coarse cache can already be valid while another native
+                    -- query memoizes the previous terrain. Invalidate across
+                    -- several readbacks; never replace a native skiability
+                    -- result or leave a repeating timer running during play.
+                    if attempts<20 and (ok and ready_passes<4
+                        or not ok and message=='snow readback is not ready') then
+                        api:after(500,refresh_skiability)
+                    elseif ok then log(message)
                     else log('skiability refresh unavailable: '..tostring(message)) end
                 end
                 api:after(500,refresh_skiability)
@@ -1026,6 +1044,7 @@ local function align_finalized_building(actor)
             "building ground check: delta=%.1f cm, ground=%.1f cm%s",
             delta, ground_z, outcome))
     end
+    return aligned
 end
 
 local function defer_finalized_placeable_alignment(actor)
@@ -1047,7 +1066,10 @@ local function defer_finalized_placeable_alignment(actor)
         end
         -- Leave the finalizer's hook stack before changing native geometry.
         Terrain.align_lift(actor)
-        align_finalized_building(actor)
+        if align_finalized_building(actor) then
+            local ok, detail = NativeTerrain.refresh_placeable_pads({actor})
+            if not ok then log('building terrain pads refresh failed: '..tostring(detail)) end
+        end
     end
     -- UE4SS stores delayed callbacks weakly. Keep this closure (and therefore
     -- the actor wrapper) alive until it has run.

@@ -50,7 +50,7 @@ exercise(false,true,false,'valid')
 exercise(true,true,false,'stale')
 exercise(true,true,false,'missing')
 
-local function map_cycle(lose_building,wrong_mesh,swap_ids)
+local function map_cycle(lose_building,wrong_mesh,swap_ids,deleted_shell)
     local tick,callback,lost,captures,after_gc=0,nil,false,0,false
     local written={}
     local world={IsValid=function() return true end,GetAddress=function() return 77 end,GetFullName=function() return 'World /Engine/Maps/Entry.Entry' end}
@@ -76,8 +76,10 @@ local function map_cycle(lose_building,wrong_mesh,swap_ids)
     local trails=object('trails');trails.RegisteredTrails={ForEach=function(_,fn) fn() end}
     local environment=object('environment');environment.HeightmapReference={GetFullName=function() return 'Texture2D source' end}
     FindAllOf=function(kind)
-        return ({BuildingActor=lost and {marker} or {building,marker},LiftActor={object('lift')},HubActor={object('hub')},
-            StaffSubsystem={staff},TrailMapSubsystem={trails},LevelEnvironmentSettings={environment}})[kind] or {}
+        if kind=='BuildingActor' and deleted_shell then
+            return {building,marker,object('destroyed but still a valid UObject')}
+        end
+        return ({StaffSubsystem={staff},TrailMapSubsystem={trails},LevelEnvironmentSettings={environment}})[kind] or {}
     end
     package.loaded.vegetation={components={}}
     package.loaded.loading={active=false}
@@ -99,10 +101,17 @@ local function map_cycle(lose_building,wrong_mesh,swap_ids)
     os.rename=function(a,b) written[b]=written[a];return true end
     os.time=function() return tick end
     StaticFindObject=function(path)
+        if path:find('/Script/SkiResortSimulator.',1,true) and not path:find('SaveDumpLibrary',1,true) then return path end
         assert(path:find('SaveDumpLibrary',1,true))
         return {IsValid=function() return true end,GetSaveGamesDir=function() return 'test-evidence/userdata/Saved/SaveGames' end}
     end
     package.loaded.UEHelpers={GetWorld=function() return world end,GetPlayerController=function() return world end,
+        GetGameplayStatics=function() return {GetAllActorsOfClass=function(_,owner,class,entries)
+            assert(owner==world)
+            local kind=class:match('%.([^%.]+)$')
+            local found=({BuildingActor=lost and {marker} or {building,marker},LiftActor={object('lift')},HubActor={object('hub')}})[kind] or {}
+            for _,actor in ipairs(found) do entries[#entries+1]={get=function() return actor end} end
+        end} end,
         GetKismetSystemLibrary=function() return {QuitGame=function() end,CollectGarbage=function() lost=lose_building;after_gc=true end,
             ExecuteConsoleCommand=function() captures=captures+1 end} end}
     LoopInGameThreadWithDelay=function(_,fn) callback=fn;return 1 end
@@ -120,5 +129,6 @@ map_cycle(false,false)
 map_cycle(true,false)
 map_cycle(false,true)
 map_cycle(false,false,true)
+map_cycle(false,false,false,true)
 io.open,os.remove,os.rename,os.time=oldopen,oldremove,oldrename,oldtime
 print('Compatibility probe: isolation, retained callbacks, map loading, counts, GC loss and wrong variant meshes detected')

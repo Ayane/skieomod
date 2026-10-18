@@ -79,6 +79,7 @@ Le contrat versionné est [game-contract.json](../compatibility/game-contract.js
 | Personnel | Fonction de vivier et accès aux paramètres modifiés. |
 | Skiabilité et noms géographiques | Query, mémo, FText ou insertion de noms incompatibles. |
 | Navigation | Absence ou ambiguïté des signatures recherchées ; la vérification du propriétaire reste effectuée par le helper lors du chargement. |
+| Empreintes de bâtiments | Point d'entrée de reconstruction des terrassements ; le helper vérifie aussi le code complet et les champs privés avant tout appel. |
 | Neige CPU | Gardes d'accès aux tuiles absentes, y compris le cas où le helper retourne silencieusement « pas de mesure ». |
 | Notation des pistes | Code, constantes, références, cache et table de saut incohérents ou ambigus ; relocalisation contrôlée des fonctions reconnues. |
 | Ressources et paquets | Blueprint/matériau supprimé, archive invalide ou mauvaise identité/version de carte ou de dépendance. |
@@ -108,8 +109,9 @@ python3 tools/check_game_compatibility.py --previous build/compatibility/essai-p
 Les limites de qualification du build 25996759 restent décrites dans
 [son rapport](game-update-25996759.md), notamment pour le rendu et certaines
 positions restaurées. Elles restent à vérifier lors d'une nouvelle revue.
-Le [rapport du build 26019240](game-update-26019240.md) distingue les correctifs
-natifs et de sauvegarde des défauts de rendu qui empêchent sa qualification.
+Le [premier rapport du build 26019240](game-update-26019240.md) décrit les
+obstacles de la qualification initiale. La [revue neige de 1.24.2](buildings-snow-26019240.md)
+explique leurs causes, le correctif et la nouvelle qualification.
 
 ## 2. Contrôles UE4SS dans une copie isolée
 
@@ -169,6 +171,20 @@ Pour **chaque carte**, vérifier le relief, les bâtiments, le mobilier, les
 panneaux colorés, les lignes de piste et le masquage des arbres. Tester aussi
 le menu Custom Map et le retour au menu. Conserver des captures rapprochées
 et des vues générales. Une image de relief seule ne valide pas le mobilier.
+
+Pour les bâtiments sous la neige, comparer la même vue avant/après reprise,
+avec la profondeur native mesurée et la même position de bâtiment. Garder le
+moteur actif, à vitesse de simulation nulle, assez longtemps pour que la
+caméra et les déformations GPU se stabilisent avant de figer le checkpoint.
+Une forte épaisseur peut masquer normalement le bas d'un bâtiment : une carte
+native sert de témoin. Les contours sombres des hubs et les panneaux Expert
+peuvent être noirs par choix natif ; un diagnostic de couleur permet de les
+identifier. Vérifier séparément leur géométrie et leur occultation.
+
+Les instantanés comptent les acteurs via `GetAllActorsOfClass`, comme le
+chargeur. `FindAllOf` énumère aussi des enveloppes d'acteurs déjà détruits,
+encore valides comme UObjects avant le GC. Leur exclusion ne doit pas masquer
+la disparition d'un acteur vivant ni assouplir les contrôles de GUID/position.
 
 Pour chaque cycle de sauvegarde :
 

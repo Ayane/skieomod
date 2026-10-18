@@ -600,13 +600,17 @@ def steam_client_ready(client):
                 continue
             started = marker.stat().st_mtime
             with (client / 'logs/console_log.txt').open('rb') as source:
-                source.seek(0, os.SEEK_END)
-                source.seek(max(0, source.tell() - 65536))
-                lines = source.read().decode('utf-8', errors='replace').splitlines()
-            for line in reversed(lines):
-                if 'System startup time:' in line:
-                    timestamp = time.mktime(time.strptime(line[1:20], '%Y-%m-%d %H:%M:%S'))
-                    return timestamp >= started - 2
+                # An active client can write more than 64 KiB after startup.
+                # Keep only the latest marker while streaming the log; a tail
+                # window wrongly treats a long-running client as unready.
+                latest = None
+                for line in source:
+                    if b'System startup time:' in line:
+                        latest = line
+            if latest:
+                stamp = latest[1:20].decode('ascii')
+                timestamp = time.mktime(time.strptime(stamp, '%Y-%m-%d %H:%M:%S'))
+                return timestamp >= started - 2
         except (OSError, ValueError):
             continue
     return False

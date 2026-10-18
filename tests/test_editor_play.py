@@ -96,6 +96,12 @@ class EditorPlayTests(unittest.TestCase):
             self.assertFalse(d.steam_client_ready(client))
             console.write_text('['+stamp(now)+'] System startup time: 8.0 seconds\n')
             self.assertTrue(d.steam_client_ready(client))
+            with console.open('a') as stream:
+                stream.write('ordinary client output\n' * 5000)
+            self.assertTrue(d.steam_client_ready(client), 'live Steam startup fell outside a tail window')
+            with console.open('a') as stream:
+                stream.write('['+stamp(now-60)+'] System startup time: 8.0 seconds\n')
+            self.assertFalse(d.steam_client_ready(client), 'a previous startup hid a newer stale marker')
             marker.write_text('12346')
             self.assertFalse(d.steam_client_ready(client))
 

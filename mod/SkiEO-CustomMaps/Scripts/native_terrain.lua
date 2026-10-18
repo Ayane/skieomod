@@ -426,10 +426,37 @@ function NativeTerrain.refresh_staff_pool(subsystem)
     return status
 end
 
+-- Replace each native per-id terrain pad after the final source alignment.
+-- Keep native sculpt layers and snow; clearing BrushDeltaRT hides the symptom
+-- but also discards the visible player edits stored in that render target.
+function NativeTerrain.refresh_placeable_pads(actors)
+    if #actors == 0 then return true, 'no terrain pads to refresh' end
+    require('compatibility').require('terrain.pads', require('compatibility_contracts').terrain_pads)
+    local world = UEHelpers.GetWorld()
+    local pieces = {string.pack('<c4I4I4I4', 'SKPD', 1, #actors, 0)}
+    for _, actor in ipairs(actors) do
+        assert(valid(actor) and belongs_to_world(actor, world)
+            and actor:IsA('/Script/SkiResortSimulator.PlaceableActor')
+            and not actor:IsActorBeingDestroyed() and not actor.bIsPreview,
+            'terrain pad owner is not a live placeable in the current world')
+        pieces[#pieces+1] = string.pack('<I8I8', actor:GetAddress(), actor:GetClass():GetAddress())
+    end
+    local job_path, status_path = SOURCE_DIRECTORY..'native_pads.job', SOURCE_DIRECTORY..'native_terrain.status'
+    local written, message = write_binary(job_path, table.concat(pieces))
+    if not written then return false, message end
+    os.remove(status_path)
+    local helper, failure = package.loadlib(SOURCE_DIRECTORY..'skieo_native_terrain.dll', 'skieo_refresh_placeable_pads')
+    local ok, detail = false, failure
+    if helper then ok, detail = pcall(helper) end
+    local status = read_all(status_path)
+    os.remove(job_path); os.remove(status_path)
+    return ok and status and status:sub(1,3)=='ok:' or false,
+        not ok and tostring(detail) or status or 'native terrain pads produced no status'
+end
+
 -- Replays the stock Build-tool registration once late-created actors have
--- their final terrain-aligned transforms.  The native helper batches every
--- member and performs one graph rebuild, producing the same rectangular hub
--- actors and trail-routing sources as an ordinary player-built lift.
+-- their final terrain-aligned transforms. The helper batches members and
+-- performs one graph rebuild, as for an ordinary player-built lift.
 function NativeTerrain.register_placeable_hubs(lifts, buildings)
     lifts = lifts or {}
     buildings = buildings or {}

@@ -22,7 +22,14 @@ return function(runtime,spec_path)
     end
     local function actors(class)
         local result={}
-        for _,o in ipairs(FindAllOf(class) or {}) do
+        -- UObject enumeration retains destroyed actor shells until GC. Use
+        -- the native world iterator, as the runtime does when aligning a save.
+        -- Keep identity/count comparisons strict for every live actor.
+        local entries={}
+        Helpers.GetGameplayStatics():GetAllActorsOfClass(Helpers.GetWorld(),
+            StaticFindObject('/Script/SkiResortSimulator.'..class),entries)
+        for _,entry in ipairs(entries) do
+            local o=unwrap(entry)
             if current(o) and not o:IsActorBeingDestroyed() then result[#result+1]=o end
         end
         return result
