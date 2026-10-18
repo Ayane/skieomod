@@ -14,7 +14,8 @@ release preparation is separate from deployment.
 4. Upload the release to `/opt/custom-map/releases/RELEASE`, then run
    `sudo bash deployment/install.sh /opt/custom-map/releases/RELEASE` on the server.
 
-`install.sh` obtains/renews a SAN certificate for both domains, migrates the
+`install.sh` keeps the old HTTPS virtual host active while initially obtaining
+the new SAN certificate through a separate HTTP challenge host. It then migrates the
 old `CUSTOM_MAP_URL` value while preserving other settings, restarts Gunicorn,
 validates Nginx and checks the API. Nginx redirects HTTP and the old HTTPS
 hostname to `https://skieomod.emillon.fr` with 308, preserving paths, query

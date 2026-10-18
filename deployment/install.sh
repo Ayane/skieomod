@@ -48,16 +48,21 @@ systemctl daemon-reload
 systemctl enable --now custom-map.service
 systemctl restart custom-map.service
 if [ ! -f /etc/letsencrypt/live/skieomod.emillon.fr/fullchain.pem ]; then
-    cat > /etc/nginx/sites-available/custom-map <<'HTTP'
+    # Keep the existing HTTPS virtual host active while issuing the new certificate.
+    bootstrap_names=skieomod.emillon.fr
+    if [ ! -e /etc/nginx/sites-enabled/custom-map ]; then
+        bootstrap_names='skieomod.emillon.fr skieomap.emillon.fr'
+    fi
+    cat > /etc/nginx/sites-available/custom-map-acme <<HTTP
 server {
   listen 80;
   listen [::]:80;
-  server_name skieomod.emillon.fr skieomap.emillon.fr;
+  server_name $bootstrap_names;
   location /.well-known/acme-challenge/ { root /var/www/custom-map-acme; }
   location / { return 503; }
 }
 HTTP
-    ln -sfn /etc/nginx/sites-available/custom-map /etc/nginx/sites-enabled/custom-map
+    ln -sfn /etc/nginx/sites-available/custom-map-acme /etc/nginx/sites-enabled/custom-map-acme
     nginx -t
     systemctl reload nginx
 fi
@@ -65,6 +70,7 @@ fi
 certbot certonly --webroot -w /var/www/custom-map-acme --cert-name skieomod.emillon.fr -d skieomod.emillon.fr -d skieomap.emillon.fr --keep-until-expiring --expand --non-interactive --agree-tos --register-unsafely-without-email
 install -m 0644 "$release_dir/deployment/nginx.conf" /etc/nginx/sites-available/custom-map
 ln -sfn /etc/nginx/sites-available/custom-map /etc/nginx/sites-enabled/custom-map
+rm -f /etc/nginx/sites-enabled/custom-map-acme
 nginx -t
 systemctl reload nginx
 curl --fail --silent --show-error --retry 3 --retry-all-errors --retry-delay 1 https://skieomod.emillon.fr/api/v1/health
