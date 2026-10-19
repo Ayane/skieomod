@@ -170,8 +170,22 @@ local function load_material(path)
     return nil, canonical
 end
 
-local function tint_material(material, color, label)
+local function tint_material(material, color, label, owned_dynamic)
     if type(color) ~= "table" or #color < 3 then return material end
+    if owned_dynamic then
+        -- Tint the dynamic instance that already carries the terrain textures.
+        -- A second instance parented to it renders without the parent's
+        -- texture parameters, so baked ground-cover albedo would disappear.
+        local ok, message = pcall(function()
+            material:SetVectorParameterValue(
+                UEHelpers.FindOrAddFName("Color"), {
+                    R = color[1], G = color[2], B = color[3],
+                    A = color[4] or 1.0,
+                })
+        end)
+        if not ok then log("dynamic material tint failed for " .. label .. ": " .. tostring(message)) end
+        return material
+    end
     local library = StaticFindObject(
         "/Script/Engine.Default__KismetMaterialLibrary")
     local world = UEHelpers.GetWorld()
@@ -213,6 +227,7 @@ local function apply_material(
     end
     -- Texture import can trigger GC before the dynamic instance exists.
     if NativeTerrain.retain_texture then NativeTerrain.retain_texture(material) end
+    local owned_dynamic = false
     local texture_definitions = state.map.terrain.textures or {}
     if (source_ground and resolved == requested)
         or (label == "terrain" and next(texture_definitions) ~= nil) then
@@ -245,8 +260,9 @@ local function apply_material(
         end)
         if not ok then done(false, dynamic) return end
         material = dynamic
+        owned_dynamic = true
     end
-    material = tint_material(material, color, label)
+    material = tint_material(material, color, label, owned_dynamic)
     -- This material crosses queued frames before every section references it.
     -- Lua wrappers are weak Unreal references; keep it alive during loading
     -- and parallel render-state rebuilds, just like imported terrain textures.
