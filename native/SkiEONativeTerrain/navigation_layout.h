@@ -41,4 +41,24 @@ static const uint8_t *skieo_navigation_changed_signature(
     return NULL;
 }
 
+/* Build 26056171 keeps the expanded tick but grows the subsystem by 0x18:
+   the tick's dirty fields move from +0x818..+0x860 to +0x830..+0x878 and the
+   terrain-change handler from +0x848 to +0x860 (the +0x69 flag is unchanged).
+   The caller accepts exactly one match across both handler signatures. */
+static const uint8_t *skieo_navigation_changed_alternative(
+    const uint8_t *tick, size_t size)
+{
+    static const uint8_t expanded_tick[] = {
+        0x48,0x89,0x5C,0x24,0x18,0x48,0x89,0x74,0x24,0x20,
+        0x57,0x48,0x83,0xEC,0x60,0x48,0x8D,0x71,0xC8,
+        0x0F,0x29,0x74,0x24,0x50,0x48,0x8B,0xD9,
+    };
+    static const uint8_t grown_changed[SKIEO_NAVIGATION_CHANGED_BYTES] = {
+        0xC6,0x81,0x60,0x08,0x00,0x00,0x01,0xC6,0x41,0x69,0x01,0xC3,
+    };
+    if (size >= sizeof(expanded_tick) && !memcmp(tick, expanded_tick, sizeof(expanded_tick)))
+        return grown_changed;
+    return NULL;
+}
+
 #endif

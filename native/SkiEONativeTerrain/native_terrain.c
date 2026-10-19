@@ -2854,8 +2854,10 @@ __declspec(dllexport) int skieo_refresh_navigation(void *lua_state)
         || !skieo_navigation_changed_signature((void *)tick, SKIEO_NAVIGATION_TICK_BYTES)) {
         write_status("error: unsupported WalkNav tick layout"); return 0;
     }
-    const uint8_t *expected_changed = skieo_navigation_changed_signature(
-        (void *)tick, SKIEO_NAVIGATION_TICK_BYTES);
+    const uint8_t *expected[2] = {
+        skieo_navigation_changed_signature((void *)tick, SKIEO_NAVIGATION_TICK_BYTES),
+        skieo_navigation_changed_alternative((void *)tick, SKIEO_NAVIGATION_TICK_BYTES),
+    };
     IMAGE_SECTION_HEADER *sections = IMAGE_FIRST_SECTION(nt);
     if (!nt->FileHeader.NumberOfSections || nt->FileHeader.NumberOfSections > 96
         || !readable_range(sections,
@@ -2872,10 +2874,12 @@ __declspec(dllexport) int skieo_refresh_navigation(void *lua_state)
             || !readable_range(module + start, size)) continue;
         for (size_t offset = 0; offset <= size - SKIEO_NAVIGATION_CHANGED_BYTES; ++offset) {
             uint8_t *candidate = module + start + offset;
-            if (*candidate == expected_changed[0]
-                && !memcmp(candidate, expected_changed, SKIEO_NAVIGATION_CHANGED_BYTES)) {
-                handler = candidate;
-                ++matches;
+            for (size_t k = 0; k < sizeof(expected) / sizeof(*expected); ++k) {
+                if (expected[k] && *candidate == expected[k][0]
+                    && !memcmp(candidate, expected[k], SKIEO_NAVIGATION_CHANGED_BYTES)) {
+                    handler = candidate;
+                    ++matches;
+                }
             }
         }
     }

@@ -13,6 +13,8 @@ TICKS = (
     '48895c24184889742420574883ec60488d71c80f29742450488bd9',
 )
 HANDLERS = ('c6816806000001c6414901c3', 'c6814808000001c6416901c3')
+# Build 26056171 grows the expanded subsystem by 0x18 bytes.
+GROWN_HANDLER = 'c6816008000001c6416901c3'
 
 
 @unittest.skipUnless(shutil.which('cc'), 'C compiler unavailable')
@@ -26,6 +28,9 @@ class NavigationLayoutTests(unittest.TestCase):
 const void *inspect(const unsigned char *tick, size_t size) {
     return skieo_navigation_changed_signature(tick, size);
 }
+const void *inspect_alternative(const unsigned char *tick, size_t size) {
+    return skieo_navigation_changed_alternative(tick, size);
+}
 ''')
         library = folder / 'guard.so'
         subprocess.run(['cc', '-shared', '-fPIC', '-O2', '-Wall', '-Wextra',
@@ -35,21 +40,33 @@ const void *inspect(const unsigned char *tick, size_t size) {
         cls.inspect = cls.library.inspect
         cls.inspect.argtypes = [ctypes.c_void_p, ctypes.c_size_t]
         cls.inspect.restype = ctypes.c_void_p
+        cls.inspect_alternative = cls.library.inspect_alternative
+        cls.inspect_alternative.argtypes = [ctypes.c_void_p, ctypes.c_size_t]
+        cls.inspect_alternative.restype = ctypes.c_void_p
 
     @classmethod
     def tearDownClass(cls):
         cls.temp.cleanup()
 
-    def handler(self, tick):
+    def handler(self, tick, function=None):
         storage = ctypes.create_string_buffer(tick)
-        result = self.inspect(storage, len(tick))
+        result = (function or self.inspect)(storage, len(tick))
         self.assertEqual(storage.raw[:-1], tick)
         return ctypes.string_at(result, 12).hex() if result else None
+
+    def alternative(self, tick):
+        return self.handler(tick, self.inspect_alternative)
 
     def test_each_tick_selects_its_own_handler(self):
         for index, tick in enumerate(TICKS):
             with self.subTest(index=index):
                 self.assertEqual(self.handler(bytes.fromhex(tick)), HANDLERS[index == 2])
+
+    def test_only_the_expanded_tick_accepts_the_grown_handler(self):
+        for index, tick in enumerate(TICKS):
+            with self.subTest(index=index):
+                self.assertEqual(self.alternative(bytes.fromhex(tick)),
+                                 GROWN_HANDLER if index == 2 else None)
 
     def test_changed_tick_or_owner_adjustment_is_rejected(self):
         for tick in map(bytes.fromhex, TICKS):
@@ -57,11 +74,13 @@ const void *inspect(const unsigned char *tick, size_t size) {
                 changed = bytearray(tick)
                 changed[offset] ^= 0x01
                 self.assertIsNone(self.handler(bytes(changed)))
+                self.assertIsNone(self.alternative(bytes(changed)))
 
     def test_truncated_tick_is_rejected(self):
         for tick in map(bytes.fromhex, TICKS):
             for size in range(len(tick)):
                 self.assertIsNone(self.handler(tick[:size]))
+                self.assertIsNone(self.alternative(tick[:size]))
 
 
 if __name__ == '__main__':

@@ -11,6 +11,11 @@ have their own package versions. Download the
 - Include this changelog in the tools and publish a versioned copy with each release.
 - Prepare optional Discord release announcements after HTTPS publication checks,
   with a preview mode and receipts for confirmed messages.
+- Refresh source-terrain navigation on demo build 26056171: the WalkNav
+  subsystem grew by 0x18 bytes, so its terrain-change handler now sets `+0x860`
+  instead of `+0x848` behind the unchanged expanded tick. Every map failed with
+  "navigation terrain-change handler is not unique". The helper accepts both
+  handler signatures for that tick and still requires exactly one match.
 
 ## [1.24.4] - 2026-10-19
 
