@@ -11,6 +11,9 @@ have their own package versions. Download the
 - Include this changelog in the tools and publish a versioned copy with each release.
 - Prepare optional Discord release announcements after HTTPS publication checks,
   with a preview mode and receipts for confirmed messages.
+
+## [1.24.4] - 2026-10-19
+
 - Keep baked ground-cover albedo visible when `terrain.runtime.material_color`
   is set: tint the dynamic instance that carries the terrain textures instead
   of parenting a second instance to it. Maps built with the ground-cover bake
