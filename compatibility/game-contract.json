@@ -1,11 +1,11 @@
 {
   "format": "skieo-compatibility-contract",
   "version": 1,
-  "reference_build": "26019240",
-  "reference_executable_sha256": "209da968636fc41034da8e74805c9419636d446c0a13a2e70dbc706835e9a3e6",
-  "native_helper_sha256": "5fe4384c008ad92f50aab98eab29ff4097aec03972820eb852807f501265d043",
+  "reference_build": "26040817",
+  "reference_executable_sha256": "2aa693e7391fd915233ff8190b3599ce01e598f992fb7f2e1b26b27e9de36f89",
+  "native_helper_sha256": "3e07c3a771fe86fdac68b4bee70f456b47252112375ae811e97e077f07dd552d",
   "native_sources": {
-    "native/SkiEONativeTerrain/native_terrain.c": "4e72c5cb1ddc4ddcf01cec3ecdaa994070df784118c4dce1bf529a05f28c06b0",
+    "native/SkiEONativeTerrain/native_terrain.c": "c711a21e41eca7ad7e4601a2a56d618353fee3708aed2987d35e8e2bb61faacc",
     "native/SkiEONativeTerrain/navigation_layout.h": "ae84782dc0a6c010481db6139bd2d66634b9bf1d1f30b840f2fe759a665ac6ba",
     "native/SkiEONativeTerrain/render_mapping_layout.h": "5cf8d6da07c19a575f2d6a93c54156f4f0af3e6a1a8d4f0e04e7fc654f112ff9",
     "native/SkiEOTrailRatings/trail_ratings.c": "c4d23bbaad05bf966ec018e7ed3204fa683683ea1c2de8ae1e85d5ebb31796b7",
@@ -27,108 +27,108 @@
     "native/SkiEOTrailRatings/rating_colors.h": "da51c09434b7c0bd8e582a56744f2ff059ec28a8c2857bb97e604ec0dc0e26d0",
     "native/SkiEOTrailRatings/rating_resolver.h": "6584711c98840bdaa275e022bc6fd9e84a5e917d6c9734b874ba3be8dcf41eab",
     "tools/trail_rating_profile.py": "7d8eb60d92a0c5e2b09c4ec28375cfe614b5785647efb62b1608bd5dabfe0428",
-    "native/SkiEONativeTerrain/terrain_pads_layout.h": "320cff9e0518fb140dbec2e5391c8639678713e20e67525cc1f9d8588be31d1d"
+    "native/SkiEONativeTerrain/terrain_pads_layout.h": "3de2344e4d359af894cf4dcd3e03c5764c82088c54797836ec1d91a7af820f43"
   },
   "guards": [
     {
       "id": "hubs.building",
-      "rva": "0x4fb04b0",
+      "rva": "0x4fb00f0",
       "bytes": "48895c242055488d6c24a94881ecc0000000",
       "mode": "rva"
     },
     {
       "id": "hubs.lift",
-      "rva": "0x4fb0670",
+      "rva": "0x4fb02b0",
       "bytes": "40555657488dac2450ffffff4881ecb0010000488bf9",
       "mode": "rva"
     },
     {
       "id": "hubs.rebuild",
-      "rva": "0x5049fa0",
+      "rva": "0x504a9a0",
       "bytes": "40574883ec2083b9080b000000488bf9",
       "mode": "rva"
     },
     {
       "id": "hubs.deferred",
-      "rva": "0x50414a0",
-      "bytes": "83b9080b0000000f8ef38a0000c3cccc",
+      "rva": "0x5041ac0",
+      "bytes": "83b9080b0000000f8ed38e0000c3cccc",
       "mode": "rva"
     },
     {
       "id": "staff.regenerate",
-      "rva": "0x53319e0",
+      "rva": "0x5335670",
       "bytes": "4c8bdc41564881eca0050000",
       "mode": "rva"
     },
     {
       "id": "staff.settings",
-      "rva": "0x53319fe",
+      "rva": "0x533568e",
       "bytes": "4883b908050000004c8bf10f8472020000",
       "mode": "rva"
     },
     {
       "id": "skiability.query",
-      "rva": "0x53a6210",
+      "rva": "0x53aa870",
       "bytes": "40555356488d6c24b94881ecb0000000",
       "mode": "rva"
     },
     {
       "id": "skiability.memo",
-      "rva": "0x53a64f2",
+      "rva": "0x53aab52",
       "bytes": "443bbeb401000075270f28c6f30f5c86b8010000",
       "mode": "rva"
     },
     {
       "id": "hub_names.get",
-      "rva": "0x50401e0",
+      "rva": "0x5040800",
       "bytes": "48895c240848896c24104889742418574883ec20488bfa488db1d0010000",
       "mode": "rva"
     },
     {
       "id": "hub_names.insert",
-      "rva": "0x50210f0",
+      "rva": "0x50214e0",
       "bytes": "48895c241048896c24184889742420574883ec40",
       "mode": "rva"
     },
     {
       "id": "hub_names.text",
-      "rva": "0x13499c0",
+      "rva": "0x1349860",
       "bytes": "488bc45741564883ec5848895810",
       "mode": "rva"
     },
     {
       "id": "navigation.tick",
-      "rva": "0x524ea00",
+      "rva": "0x524f140",
       "bytes": "48895c24184889742420574883ec60488d71c80f29742450488bd9",
       "mode": "unique"
     },
     {
       "id": "navigation.changed",
-      "rva": "0x52417b0",
+      "rva": "0x523c760",
       "bytes": "c6814808000001c6416901c3",
       "mode": "unique"
     },
     {
       "id": "snow_cpu.validity",
-      "rva": "0x4f5ac15",
+      "rva": "0x4f83915",
       "bytes": "0fb681a5010000418800",
       "mode": "rva"
     },
     {
       "id": "snow_cpu.lookup",
-      "rva": "0x52eccc0",
+      "rva": "0x52ee090",
       "bytes": "4963c0486bd0384903d2488b0a413bc9",
       "mode": "rva"
     },
     {
       "id": "snow_cpu.mapping",
-      "rva": "0x52eae50",
+      "rva": "0x52ec220",
       "bytes": "f20f1089f80000000f57d2f20f5c89e8000000",
       "mode": "rva"
     },
     {
       "id": "snow_cpu.ready",
-      "rva": "0x52ecf06",
+      "rva": "0x52ee2d6",
       "bytes": "41385424200f84e3fdffff",
       "mode": "rva"
     },
@@ -152,13 +152,13 @@
     },
     {
       "id": "terrain.pads",
-      "rva": "0x4fe0c00",
+      "rva": "0x4fe0ff0",
       "bytes": "40555657488dac2460feffff4881eca0020000",
       "mode": "rva"
     },
     {
       "id": "terrain.pads_cleanup",
-      "rva": "0x4fcbe40",
+      "rva": "0x4fcc230",
       "bytes": "48895c240848896c2410488974241848897c242041564883ec30488b9988030000",
       "mode": "rva"
     }
@@ -197,7 +197,8 @@
     "BuildingActor": {
       "fields": {
         "VariantId": "NameProperty",
-        "MeshComponent": "ObjectProperty"
+        "MeshComponent": "ObjectProperty",
+        "Variants": "ArrayProperty"
       },
       "functions": [
         "ApplyVariant",

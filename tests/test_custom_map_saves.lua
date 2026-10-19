@@ -117,6 +117,24 @@ actor.GetPlaceableId=function()return lift_id end
 position.Z=45;actor.K2_SetActorLocation=function()error('engine refused movement')end
 assert(not pcall(Saves.restore_placeable,actor,entries),'movement failure was ignored')
 assert(root.Mobility==0 and child.Mobility==0,'movement failure left movable components')
+-- Native saves from before the marker rename carry their old variant in
+-- CustomData. Preserve it as plain Lua data and apply its available alias.
+local variant_entries=Saves.read_placeables({Buildings=array({{BaseData=base,
+ CustomData={[str('Variant')]=str('Expert')}}}),Lifts=array({})})
+local building_key=building_id:gsub('[^%x]',''):lower()
+assert(variant_entries[building_key].variant=='Expert','native variant was discarded during world travel')
+local native_map={ForEach=function(_,callback)
+ callback({get=function()return str('Variant')end},{get=function()return str('Expert')end})
+end}
+local native_entries=Saves.read_placeables({Buildings=array({{BaseData=base,CustomData=native_map}}),Lifts=array({})})
+assert(native_entries[building_key].variant=='Expert','reflected native TMap could not be read')
+actor.GetPlaceableId=function()return building_id end
+actor.IsA=function(_,class)return class=='/Game/Blueprints/Decorations/BP_TrailMarkers.BP_TrailMarkers_C' end
+actor.Variants=array({{Id=str('BlackDiamond')}})
+actor.ApplyVariant=function(self,id)self.VariantId=str(id)end
+package.loaded.UEHelpers.FindOrAddFName=function(value)return value end
+Saves.restore_placeable(actor,variant_entries)
+assert(actor.VariantId:ToString()=='BlackDiamond','old native save did not migrate its marker variant')
 for path in pairs(tracked) do os.remove(path) end
 io=actual_io
 print('Custom map saves: fresh identities, persistent association, legacy migration and stock isolation OK')

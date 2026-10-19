@@ -75,8 +75,7 @@ function Scene.place(api,definitions)
             else actor.HubId=definition.hub end
             if definition.variant then
                 assert(actor:IsA('/Script/SkiResortSimulator.BuildingActor'), 'Variants require a BuildingActor')
-                actor:ApplyVariant(UEHelpers.FindOrAddFName(definition.variant))
-                assert(actor.VariantId:ToString()==definition.variant, 'Scene variant unavailable: '..definition.variant)
+                require('building_variants').apply(actor,definition.variant)
             end
             actor:FinalizePlacement()
             -- Finalization can assign a generated label. Keep an empty

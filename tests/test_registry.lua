@@ -60,6 +60,18 @@ local config={repositories={{name="Web",url=origin},{name="Featured",url=origin,
 repository.initialize(config);assert(repository.refresh());pump()
 assert(#repository.entries(config.repositories[1])==1 and #repository.entries(config.repositories[2])==1)
 local combined=repository.merge({});assert(#combined==2,"one registry overwrote the other on the same origin")
+-- Upgrading an existing installation keeps its repositories.json. Both legacy
+-- catalogue URLs must migrate before WinHTTP can see the server's redirects.
+local legacy={repositories={
+    {name="Old community",url="https://skieomap.emillon.fr"},
+    {name="Old featured",url="https://skieomap.emillon.fr",registry_url="https://skieomap.emillon.fr/downloads/featured-maps.json",cache_prefix="featured-"},
+}}
+local previous_requests=#requested
+repository.initialize(legacy);assert(repository.refresh());pump()
+assert(#repository.errors==0 and #repository.merge({})==2,"legacy configuration lost its web catalogues")
+assert(requested[previous_requests+1]==origin.."/api/v1/registry?offset=0")
+assert(requested[previous_requests+2]==origin.."/downloads/featured-maps.json")
+assert(legacy.repositories[1].url==origin and legacy.repositories[2].registry_url==origin.."/downloads/featured-maps.json")
 for _,entry in ipairs(combined) do assert(entry.__web and entry.__remote and entry.__unavailable) end
 repository.initialize(config);assert(#repository.merge({})==2,"separate registry caches were lost offline")
 repository.initialize({repositories={{url="https://skieomap.emillon.fr"}}})

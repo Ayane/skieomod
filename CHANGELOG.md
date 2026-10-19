@@ -12,6 +12,18 @@ have their own package versions. Download the
 - Prepare optional Discord release announcements after HTTPS publication checks,
   with a preview mode and receipts for confirmed messages.
 
+## [1.24.3] - 2026-10-19
+
+- Adapt the guarded native bridges to demo build 26040817: hubs, staff,
+  skiability, geographic names, CPU snow and building terrain pads. Keep the
+  previous reviewed profiles and exact terrain-pad code fingerprints.
+- Resolve legacy trail-marker variants against the native variants available
+  on each build. Preserve Beginner/Intermediate/Expert maps and old native
+  saves after the game's rename to GreenCircle/BlueSquare/BlackDiamond.
+- Cover migration of retained community and featured catalogue URLs from
+  skieomap.emillon.fr to skieomod.emillon.fr. This fixes catalogue refresh for
+  installations still running 1.23.0 when they update the loader.
+
 ## [1.24.2] - 2026-10-18
 
 - Re-register native terrain pads after source terrain and saved placeables

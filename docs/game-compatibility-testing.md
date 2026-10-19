@@ -112,6 +112,8 @@ positions restaurées. Elles restent à vérifier lors d'une nouvelle revue.
 Le [premier rapport du build 26019240](game-update-26019240.md) décrit les
 obstacles de la qualification initiale. La [revue neige de 1.24.2](buildings-snow-26019240.md)
 explique leurs causes, le correctif et la nouvelle qualification.
+La [revue du build 26040817](game-update-26040817.md) décrit les nouveaux
+profils natifs, la migration des panneaux et la qualification de 1.24.3.
 
 ## 2. Contrôles UE4SS dans une copie isolée
 

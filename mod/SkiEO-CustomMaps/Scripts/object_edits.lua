@@ -65,7 +65,7 @@ local function set_value(object, name, value)
     if name=='InstanceName' and object:IsA('/Script/SkiResortSimulator.PlaceableActor') then
         object:SetInstanceName(value)
     elseif name=='VariantId' and object:IsA('/Script/SkiResortSimulator.BuildingActor') then
-        object:ApplyVariant(type(value)=='string' and UEHelpers.FindOrAddFName(value) or value)
+        require('building_variants').apply(object,type(value)=='string' and value or value:ToString())
     else object[name]=value end
 end
 

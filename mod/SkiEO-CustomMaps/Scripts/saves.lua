@@ -118,10 +118,27 @@ function Saves.read_placeables(save)
     local result = {}
     for _, field in ipairs({'Buildings', 'Lifts'}) do
         save[field]:ForEach(function(_, value)
-            local base = unwrap(value).BaseData
+            local saved = unwrap(value)
+            local base = saved.BaseData
             local id = guid_string(base.ID)
             assert(not result[id], 'duplicate saved placeable identifier')
             local entry = {name=base.DisplayName:ToString()}
+            if field == 'Buildings' then
+                local function remember_variant(key, value)
+                    key, value = unwrap(key), unwrap(value)
+                    key = type(key)=='string' and key or key:ToString()
+                    if key == 'Variant' then
+                        value = type(value)=='string' and value or value:ToString()
+                        if value~='' and value~='None' then entry.variant=value end
+                    end
+                end
+                local custom = saved.CustomData
+                if custom and type(custom.ForEach)=='function' then
+                    custom:ForEach(remember_variant)
+                else
+                    for key, value in pairs(custom or {}) do remember_variant(key, value) end
+                end
+            end
             if field == 'Lifts' then
                 local p = base.Transform.Translation
                 entry.position = {X=p.X,Y=p.Y,Z=p.Z}
@@ -141,6 +158,7 @@ function Saves.restore_placeable(actor, entries)
     -- Native LoadFromSaveData replaces an empty label with its type name.
     -- An empty saved label is still intentional and must survive a roundtrip.
     actor:SetInstanceName(FText(entry.name))
+    if entry.variant then require('building_variants').apply(actor,entry.variant) end
     if not entry.position then return end
     local location = actor:K2_GetActorLocation()
     if math.abs(location.X-entry.position.X) < 0.001

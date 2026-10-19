@@ -141,12 +141,15 @@ return function(runtime,spec_path)
                 remember(a,variant)
                 result.variants[variant]=(result.variants[variant] or 0)+1
                 if class:find('BP_TrailMarkers',1,true) then
-                    local color=({Beginner='Green',Intermediate='Blue',Expert='Black'})[variant]
+                    local color=({Beginner='Green',Intermediate='Blue',Expert='Black',
+                        GreenCircle='Green',BlueSquare='Blue',BlackDiamond='Black',
+                        DblBlackDiamond='Black_Double',BlueCircle='Green',RedCircle='Green',
+                        BlackCircle='Green',OrangeRectangle='Orange'})[variant]
                     local mesh=a.MeshComponent.StaticMesh:GetFullName()
                     if not color or not mesh:find('sm_prop_TrailMarker_'..color..'.',1,true) then
                         result.mesh_mismatches=result.mesh_mismatches+1
                     end
-                    if variant~='Beginner' and variant~='Intermediate' and variant~='Expert' then
+                    if not color then
                         result.invalid_marker_variants=result.invalid_marker_variants+1
                     end
                     -- This inspects native serialization only. It is not a
