@@ -14,8 +14,9 @@ local R=require('runtime')
 local start=R.start
 local local_map={id='test.local',metadata={name='Local'},__featured=true,__update={}}
 local started,installs={},0
-R.start=function(map)
+R.start=function(map,options)
     assert(loading.active and loading.map.id==map.id,'world loading did not continue acquisition screen')
+    R.started_options=options
     started[#started+1]=map;return true
 end
 local completion,progress
@@ -36,7 +37,9 @@ tick()
 assert(result=='ready' and #started==1 and installs==0 and not R.pending_play)
 assert(R.dependency_status(local_map),'an optional update prevented offline playback')
 local remote={id='test.remote',metadata={name='Remote'},__unavailable=true,__featured=true}
-assert(R.play(remote))
+local sandbox_options={seed=123,day_length=2,days_per_month=3,sandbox=true}
+assert(R.play(remote,nil,false,sandbox_options))
+sandbox_options.sandbox=false
 tick();assert(installs==1 and loading.active and #started==1)
 progress('Downloading map…',0.5)
 assert(loading.stage=='Downloading map…' and loading.fraction>0)
@@ -44,6 +47,7 @@ local downloaded={id=remote.id,metadata=remote.metadata}
 R.maps={local_map,downloaded};R.selected_index=1
 completion()
 assert(started[2]==downloaded and loading.active and not R.pending_play,'download launched the changed selection')
+assert(R.started_options.sandbox and R.started_options.days_per_month==3,'download lost the captured game options')
 assert(R.play(remote,function(failure) result=failure end));tick()
 completion('offline')
 assert(result=='offline' and not loading.active and #started==2 and not R.pending_play)

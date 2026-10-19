@@ -50,3 +50,8 @@ e.balance,e.ticket_price=12345,42
 H.action({_restoring=true},'configure',{currency='CHF',start_year=2003,starting_balance=250000,ticket_price=38})
 assert(e.balance==12345 and e.ticket_price==42,'scenario configuration overwrote a saved balance or ticket price')
 print('Scenario host: world isolation, single financial entry, unfunded purchases, deficits and game counter compatibility OK')
+local balance,expenses=e.balance,e.expenses
+assert(H.action({_sandbox=true},'charge',800000,1,true))
+assert(e.balance==balance and e.expenses==expenses,'sandbox charged a scripted scenario purchase')
+assert(H.action({_sandbox=true},'installation','scenario.lift',{disabled=true,no_refund=true}),
+    'sandbox reapplied scripted installation restrictions')

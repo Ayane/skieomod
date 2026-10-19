@@ -86,6 +86,17 @@ function Theme.button_style(button, color, hover, radius)
     button:SetBackgroundColor(Theme.colors.white)
     button:SetColorAndOpacity(Theme.colors.white)
 end
+function Theme.badge(canvas,tree,label,source,x,y,width,height)
+    local border=Theme.border(tree,Theme.colors.blueprint,5,Theme.colors.edge)
+    Theme.place(canvas,border,x,y,width,height)
+    border:SetPadding({Left=10,Top=2,Right=10,Bottom=2})
+    local text=Theme.text(tree,label,source,14,Theme.colors.white)
+    text:SetAutoWrapText(false)
+    local slot=border:AddChild(text)
+    slot:SetHorizontalAlignment(0)
+    slot:SetVerticalAlignment(2)
+    return border
+end
 function Theme.button(tree, label, source_button, source_text, color, size, text_color)
     local button = Theme.construct("Button",tree)
     -- Start with the constructed style rather than copying a native style
@@ -179,6 +190,11 @@ function Theme.icon(canvas,tree,kind,source,x,y,size,color)
             local following=points[index%#points+1]
             line(point[1],point[2],following[1],following[2],2)
         end
+    elseif kind=="downloaded" then
+        line(0.12,0.52,0.39,0.8,2.5);line(0.39,0.8,0.9,0.18,2.5)
+    elseif kind=="web" then
+        Theme.place(icon,Theme.border(tree,{R=0,G=0,B=0,A=0},size/2,color),0,0,size,size)
+        line(0.05,0.5,0.95,0.5,1.5);line(0.5,0.05,0.5,0.95,1.5)
     elseif kind=="local" then
         Theme.place(icon,Theme.border(tree,color,2),0,size*0.08,size,size*0.65)
         Theme.place(icon,Theme.border(tree,Theme.colors.row,1),size*0.1,size*0.18,size*0.8,size*0.44)

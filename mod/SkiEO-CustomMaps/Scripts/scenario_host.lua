@@ -79,7 +79,7 @@ local function configure(api,options)
         if options.starting_balance then assert(finite(options.starting_balance));e:SetBalance(options.starting_balance) end
         if options.ticket_price then e:SetTicketPrice(options.ticket_price) end
     end
-    if options.loans then
+    if options.loans and not api._sandbox then
         local settings=e:GetSettings()
         assert(valid(settings) and valid(settings.LoanTiersTable),'loan settings unavailable')
         local loans,sizing={},{}
@@ -116,7 +116,7 @@ local function configure(api,options)
     end
     -- DataTable rows drive purchase previews, affordability, construction and
     -- recurring costs. Restore shared rows before another map uses them.
-    if options.costs then
+    if options.costs and not api._sandbox then
         local table_asset=subsystem('SkiResortGameMode'):GetBuildingEconomyTable()
         assert(valid(table_asset),'building economy table unavailable')
         local restores={}
@@ -136,7 +136,7 @@ local function configure(api,options)
             end
         end)
     end
-    if options.class_costs then
+    if options.class_costs and not api._sandbox then
         local function apply()
             for _,actor in ipairs(FindAllOf('PlaceableActor') or {}) do
                 if current(actor) then
@@ -238,7 +238,12 @@ end
 function Host.action(api,name,...)
     if name=='configure' then return configure(api,...) end
     if name=='snapshot' then return Host.snapshot(api) end
-    if name=='charge' then return charge(...) end
+    if name=='charge' then
+        local amount=...
+        assert(finite(amount) and amount>=0 and amount%1==0,'charge must be a nonnegative integer')
+        if api._sandbox then return true end
+        return charge(...)
+    end
     if name=='revenue' then
         local amount=...
         assert(finite(amount) and amount>=0 and amount%1==0,'invalid revenue')
@@ -259,7 +264,12 @@ function Host.action(api,name,...)
         end
         return list
     end
-    if name=='installation' then return installation(...) end
+    if name=='installation' then
+        -- A scenario's maintenance model must not close lifts, lock demolition
+        -- or reapply operating costs in a sandbox game.
+        if api._sandbox then return true end
+        return installation(...)
+    end
     if name=='place_resort' then return place_resort(api,...) end
     if name=='hub_names' then return hub_names(api,...) end
     if name=='trail_rating_system' then return require('trail_ratings').set(api,...) end

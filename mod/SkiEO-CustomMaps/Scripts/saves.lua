@@ -81,7 +81,7 @@ function Saves.read_state(save, map)
     return value.state
 end
 local function valid(object) return object and object:IsValid() end
-function Saves.prepare_new(map)
+function Saves.prepare_new(map,options)
     -- UE 5.8 GameSessionSubsystem's no-request path resumes the last resort.
     -- Clearing the reflected scenario/initial-save pointers alone still takes
     -- that path. Select native New Game explicitly before world travel.
@@ -97,6 +97,7 @@ function Saves.prepare_new(map)
     end
     local session = FindFirstOf('GameSessionSubsystem')
     assert(valid(session), 'game session is unavailable')
+    if options then require('game_options').stage(session,options) end
     session.SkiEOPendingLoadSlot = ''
     session.PendingInitialSave,session.PendingScenario = nil,nil
     session.SkiEOPendingResortName = map.metadata.name
@@ -277,7 +278,7 @@ function Saves.find_restore(maps)
             end
             assert(not result or result.map == map, 'ambiguous pending custom-map saves')
             result = {map=map,guid=guid,legacy=not id,script_state=Saves.read_state(save,map),
-                placeables=Saves.read_placeables(save)}
+                placeables=Saves.read_placeables(save),sandbox=save.bSandboxMode==true}
         end
     end
     if result then Saves.bind(result.guid, result.map) end

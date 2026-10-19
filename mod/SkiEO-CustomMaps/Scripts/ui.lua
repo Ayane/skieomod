@@ -2,6 +2,7 @@ local WorkshopView = require("workshop_view")
 local Presentation = require("map_presentation")
 local Theme = require("ui_theme")
 local Assets = require("ui_assets")
+local GameOptions = require("game_options")
 local C = Theme.colors
 -- Runtime UMG adapter for the native New Game dialog.  The game builds its
 -- widgets in C++, so the loader adds standard UMG children after Construct.
@@ -99,7 +100,9 @@ local function fill_slot(slot)
     if is_a(slot, "/Script/UMG.CanvasPanelSlot") then
         slot:SetAnchors({ Minimum = { X = 0.0, Y = 0.0 }, Maximum = { X = 1.0, Y = 1.0 } })
         slot:SetOffsets({ Left = 0.0, Top = 0.0, Right = 0.0, Bottom = 0.0 })
-        pcall(function() slot:SetZOrder(1000) end)
+        -- Native OptionsBackdrop is at 500. Keep both injected layers above
+        -- normal content and below the modal so it owns rendering and input.
+        pcall(function() slot:SetZOrder(10) end)
     else
         pcall(function() slot:SetHorizontalAlignment(0) end)
         pcall(function() slot:SetVerticalAlignment(0) end)
@@ -315,6 +318,7 @@ end
 
 local function select_native_tab(screen,selected)
     show_screen(screen,false)
+    if valid(screen.owner.MapSizeRow) then screen.owner.MapSizeRow:SetVisibility(0) end
     for _,tab in ipairs(screen.native_tabs) do
         local active=tab.button:GetAddress()==selected:GetAddress()
         Theme.button_style(tab.button,active and C.selected or C.row)
@@ -406,29 +410,48 @@ local function rebuild_list(screen)
             Theme.button_style(button,C.row)
             box:AddChild(button)
             local row=construct("/Script/UMG.CanvasPanel",screen.tree)
-            button:AddChild(row)
+            local row_slot=button:AddChild(row)
+            row_slot:SetHorizontalAlignment(0)
+            row_slot:SetVerticalAlignment(0)
             row:SetVisibility(4)
+            row:SetClipping(1)
             local texture=preview_texture(screen,map)
             if not Assets.picture(row,screen.tree,texture,8,7,72,52) then
                 Theme.place(row,Theme.border(screen.tree,C.ice,6),8,7,72,52)
                 Theme.icon(row,screen.tree,"mountain",screen.text_style,27,13,33,C.navy)
             end
-            local title=Theme.label(row,screen.tree,WorkshopView.title(map)..(map.__featured and " [Featured]" or map.__workshop and " [Workshop]" or (map.__web or map.__remote) and " [Web]" or " [Local]"),
+            local title=Theme.label(row,screen.tree,WorkshopView.title(map),
                 screen.heading_style,16,C.navy,94,9,203,23)
             title:SetAutoWrapText(false);title:SetTextOverflowPolicy(1)
             local card=Presentation.card(map,item_state(map))
             local subtitle=Theme.label(row,screen.tree,card.location,screen.text_style,14,C.muted,94,35,203,24)
             subtitle:SetAutoWrapText(false);subtitle:SetTextOverflowPolicy(1)
-            Theme.icon(row,screen.tree,map.__featured and "featured" or map.__workshop and "workshop" or "local",screen.text_style,302,23,21,C.navy)
+            local downloaded=map.__read and (map.__web or map.__remote or map.__featured or map.__workshop)
+            for _,text in ipairs({title,subtitle}) do
+                text.Slot:SetAnchors({Minimum={X=0,Y=0},Maximum={X=1,Y=0}})
+                local top=text==title and 9 or 35
+                text.Slot:SetOffsets({Left=94,Top=top,Right=downloaded and 68 or 40,Bottom=24})
+            end
+            local function row_icon(kind,offset,color)
+                local icon=Theme.icon(row,screen.tree,kind,screen.text_style,0,0,18,color)
+                icon.Slot:SetAnchors({Minimum={X=1,Y=0.5},Maximum={X=1,Y=0.5}})
+                icon.Slot:SetAlignment({X=1,Y=0.5})
+                icon.Slot:SetPosition({X=-offset,Y=0})
+                return icon
+            end
+            local source_icon=row_icon(map.__featured and "featured" or map.__workshop and "workshop"
+                or (map.__web or map.__remote) and "web" or "local",12,C.navy)
+            local installed_icon=downloaded and row_icon("downloaded",38,C.green) or nil
             bind_button(button,function() select_map(screen,index) end)
-            screen.rows[#screen.rows+1]={button=button,index=index,title=title,subtitle=subtitle}
+            screen.rows[#screen.rows+1]={button=button,index=index,title=title,subtitle=subtitle,
+                source_icon=source_icon,installed_icon=installed_icon}
             local key=map.__workshop and map.__workshop.published_file_id or map.id
             if key==screen.selected_key or (not screen.selected_key and index==UI.runtime.selected_index) then selected=index end
         end
     end
     screen.scroll:ScrollToStart()
     if #screen.rows==0 then
-        screen.list:AddChild(Theme.text(screen.tree,"No matching items.\nTry another search or source,\nor refresh maps.",screen.text_style,17,C.muted))
+        screen.list:AddChild(Theme.text(screen.tree,"No matching items.\nTry another search or source.",screen.text_style,17,C.muted))
         screen.selected_index,screen.selected_key,UI.runtime.selected_index=nil,nil,nil
         update_details(screen,nil)
         build_wireframe(screen,nil)
@@ -517,9 +540,7 @@ local function build_screen(owner,tree,root,scenario_button,scenario_text,screen
     screen.marker:SetRenderTransformPivot({X=0.5,Y=0.5})
     screen.marker:SetRenderTransformAngle(45)
     screen.marker_slot=Theme.place(map_frame,screen.marker,0,0,14,14)
-    local map_badge=Theme.border(tree,C.blueprint,5,C.edge)
-    Theme.place(map_frame,map_badge,12,10,115,28)
-    map_badge:AddChild(Theme.text(tree,"Region Map",screen.text_style,14,C.white))
+    Theme.badge(map_frame,tree,"Region Map",screen.text_style,12,10,130,30)
 
     local wire_frame=Theme.card(body,tree,372,263,420,223,C.row)
     Theme.place(wire_frame,Theme.border(tree,C.blueprint,5),7,7,406,209)
@@ -532,17 +553,15 @@ local function build_screen(owner,tree,root,scenario_button,scenario_text,screen
     Theme.place(wire_frame,screen.wire_canvas,8,8,404,207)
     screen.wire_canvas:SetClipping(1)
     screen.wire_empty=Theme.label(wire_frame,tree,"Terrain preview available for installed maps",screen.text_style,16,C.row,42,96,340,55)
-    local wire_badge=Theme.border(tree,C.blueprint,5,C.edge)
-    Theme.place(wire_frame,wire_badge,12,10,145,28)
-    wire_badge:AddChild(Theme.text(tree,"Terrain Preview",screen.text_style,14,C.white))
+    Theme.badge(wire_frame,tree,"Terrain Preview",screen.text_style,12,10,165,30)
 
     local info=Theme.card(body,tree,806,14,376,472,C.paper)
     screen.detail_title=Theme.label(info,tree,"",screen.heading_style,30,C.navy,28,20,320,44)
     screen.detail_title:SetAutoWrapText(false);screen.detail_title:SetTextOverflowPolicy(1)
-    screen.detail_subtitle=Theme.label(info,tree,"",screen.text_style,14,C.muted,28,67,320,24)
-    screen.detail_credits=Theme.label(info,tree,"",screen.text_style,14,C.muted,28,91,320,42)
+    screen.detail_credits=Theme.label(info,tree,"",screen.text_style,14,C.navy,28,67,320,42)
+    screen.detail_subtitle=Theme.label(info,tree,"",screen.text_style,14,C.muted,28,111,320,24)
     screen.details_scroll=construct("/Script/UMG.ScrollBox",tree)
-    Theme.place(info,screen.details_scroll,28,137,320,118)
+    Theme.place(info,screen.details_scroll,28,147,320,108)
     screen.details=Theme.text(tree,"",screen.text_style,16,Theme.color("665F56"))
     screen.details_scroll:AddChild(screen.details)
     Theme.line(info,tree,28,267,348,267,C.edge)
@@ -566,12 +585,14 @@ local function build_screen(owner,tree,root,scenario_button,scenario_text,screen
     Theme.place(body,back,24,525,175,51)
     Theme.icon(body,tree,"back",screen.text_style,44,541,21,C.navy)
     bind_button(back,function() show_screen(screen,false);owner:OnCancelClicked() end)
-    local refresh=Theme.button(tree,"Refresh maps",scenario_button,screen.text_style,C.row,17,C.navy)
-    Theme.place(body,refresh,229,525,256,51)
-    Theme.icon(body,tree,"workshop",screen.text_style,246,536,28,C.navy)
-    bind_button(refresh,function()
-        UI.runtime.refresh_workshop(UI.refresh)
-        screen.status:SetText(FText(UI.runtime.workshop.message))
+    local options=Theme.button(tree,"Options",scenario_button,screen.text_style,C.row,18,C.navy)
+    screen.options_button=options
+    Theme.place(body,options,229,525,175,51)
+    bind_button(options,function()
+        -- Portable terrain keeps its authored dimensions. Native diorama
+        -- generation applies to stock maps, so omit that row for Custom Map.
+        if valid(owner.MapSizeRow) then owner.MapSizeRow:SetVisibility(1) end
+        owner:OnOptionsToggleClicked()
     end)
     local workshop,workshop_text=Theme.button(tree,"Workshop page ↗",scenario_button,screen.text_style,C.row,16,C.navy)
     screen.workshop_button,screen.workshop_text=workshop,workshop_text
@@ -580,11 +601,13 @@ local function build_screen(owner,tree,root,scenario_button,scenario_text,screen
         local map=screen.selected_index and UI.runtime.selected()
         if map and map.__update then
             screen.play_error=nil
+            local accepted,options=pcall(GameOptions.capture,owner)
+            if not accepted then screen.play_error=tostring(options);screen.status:SetText(FText(screen.play_error));return end
             UI.runtime.play(map,function(failure)
                 UI.refresh()
                 screen.play_error=failure
                 if failure then screen.status:SetText(FText(failure)) end
-            end,true)
+            end,true,options)
             return
         end
         if map then UI.runtime.workshop.open(map) end
@@ -620,11 +643,13 @@ local function build_screen(owner,tree,root,scenario_button,scenario_text,screen
         local map=screen.selected_index and UI.runtime.selected()
         if not map then return end
         screen.play_error=nil
+        local accepted,options=pcall(GameOptions.capture,owner)
+        if not accepted then screen.play_error=tostring(options);screen.status:SetText(FText(screen.play_error));return end
         UI.runtime.play(map,function(failure)
             UI.refresh()
             screen.play_error=failure
             if failure then screen.status:SetText(FText(failure)) end
-        end)
+        end,false,options)
         -- Keep Custom Map underneath the loading screen until level travel.
         -- Restoring the native tabs here exposes the classic menu for a frame.
     end)
@@ -695,6 +720,7 @@ local function inject(owner)
             end
         else rebuild_list(screen) end
         show_screen(screen, true)
+        if UI.runtime.refresh_catalog_if_due then UI.runtime.refresh_catalog_if_due(UI.refresh) end
     end)
     -- Restore the native content on press, before its native click handler
     -- changes World/Scenarios visibility.
@@ -724,7 +750,15 @@ local function scan_dialogs()
     -- Update live state without rebuilding hundreds of widgets while Steam is
     -- downloading. This function already runs on the game thread.
     for _, screen in pairs(UI.screens) do
+        if valid(screen.owner) and screen.owner:IsInViewport() then
+            local modal=screen.owner.OptionsModalRoot
+            local visibility=valid(modal) and modal:GetVisibility() or 1
+            local blocked=visibility~=1 and visibility~=2
+            if valid(screen.tab_view) then screen.tab_view:SetIsEnabled(not blocked) end
+            if valid(screen.view) then screen.view:SetIsEnabled(not blocked) end
+        end
         if valid(screen.owner) and valid(screen.start_button) and screen.visible and screen.owner:IsInViewport() then
+            if UI.runtime.refresh_catalog_if_due then UI.runtime.refresh_catalog_if_due(UI.refresh) end
             local query=widget_text(screen.search) or ""
             if query~=screen.query then screen.query=query;rebuild_list(screen) end
             local entry=screen.selected_index and UI.runtime.selected()

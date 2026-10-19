@@ -19,8 +19,17 @@ local function new_dialog()
     owner.KeyTitleText=Mock.object("TextBlock",tree)
     owner.DescriptionText=Mock.object("TextBlock",tree)
     owner.NameInput=Mock.object("EditableTextBox",tree)
+    for name,value in pairs({SeedInput='1234',DayLengthValueText='1x',DaysPerMonthValueText='1',SandboxStateText='Off'}) do
+        owner[name]=Mock.object('TextBlock',tree);owner[name]:SetText(value)
+    end
     owner.WorldSheetTexture=Mock.object("Texture2D")
     owner.OnCancelClicked=function(self) self.cancelled=true end
+    owner.OptionsModalRoot=Mock.object('Border',tree);owner.RootCanvas:AddChild(owner.OptionsModalRoot)
+    owner.OptionsModalRoot:SetVisibility(1);owner.OptionsModalRoot.Slot:SetZOrder(500)
+    owner.OnOptionsToggleClicked=function(self)
+        self.options_open=not self.options_open
+        self.OptionsModalRoot:SetVisibility(self.options_open and 0 or 1)
+    end
     return owner,native,band,tabs
 end
 local owner,native,band,tabs=new_dialog()
@@ -36,10 +45,10 @@ end,
 runtime.browse_items=function() return runtime.browse_kind=="mod" and {} or runtime.maps end
 runtime.selected=function() return runtime.selected_index and runtime.browse_items()[runtime.selected_index] end
 local refreshes=0
-runtime.refresh_workshop=function() refreshes=refreshes+1;return false end
+runtime.refresh_catalog_if_due=function() if refreshes==0 then refreshes=refreshes+1 end;return false end
 runtime.dependency_status=function() return true end
 runtime.start=function(map) runtime.started=map;return true end
-runtime.play=function(map,callback) runtime.start(map);callback();return true end
+runtime.play=function(map,callback,update,options) runtime.last_options=options;runtime.start(map);callback();return true end
 local UI=require("ui")
 local editor_urls={}
 local can_launch=true
@@ -56,7 +65,18 @@ UI.refresh();assert(#Mock.objects==tab_objects,'hidden Custom Map built its prev
 Mock.emit(screen.custom_button,"OnClicked")
 assert(#screen.rows==3 and screen.detail_title.text=="Alpine Playground")
 assert(screen.terrain_text.text=="Terrain: 1.00 × 2.00 km")
-assert(refreshes==0,'opening Custom Map contacted the network')
+assert(refreshes==1,'opening Custom Map did not check the catalogue')
+assert(screen.detail_credits.text=='By A','map author missing below the title')
+local row_content=screen.rows[1].button:GetChildAt(0)
+assert(row_content.Slot.horizontal_alignment==0 and row_content.Slot.vertical_alignment==0,
+    'responsive list row collapsed to its thumbnail instead of filling its button')
+assert(screen.tab_view.Slot.z_order<500 and screen.view.Slot.z_order<500,'Custom Map covers native Options')
+Mock.emit(screen.options_button,'OnClicked')
+Mock.loop()
+assert(owner.options_open and screen.visible,'Options did not preserve Custom Map selection')
+assert(not screen.view.enabled and not screen.tab_view.enabled,'modal left underlying gamepad controls enabled')
+Mock.emit(screen.options_button,'OnClicked');Mock.loop()
+assert(screen.view.enabled and screen.tab_view.enabled,'closing Options did not restore controls')
 assert(screen.visible and native:GetVisibility()==1 and band:GetVisibility()==1)
 Mock.emit(screen.editor_button,'OnClicked')
 assert(#editor_urls==1 and editor_urls[1]=='skieomod://editor' and not runtime.started)
@@ -101,7 +121,10 @@ runtime.workshop.busy=true;Mock.loop()
 assert(screen.start_button.enabled and screen.rows[1].button.enabled,'refresh locked browsing or Play')
 runtime.workshop.busy=false
 screen.search:SetText("Alpine");Mock.loop()
+owner.SandboxStateText:SetText("On")
 Mock.emit(screen.start_button,"OnClicked")
+assert(runtime.last_options.sandbox and runtime.last_options.seed==1234)
+owner.SandboxStateText:SetText("Off")
 assert(runtime.started==maps[1] and screen.visible and native:GetVisibility()==1,'Play uncovered the classic menu')
 Mock.emit(screen.custom_button,"OnClicked")
 local back
@@ -120,7 +143,7 @@ runtime.play=function(map,callback)
     installs=installs+1;callback(nil);return true
 end
 UI.refresh()
-assert(screen.rows[1].title.text:find("[Featured]",1,true))
+assert(screen.rows[1].title.text==maps[1].metadata.name)
 Mock.emit(screen.custom_button,"OnClicked")
 runtime.started=nil
 Mock.emit(screen.start_button,"OnClicked")
@@ -144,8 +167,10 @@ screen.search:SetText("");Mock.loop()
 maps[1].__read=function() return "" end
 maps[2].__read=function() return "" end
 maps[1].__web=true
-Mock.emit(screen.source_buttons["local"],"OnClicked");assert(#screen.rows==2)
+Mock.emit(screen.source_buttons["local"],"OnClicked");assert(#screen.rows==1 and screen.rows[1].index==2)
 Mock.emit(screen.source_buttons.web,"OnClicked");assert(#screen.rows==1 and screen.rows[1].index==1)
+assert(screen.rows[1].installed_icon,'downloaded web map has no installed indicator')
+assert(screen.rows[1].source_icon.Slot.anchors.Minimum.X==1,'source icon is not anchored inside the row')
 screen.search:SetText("Nordic");Mock.loop();assert(#screen.rows==0 and not screen.start_button.enabled)
 Mock.emit(screen.source_buttons.all,"OnClicked");assert(#screen.rows==1 and screen.rows[1].index==2)
 screen.search:SetText("Alpine");Mock.loop()

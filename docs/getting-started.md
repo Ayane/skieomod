@@ -12,6 +12,15 @@ Workshop becomes available, and helps you create, test and publish your own proj
 The default website is https://skieomod.emillon.fr; the old skieomap hostname redirects there.
 Browse published maps directly in **New Game → Custom Map**, using the
 **All / Local / Web / Steam** filters and search.
+**Local** contains local projects and manually installed maps. Downloaded web
+maps stay in **Web**, with a check mark. The catalogue refreshes automatically
+on opening and every five minutes while browsing; cached maps remain available
+when the server cannot be reached.
+
+Open **Options** before **Play** to select sandbox, day length and days per month.
+Sandbox removes native costs, unlocks everything and disables achievements;
+custom scenario objectives and scripted charges are disabled too. The mode is
+retained in native saves. Custom terrain keeps the dimensions authored by its creator.
 Web publication uses `skieomod publish PROJECT` and a token from
 https://skieomod.emillon.fr/account; see the [publication guide](custom-map-repository.md).
 

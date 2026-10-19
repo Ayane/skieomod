@@ -57,11 +57,11 @@ int inspect_cleanup(const uint8_t *data, size_t size, uint32_t rva) {
 
     def test_unknown_code_and_truncated_snapshots_are_refused(self):
         raw = ctypes.create_string_buffer(0x828)
-        for rva in (0x4fe0ff0, 0x4fe0c00, 0x4fdf110, 0, 0x4fe0c01):
+        for rva in (0x4fe0f70, 0x4fe0ff0, 0x4fe0c00, 0x4fdf110, 0, 0x4fe0c01):
             for size in range(0x829):
                 self.assertFalse(self.inspect(raw, size, rva))
         self.assertEqual(raw.raw, bytes(len(raw)))
-        for rva in (0x4fcc230, 0x4fcbe40, 0x4fca360, 0):
+        for rva in (0x4fcc020, 0x4fcc230, 0x4fcbe40, 0x4fca360, 0):
             for size in range(0x10c):
                 self.assertFalse(self.inspect_cleanup(raw, size, rva))
 
@@ -93,7 +93,7 @@ int inspect_cleanup(const uint8_t *data, size_t size, uint32_t rva) {
                 self.assertFalse(self.inspect(raw, len(code), rva), hex(offset))
                 raw[offset] = bytes([code[offset]])
             self.assertEqual(raw.raw[:-1], code)
-            cleanup_rva = {0x4fe0ff0: 0x4fcc230, 0x4fe0c00: 0x4fcbe40, 0x4fdf110: 0x4fca360}[rva]
+            cleanup_rva = {0x4fe0f70: 0x4fcc020, 0x4fe0ff0: 0x4fcc230, 0x4fe0c00: 0x4fcbe40, 0x4fdf110: 0x4fca360}[rva]
             code = PEImage(path.read_bytes()).read(cleanup_rva, 0x10b)
             raw = ctypes.create_string_buffer(code)
             self.assertTrue(self.inspect_cleanup(raw, len(code), cleanup_rva))

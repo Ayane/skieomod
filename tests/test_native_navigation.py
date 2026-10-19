@@ -10,9 +10,11 @@ ROOT = Path(__file__).resolve().parents[1]
 TICKS = (
     '48895c2418564883ec30488d71c8',
     '40534883ec300f29742420488bd948897424400f28f1488d71c8',
-    '48895c24184889742420574883ec60488d71c80f29742450488bd9',
+    '48895c24184889742420574883ec60488d71c80f29742450488bd9' + '00' * 34 + 'c7836805000000000000',
+    '48895c24184889742420574883ec60488d71c80f29742450488bd9' + '00' * 34 + 'c7837005000000000000',
 )
-HANDLERS = ('c6816806000001c6414901c3', 'c6814808000001c6416901c3')
+HANDLERS = ('c6816806000001c6414901c3', 'c6816806000001c6414901c3',
+            'c6814808000001c6416901c3', 'c6816008000001c6416901c3')
 
 
 @unittest.skipUnless(shutil.which('cc'), 'C compiler unavailable')
@@ -49,11 +51,11 @@ const void *inspect(const unsigned char *tick, size_t size) {
     def test_each_tick_selects_its_own_handler(self):
         for index, tick in enumerate(TICKS):
             with self.subTest(index=index):
-                self.assertEqual(self.handler(bytes.fromhex(tick)), HANDLERS[index == 2])
+                self.assertEqual(self.handler(bytes.fromhex(tick)), HANDLERS[index])
 
     def test_changed_tick_or_owner_adjustment_is_rejected(self):
         for tick in map(bytes.fromhex, TICKS):
-            for offset in range(len(tick)):
+            for offset in list(range(min(27, len(tick)))) + (list(range(61, 71)) if len(tick) == 71 else []):
                 changed = bytearray(tick)
                 changed[offset] ^= 0x01
                 self.assertIsNone(self.handler(bytes(changed)))

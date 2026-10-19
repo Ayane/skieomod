@@ -377,6 +377,7 @@ function Runtime.refresh()
                         entries[index] = package
                     elseif existing.__manifest_path == package.__manifest_path then
                         existing.__workshop = package.__workshop or existing.__workshop
+                        existing.__web = package.__web or existing.__web
                     end
                     found = true; break
                 end
@@ -421,6 +422,16 @@ function Runtime.refresh_workshop(callback)
             if callback then execute_in_game_thread(callback) end
         end)
     end)
+end
+
+-- Browsing uses the cached catalogue immediately. Check at most once every
+-- five minutes, including after failures, and never compete with a download.
+function Runtime.refresh_catalog_if_due(callback)
+    local now = os.time()
+    if Runtime.catalog_busy() or Runtime.pending_play
+        or now < (Runtime.next_catalog_refresh or 0) then return false end
+    Runtime.next_catalog_refresh = now + 300
+    return Runtime.refresh_workshop(callback)
 end
 
 function Runtime.install_map(map, callback, progress)
@@ -756,7 +767,7 @@ host.loading_finished = function(api, success, message)
     end)
 end
 
-local function activate_map(map, restoring)
+local function activate_map(map, restoring, sandbox)
     local dependencies_ok, dependencies = pcall(Versions.resolve, map, Runtime.mods)
     if not dependencies_ok then log(dependencies) return nil end
     for _, mod in ipairs(dependencies) do
@@ -782,6 +793,7 @@ local function activate_map(map, restoring)
     Runtime.active_map = map
     Runtime.active_api = Api.new(host, map)
     Runtime.active_api._restoring = restoring or false
+    Runtime.active_api._sandbox = sandbox or false
     Runtime.active_api._persistent = Runtime.pending_script_state
     Runtime.pending_script_state = nil
     Runtime.active_script = nil
@@ -870,7 +882,7 @@ function Runtime.restore(saved)
         return
     end
     Runtime.pending_script_state = saved.script_state
-    local api = assert(activate_map(map,true), 'could not activate saved custom map')
+    local api = assert(activate_map(map,true,saved.sandbox), 'could not activate saved custom map')
     api._saved_placeables = saved.placeables
     Loading.show(map)
     Runtime.emit("map.before_load", {restored=true})
@@ -881,7 +893,7 @@ function Runtime.restore(saved)
     log("restoring independent world for " .. map.id .. (saved.legacy and " (legacy save)" or ""))
 end
 
-function Runtime.start(map)
+function Runtime.start(map,options)
     map = map or Runtime.selected()
     if not map then log("no custom map is selected") return false end
     if map.__unavailable then log("wait for the map and required mods to finish downloading") return false end
@@ -889,7 +901,8 @@ function Runtime.start(map)
     local verified,failure=verify_installed_map(map)
     if not verified then return false,failure end
     map=verified
-    local api = activate_map(map,false)
+    options=require('game_options').validate(options)
+    local api = activate_map(map,false,options.sandbox)
     if not api then return false end
 
     execute_in_game_thread(function()
@@ -898,7 +911,7 @@ function Runtime.start(map)
             Loading.show(map)
             Runtime.emit("map.before_load")
             clear_pending_session()
-            Saves.prepare_new(map)
+            Saves.prepare_new(map,options)
             World.prepare(map, log, function(failure)
                 api:_finish_loading(false, failure)
             end)
@@ -940,10 +953,11 @@ end
 
 -- One loading screen owns acquisition and world initialization. Installed maps
 -- with their required mods take the local path, even during a catalogue refresh.
-function Runtime.play(map, callback, update)
+function Runtime.play(map, callback, update, options)
     map = map or Runtime.selected()
     if not map or map.format and map.format.name == "skieo-mod" then return false end
     if Runtime.pending_play or Runtime.active_api and not Runtime.active_api._loading_finished then return false end
+    options=require('game_options').validate(options)
     local pending = {map=map}
     Runtime.pending_play = pending
     execute_in_game_thread(function()
@@ -951,7 +965,7 @@ function Runtime.play(map, callback, update)
         local function finish(failure, installed)
             if Runtime.pending_play ~= pending then return end
             if not failure then
-                local started,reason=Runtime.start(installed or map)
+                local started,reason=Runtime.start(installed or map,options)
                 if not started then failure=reason or "Could not start the custom map" end
             end
             Runtime.pending_play = nil

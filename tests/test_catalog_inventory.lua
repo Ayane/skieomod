@@ -34,3 +34,12 @@ cached_mods={entry('test.tools','2.0.0','/mods/tools-2')}
 Runtime.refresh()
 assert(#Runtime.mods==2,'map de-duplication removed a required mod version')
 print('Catalogue inventory: logical map identity, latest version, selection and mod versions OK')
+local installed=entry('test.downloaded','1.0.0','/mods/repository-test.downloaded-1.0.0.skieomap')
+installed.__read=function() end
+local provenance=entry(installed.id,'1.0.0',installed.__manifest_path)
+provenance.__web=true
+local_maps,cached_maps={installed},{provenance}
+Runtime.refresh()
+assert(#Runtime.maps==1 and Runtime.maps[1].__web,'discovery lost downloaded web provenance')
+local P=require('map_presentation')
+assert(P.source_matches(Runtime.maps[1],'web') and not P.source_matches(Runtime.maps[1],'local'))

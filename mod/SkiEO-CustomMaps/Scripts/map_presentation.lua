@@ -8,7 +8,7 @@ function Presentation.definition(entry)
     return type(value)=="table" and value or {}
 end
 function Presentation.card(entry,state)
-    if not entry then return {title="No map selected",subtitle="",description="Refresh Workshop or build a local project.",
+    if not entry then return {title="No map selected",subtitle="",description="Browse the web catalogue or build a local project.",
         terrain="—",elevation="—",trails="—",lifts="—",difficulties={}} end
     local metadata,item=entry.metadata or {},entry.__workshop
     local definition=Presentation.definition(entry)
@@ -16,8 +16,9 @@ function Presentation.card(entry,state)
         location=entry.location and entry.location.label or (entry.__featured and "Featured map" or item and "Steam Workshop" or (entry.__web or entry.__remote) and "Web map" or "Local map"),
         subtitle=entry.__featured and (entry.__read and "Featured · package "..(metadata.version or "") or "Featured · download on Play")
             or item and "Steam Workshop" or (entry.__web or entry.__remote) and (entry.__read and "Web · package "..(metadata.version or "") or "Web · download on Play") or "Local development · package "..(metadata.version or ""),
-        credits=item and ("Publisher: "..(item.owner_name or item.owner_steam_id or "Steam community"))
-            or "Credits: "..table.concat(metadata.authors or {},", "),
+        credits=#(metadata.authors or {})>0 and ("By "..table.concat(metadata.authors,", "))
+            or item and ("Publisher: "..(item.owner_name or item.owner_steam_id or "Steam community"))
+            or "Author not specified",
         description=item and item.description or metadata.description or "",
         terrain="—",elevation="—",trails="—",lifts="—",difficulties={},
         workshop_details=item and WorkshopView.details(entry,state) or nil}
@@ -42,7 +43,8 @@ function Presentation.card(entry,state)
 end
 function Presentation.source_matches(entry,source)
     if not source or source=="all" then return true end
-    if source=="local" then return not not entry.__read end
+    if source=="local" then return not not entry.__read
+        and not (entry.__web or entry.__remote or entry.__featured or entry.__workshop) end
     if source=="web" then return not not (entry.__web or entry.__remote or entry.__featured) end
     if source=="workshop" then return entry.__workshop~=nil end
     return false

@@ -17,8 +17,15 @@ Le catalogue communautaire utilise l’API web du projet, alimentée par
 `skieomod publish`. Les filtres All / Local / Web / Steam et la recherche
 sont intégrés au menu. Steam Workshop reste en préparation. Les cartes Featured du
 projet utilisent `https://skieomod.emillon.fr/downloads/featured-maps.json`.
-Le menu utilise les métadonnées locales et mises en cache ; **Refresh maps**
-actualise le catalogue sans bloquer la sélection ni les cartes installées.
+Le menu utilise les métadonnées locales et mises en cache. Le catalogue est
+actualisé automatiquement à l’ouverture, puis au plus toutes les cinq minutes
+pendant la consultation, sans bloquer la sélection ni les cartes installées.
+Les cartes web téléchargées restent dans **Web**, avec une coche ; **Local**
+regroupe les projets locaux et les cartes installées manuellement.
+**Options** ouvre les réglages natifs : sandbox, durée du jour et jours par mois.
+Le sandbox supprime les coûts et déverrouille tout, désactive les succès ainsi
+que les objectifs et dépenses des scénarios scriptés. Les sauvegardes natives
+conservent ce mode. Les terrains gardent leurs dimensions d’origine.
 **Play** lance directement une carte et ses dépendances déjà présentes, sans
 requête réseau. Les archives manquantes sont téléchargées et vérifiées par
 SHA-256 dans l’écran de chargement, avant la création du monde. Les mises à jour

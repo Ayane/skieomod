@@ -10,6 +10,18 @@ x86_64-w64-mingw32-gcc -shared -O2 -s -Wall -Wextra \
 
 Terrain diagnostics and supported layouts are documented in [terrain-runtime-debugging.md](../../docs/terrain-runtime-debugging.md).
 
+Build 26056171 moves the hub batching counter to `+0xB10` and changes the
+navigation work counter and terrain dirty flag. The navigation resolver now
+checks the counter instruction as well as its prologue before choosing the
+paired terrain-change handler. Older reviewed profiles remain supported.
+
+`skieo_stage_game_options` accepts a bounded `SKGO` v1 request containing the
+game-session address and class, seed, day-length scale, days per month and
+sandbox flag. It checks the session class and an exact, unique executable
+signature of the native request assignment before writing the reviewed fields.
+Lua additionally checks the reflected session anchors. Portable tests verify
+the signature, rejection paths, write bounds and preservation of adjacent state.
+
 The Lua loader now checks reflected terrain, Landscape, placement and session
 anchors before staging a world or registering private properties. It obtains
 field addresses through UE4SS `ContainerPtrToValuePtr` on default objects, without

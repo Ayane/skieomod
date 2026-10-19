@@ -12,6 +12,22 @@ have their own package versions. Download the
 - Prepare optional Discord release announcements after HTTPS publication checks,
   with a preview mode and receipts for confirmed messages.
 
+## [1.24.5] - 2026-10-19
+
+- Adapt the reviewed native profiles to demo build 26056171, including the
+  changed hub batching counter and navigation layout. Keep previous profiles.
+- Add native Options to Custom Map: sandbox, day length and days per month.
+  Capture settings before downloads and preserve sandbox mode in native saves.
+  Sandbox disables scripted scenario objectives and charges as well as native costs.
+- Refresh web catalogues automatically on opening the browser and every five
+  minutes while browsing. Keep cached maps available offline; remove Refresh maps.
+- Keep downloaded web and Featured maps in Web, with an installed check mark;
+  reserve Local for local projects and manually installed maps.
+- Keep Custom Map and the shared tabs below the native Options modal. Pad
+  preview captions, anchor row icons within their cards and show the author
+  directly below the map title.
+- Credit ReymanHG in the documentation, CLI help and website for the 1.24.4 fixes.
+
 ## [1.24.4] - 2026-10-19
 
 - Keep baked ground-cover albedo visible when `terrain.runtime.material_color`

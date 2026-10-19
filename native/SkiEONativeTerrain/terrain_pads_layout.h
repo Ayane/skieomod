@@ -23,7 +23,8 @@ static int skieo_terrain_pads_matches(const uint8_t *code, size_t size,
                                     uint32_t rva)
 {
     if (size < SKIEO_TERRAIN_PADS_BYTES) return 0;
-    uint64_t expected = rva == 0x4FE0FF0 ? UINT64_C(0x836BFA5102F90B48)
+    uint64_t expected = rva == 0x4FE0F70 ? UINT64_C(0x7BAAABDF7939B880)
+        : rva == 0x4FE0FF0 ? UINT64_C(0x836BFA5102F90B48)
         : rva == 0x4FE0C00 ? UINT64_C(0x0879A1D98812E619)
         : rva == 0x4FDF110 ? UINT64_C(0xE916A3448ECA3D54) : 0;
     return expected && skieo_terrain_pads_hash(code, SKIEO_TERRAIN_PADS_BYTES) == expected;
@@ -33,7 +34,8 @@ static int skieo_terrain_pads_cleanup_matches(const uint8_t *code, size_t size,
                                             uint32_t rva)
 {
     if (size < SKIEO_TERRAIN_PADS_CLEANUP_BYTES) return 0;
-    uint64_t expected = rva == 0x4FCC230 ? UINT64_C(0x2CC68335B006FA28)
+    uint64_t expected = rva == 0x4FCC020 ? UINT64_C(0x36BC6A519E3F4B78)
+        : rva == 0x4FCC230 ? UINT64_C(0x2CC68335B006FA28)
         : rva == 0x4FCBE40 ? UINT64_C(0xD5CE2DE6D6D72363)
         : rva == 0x4FCA360 ? UINT64_C(0x334861B36D7EC8FA) : 0;
     return expected && skieo_terrain_pads_hash(code, SKIEO_TERRAIN_PADS_CLEANUP_BYTES) == expected;

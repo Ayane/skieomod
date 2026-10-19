@@ -120,6 +120,7 @@ function Api:scenario(definition)
         and type(definition.objectives) == 'table' and #definition.objectives > 0
         and #definition.objectives <= 4, 'scenario needs a title and one to four objectives')
     local session = self._session or self
+    if session._sandbox then return false end
     session._scenario = definition
 end
 

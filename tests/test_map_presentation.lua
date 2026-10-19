@@ -38,5 +38,5 @@ assert(P.matches(remote,"Steam","workshop") and not P.matches(remote,"","local")
 local web={id="author.web",metadata={name="Web Valley",description="Snow",authors={"Creator"}},__remote={}}
 assert(P.matches(web,"Creator","web") and not P.matches(web,"Snow","local"))
 web.__read=function() end
-assert(P.matches(web,"author.web","local") and P.matches(web,"valley","web"))
+assert(not P.matches(web,"author.web","local") and P.matches(web,"valley","web"))
 assert(not P.matches(web,"","unknown"))

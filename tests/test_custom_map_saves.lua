@@ -47,6 +47,10 @@ end
 objects={saved(fresh)}
 local restored=Saves.find_restore({other,map})
 assert(restored.map==map and not restored.legacy,'saved map identity followed selection order')
+objects[1].bSandboxMode=true
+assert(Saves.find_restore({other,map}).sandbox,'native save lost sandbox mode')
+objects[1].bSandboxMode=false
+assert(not Saves.find_restore({other,map}).sandbox,'normal save acquired sandbox mode')
 assert(not pcall(Saves.find_restore,{other}),'missing saved map was replaced silently')
 assert(not pcall(Saves.bind,guid,other),'association was overwritten')
 local legacy='55555555-66666666-77777777-88888888'

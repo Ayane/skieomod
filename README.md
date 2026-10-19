@@ -27,21 +27,28 @@ installs UE4SS and the Custom Map loader.
 Open **New Game → Custom Map** to browse and search maps in the game:
 
 - **All** combines the available sources.
-- **Local** shows maps available on disk, including downloaded maps.
-- **Web** shows published community maps and Featured maps.
+- **Local** shows local projects and manually installed maps.
+- **Web** shows published community maps and Featured maps, including downloaded
+  maps marked with a check.
 - **Steam** is reserved for the Workshop adapter and installed Steam content.
 
 Select a map and press **Play** to download missing content and required
 mapmods. Downloads are checked against the catalogue's SHA-256 and manifest.
-Downloaded maps remain playable offline. Refresh discovers optional updates;
-locally authored files are preserved.
+Downloaded maps remain playable offline. The catalogue is checked automatically
+when the browser opens, then at most once every five minutes while browsing.
+Map updates remain optional; locally authored files are preserved.
+
+Use **Options** before **Play** to choose sandbox, day length and days per month.
+Sandbox removes costs and unlocks everything, disables achievements and skips
+scripted scenario objectives and charges. Native saves retain the selected mode.
+Portable maps keep their authored terrain dimensions.
 
 Try [Veymont](mod/SkiEO-Veymont/README.md), based on real Vercors terrain, or
 [Super Saint-Bernard](mod/SkiEO-SuperSaintBernard/README.md), a historical
 resort scenario. Game updates can require compatibility fixes; see the
 [compatibility protocol](docs/game-compatibility-testing.md).
-The [26019240 report](docs/game-update-26019240.md) records native fixes and
-remaining rendering failures; this game build has not passed full qualification.
+The [26056171 report](docs/game-update-26056171.md) records the current demo
+qualification, native fixes, sandbox options and browser checks.
 
 ## Create and publish
 

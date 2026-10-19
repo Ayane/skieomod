@@ -114,6 +114,8 @@ obstacles de la qualification initiale. La [revue neige de 1.24.2](buildings-sno
 explique leurs causes, le correctif et la nouvelle qualification.
 La [revue du build 26040817](game-update-26040817.md) décrit les nouveaux
 profils natifs, la migration des panneaux et la qualification de 1.24.3.
+La [revue du build 26056171](game-update-26056171.md) couvre les nouveaux profils,
+les options de sandbox et les contrôles du navigateur de 1.24.5.
 
 ## 2. Contrôles UE4SS dans une copie isolée
 
