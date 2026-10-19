@@ -128,6 +128,9 @@ assert(World.active.sky.LightComponent.Cubemap and World.active.sky.LightCompone
 assert(not World.active.sky.LightComponent.bRealTimeCapture and not World.active.sky.LightComponent.bLowerHemisphereIsBlack)
 assert(World.active.lighting.SunLight and World.active.lighting.MoonLight
     and World.active.lighting.SkyLight==World.active.sky,'native lighting references are incomplete')
+-- The sky light is a static daylight cubemap at intensity 3: the night value must stay below it.
+assert(World.active.lighting.SkyLightIntensity_Night and World.active.lighting.SkyLightIntensity_Night < 3,
+    'night sky light would make nights brighter than noon')
 assert(not World.matches(map),'old world matched before travel completed')
 current = world
 assert(World.matches(map) and World.state(map).map == map)

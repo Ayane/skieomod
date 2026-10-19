@@ -15,6 +15,10 @@ have their own package versions. Download the
   is set: tint the dynamic instance that carries the terrain textures instead
   of parenting a second instance to it. Maps built with the ground-cover bake
   (which writes a white tint) showed only the material's default speckle.
+- Keep nights dark in the independent world: lower the environment controller's
+  night sky-light intensity from its stock 9 to 0.5. The stock value offsets a
+  captured night sky on cooked maps; with the static daylight cubemap it made
+  nights brighter than noon.
 
 ## [1.24.3] - 2026-10-19
 
