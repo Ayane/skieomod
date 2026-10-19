@@ -3,6 +3,10 @@
 Par **Albatar (Élie Millon)**. Le [guide anglais](getting-started.md) présente
 l’installation et les premiers essais avec Veymont, carte Featured du même auteur.
 
+Contributions de **[ReymanHG](https://github.com/ReymanHG)** : corrections des
+textures du sol et de l’éclairage nocturne, publiées dans la version 1.24.4.
+Voir les [crédits du projet](https://github.com/Ayane/skieomod#credits).
+
 `skieomod` crée et teste des cartes, des mods UE4SS et des `mapmod`. Steam
 Workshop est le catalogue de cartes/mods prévu pour la sortie du jeu. Avant
 son ouverture, les créateurs et testeurs utilisent aussi la CLI pour installer

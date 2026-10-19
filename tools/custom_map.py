@@ -184,7 +184,9 @@ Use skieomod help COMMAND or skieomod COMMAND --help for details.
 Projects include a README and guides in docs/. Python 3.10+ is required.
 Local creation, builds and Workshop preparation work without a Steamworks client.
 Remote Workshop commands require a separately supplied native Steamworks client.
-Custom Maps and the Featured Veymont map: Albatar (Élie Millon).''')
+Custom Maps and the Featured Veymont map: Albatar (Élie Millon).
+Contributions: ReymanHG (ground-cover textures and night lighting).
+Credits: https://github.com/Ayane/skieomod#credits''')
     parser.add_argument("--version", action="version", version="skieomod " + VERSION)
     parser.add_argument('--steam-client', type=Path, help='native Steamworks client executable implementing the Workshop JSON protocol')
     commands = parser.add_subparsers(dest="command", title='commands', metavar='COMMAND')

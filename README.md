@@ -106,3 +106,14 @@ Generated releases, game exports, personal test projects and credentials do
 not belong in the public source tree. The loader's small native DLLs are
 included for installation; their source is in `native/`. Map source data and
 tutorial exercise assets are included under the licenses documented alongside them.
+
+## Credits
+
+- [Albatar (Élie Millon / Ayane)](https://github.com/Ayane): project creator and
+  maintainer; Custom Maps, `skieomod` and Veymont.
+- [ReymanHG](https://github.com/ReymanHG): fixes for baked ground-cover textures
+  ([#1](https://github.com/Ayane/skieomod/pull/1)) and night lighting
+  ([#2](https://github.com/Ayane/skieomod/pull/2)), released in 1.24.4.
+
+Dependencies and map data are credited in [third-party notices](THIRD_PARTY_NOTICES.md)
+and in the licenses and credits shipped with each map or mapmod.

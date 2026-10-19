@@ -2,6 +2,10 @@
 
 By **Albatar (Élie Millon)**.
 
+Contributions by **[ReymanHG](https://github.com/ReymanHG)**: fixes for ground-cover
+textures and night lighting, released in 1.24.4. See the
+[project credits](https://github.com/Ayane/skieomod#credits).
+
 Custom Maps adds playable custom maps and Lua mods to **Ski-E-O!**. The
 `skieomod` command-line tool installs the loader, keeps it updated before Steam
 Workshop becomes available, and helps you create, test and publish your own projects.

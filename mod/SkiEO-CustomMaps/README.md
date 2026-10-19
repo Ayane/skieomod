@@ -3,6 +3,9 @@
 Par **Albatar (Élie Millon)**. La distribution inclut le guide anglais
 `getting-started.md`. Veymont, du même auteur, est proposée comme carte Featured.
 
+Contributions de **[ReymanHG](https://github.com/ReymanHG)** : corrections des
+textures du sol et de l’éclairage nocturne, publiées dans la version 1.24.4.
+
 Chargeur générique de cartes personnalisées pour la démo de Ski-E-O!.
 Le protocole de compatibilité vérifie les ponts natifs, le rendu et les
 sauvegardes à chaque mise à jour du jeu ; voir `docs/game-compatibility-testing.md`.
