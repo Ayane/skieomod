@@ -67,6 +67,11 @@ game revision is reported as unverified, so you can check for a compatible
 release before testing a map. `skieomod update --check` downloads only the small
 release manifest, without downloading the loader ZIP.
 
+Custom Map also shows a warning above the browser when the running executable
+does not match a qualified build, or its version cannot be verified. This check
+works offline and lists the supported Steam build. After a game update, check
+for a new mod release before starting a custom map.
+
 If you installed CLI 1.6 or earlier, repeat the installation command once: the
 expanded example needs CLI 1.7 or later. Close the game, then run:
 

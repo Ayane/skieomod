@@ -24,6 +24,44 @@ static void status(const wchar_t *name, const char *message) {
     FILE *file = _wfopen(temporary, L"wb");
     if (file) { fputs(message, file); fclose(file); MoveFileExW(temporary, path, MOVEFILE_REPLACE_EXISTING | MOVEFILE_WRITE_THROUGH); }
 }
+/* Hash the running executable once, off the game thread. No Steam session,
+   network access or private game memory is needed for build recognition. */
+static volatile LONG identity_started;
+static DWORD WINAPI game_identity_worker(void *unused) {
+    (void)unused;
+    wchar_t path[32768];
+    unsigned char buffer[65536], digest[32];
+    char result[68] = "ok ";
+    BCRYPT_ALG_HANDLE algorithm = NULL;
+    BCRYPT_HASH_HANDLE hash = NULL;
+    FILE *file = NULL;
+    const char *failure = "error: cannot identify game executable";
+    DWORD length = GetModuleFileNameW(NULL, path, 32768);
+    if (!length || length >= 32768) goto done;
+    file = _wfopen(path, L"rb");
+    if (!file || BCryptOpenAlgorithmProvider(&algorithm, BCRYPT_SHA256_ALGORITHM, NULL, 0)
+        || BCryptCreateHash(algorithm, &hash, NULL, 0, NULL, 0, 0)) goto done;
+    size_t count;
+    while ((count = fread(buffer, 1, sizeof(buffer), file)) != 0)
+        if (BCryptHashData(hash, buffer, (ULONG)count, 0)) goto done;
+    if (ferror(file) || BCryptFinishHash(hash, digest, sizeof(digest), 0)) goto done;
+    for (unsigned i = 0; i < 32; ++i) sprintf(result + 3 + i * 2, "%02x", digest[i]);
+    failure = result;
+done:
+    if (file) fclose(file);
+    if (hash) BCryptDestroyHash(hash);
+    if (algorithm) BCryptCloseAlgorithmProvider(algorithm, 0);
+    status(L"game_identity.status", failure);
+    return 0;
+}
+__declspec(dllexport) int skieo_game_identity(void *state) {
+    (void)state;
+    if (InterlockedCompareExchange(&identity_started, 1, 0) != 0) return 0;
+    HANDLE worker = CreateThread(NULL, 0, game_identity_worker, NULL, 0, NULL);
+    if (worker) CloseHandle(worker);
+    else status(L"game_identity.status", "error: cannot start game version check");
+    return 0;
+}
 static uint32_t crc32_bytes(const unsigned char *data, size_t size) {
     uint32_t table[256], crc = 0xffffffffU;
     for (uint32_t n = 0; n < 256; n++) {

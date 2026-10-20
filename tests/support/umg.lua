@@ -89,6 +89,7 @@ function Methods:SetRenderTransformPivot(value) self.pivot=copy(value) end
 function Methods:SetRenderTransformAngle(value) self.angle=value end
 function Methods:SetWidthOverride(value) self.width=value end
 function Methods:SetHeightOverride(value) self.height=value end
+function Methods:ForceLayoutPrepass() self.layout_prepasses=(self.layout_prepasses or 0)+1 end
 function Methods:SetClipping(value) self.clipping=value end
 function Methods:SetStretch(value) self.stretch=value end
 function Methods:SetAutoWrapText(value) self.wrap=value end

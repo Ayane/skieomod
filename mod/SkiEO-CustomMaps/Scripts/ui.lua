@@ -3,6 +3,8 @@ local Presentation = require("map_presentation")
 local Theme = require("ui_theme")
 local Assets = require("ui_assets")
 local GameOptions = require("game_options")
+local GameVersion = require("game_version")
+local VersionWarning = require("ui_version_warning")
 local C = Theme.colors
 -- Runtime UMG adapter for the native New Game dialog.  The game builds its
 -- widgets in C++, so the loader adds standard UMG children after Construct.
@@ -461,6 +463,10 @@ local function rebuild_list(screen)
     select_map(screen,selected or screen.rows[1].index)
 end
 
+local function update_version_warning(screen)
+    VersionWarning.update(screen,GameVersion.poll())
+end
+
 local function build_screen(owner,tree,root,scenario_button,scenario_text,screen)
     screen.button_style=scenario_button
     screen.text_style=valid(owner.DescriptionText) and owner.DescriptionText or scenario_text
@@ -474,7 +480,12 @@ local function build_screen(owner,tree,root,scenario_button,scenario_text,screen
     UI.pending_views[owner:GetAddress()]=view
     fill_slot(add_child(root,view))
     local canvas=Theme.scaled(view,tree,0.145,0.305,0.86,0.922,1200,590)
-    local body=Theme.card(canvas,tree,0,0,1200,590,C.ice)
+    local browser=construct("/Script/UMG.CanvasPanel",tree)
+    Theme.place(canvas,browser,0,0,1200,590)
+    local body=Theme.card(browser,tree,0,0,1200,590,C.ice)
+    screen.browser_body,screen.browser_size=browser,canvas:GetParent()
+    VersionWarning.create(screen,canvas,tree)
+    update_version_warning(screen)
     Theme.icon(body,tree,"mountain",screen.text_style,28,10,30,C.navy)
     screen.list_title=Theme.label(body,tree,"CUSTOM MAPS",screen.heading_style,22,C.navy,68,16,240,31)
     local kind_button,kind_text=Theme.button(tree,"Mods",scenario_button,screen.text_style,C.row,14,C.navy)
@@ -751,6 +762,7 @@ local function scan_dialogs()
     -- downloading. This function already runs on the game thread.
     for _, screen in pairs(UI.screens) do
         if valid(screen.owner) and screen.owner:IsInViewport() then
+            update_version_warning(screen)
             local modal=screen.owner.OptionsModalRoot
             local visibility=valid(modal) and modal:GetVisibility() or 1
             local blocked=visibility~=1 and visibility~=2
@@ -802,6 +814,7 @@ end
 
 function UI.install(runtime)
     UI.runtime = runtime
+    GameVersion.poll()
     if UI.hook_installed then return end
     UI.hook_installed = true
     local ok, message = pcall(function()

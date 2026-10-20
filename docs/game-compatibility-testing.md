@@ -116,6 +116,8 @@ La [revue du build 26040817](game-update-26040817.md) décrit les nouveaux
 profils natifs, la migration des panneaux et la qualification de 1.24.3.
 La [revue du build 26056171](game-update-26056171.md) couvre les nouveaux profils,
 les options de sandbox et les contrôles du navigateur de 1.24.5.
+La [revue du build 26071000](game-update-26071000.md) décrit les relocalisations
+de 1.24.6 et l’avertissement de version dans Custom Map.
 
 ## 2. Contrôles UE4SS dans une copie isolée
 

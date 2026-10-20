@@ -10,6 +10,9 @@ ABI, without linking against UE4SS internals or a separate Lua runtime.
   loading screen to display download progress without blocking the game thread.
 - `skieo_inflate`: validates a bounded raw Deflate member and CRC using miniz,
   then writes the result. The Lua fallback supports the same ZIP methods.
+- `skieo_game_identity`: hashes the running executable with BCrypt on a separate
+  worker, once per process. Lua compares its SHA-256 with qualified builds to
+  display the Custom Map version warning, including when offline.
 
 Build on Linux with MinGW:
 

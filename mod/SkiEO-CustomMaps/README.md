@@ -140,3 +140,9 @@ Les cartes peuvent définir leurs images de sol dans `terrain.textures`
 `albedo` est appliqué au sol ; les autres canaux se relient aux paramètres
 d'un matériau compatible par `terrain.runtime.texture_parameters`.
 La forêt portable suit l'état du bouton de masquage natif des arbres.
+
+Custom Map warns above the browser when the running game executable is not a
+qualified build, or its version cannot be verified. For 1.24.6, the qualified
+Steam demo build is 26071000. Update the mod at https://skieomod.emillon.fr.
+The check runs once in the background and works offline. Existing native
+compatibility guards remain active when starting a map.

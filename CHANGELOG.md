@@ -12,6 +12,17 @@ have their own package versions. Download the
 - Prepare optional Discord release announcements after HTTPS publication checks,
   with a preview mode and receipts for confirmed messages.
 
+## [1.24.6] - 2026-10-20
+
+- Support Steam demo build 26071000 after reviewing the relocated native
+  bridges for hubs, staff, skiability, geographic names, snow and terrain pads.
+  Retain earlier profiles and exact code guards.
+- Show a warning above Custom Map when the running executable does not match
+  a qualified build. Check its SHA-256 once in the background, including offline;
+  an unavailable check remains explicitly unverified.
+- Keep the warning hidden during construction and prepare its text and layout
+  before showing it, avoiding a briefly empty panel above the browser.
+
 ## [1.24.5] - 2026-10-19
 
 - Adapt the reviewed native profiles to demo build 26056171, including the
