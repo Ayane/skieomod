@@ -25,3 +25,6 @@ include tests/check_skieomod_distribution.py
 include deployment/publish_loader_updates.py
 include deployment/release_custom_map.py
 include deployment/discord_releases.py
+include mod/SkiEO-CustomMaps/Scripts/skieo_update_bootstrap.dll
+include mod/SkiEO-CustomMaps/Scripts/skieo_updater.exe
+recursive-include native/SkiEOUpdater *.c *.h *.sh *.md

@@ -75,6 +75,7 @@ local function fetch(url, maximum, sha, callback, progress)
     queue[#queue + 1] = {url = url, maximum = maximum, sha = sha, callback = callback, progress=progress}
     run_next()
 end
+Repository.fetch = fetch
 local function validate_release(release, origin)
     assert(type(release) == "table" and type(release.id) == "string" and release.id:match("^[a-z0-9]+[._-][a-z0-9._-]+$") and #release.id <= 120, "invalid repository package id")
     assert(release.kind == "map" or release.kind == "mod", "invalid package kind")

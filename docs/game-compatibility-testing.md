@@ -256,3 +256,7 @@ supprimée, un rapport ancien ou incomplet, un crash, une perte d'objet après G
 des GUID remplacés et un mauvais maillage de variante. Ils vérifient aussi la
 séparation des sauvegardes et des chemins de mods. Ils ne remplacent pas la
 qualification réelle du build installé.
+
+La [revue du build 26097896](game-update-26097896.md) documente la qualification
+avec 1.24.7 et les essais du téléchargement, de l’installation différée et de la
+récupération des mises à jour automatiques.

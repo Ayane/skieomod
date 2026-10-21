@@ -5,6 +5,7 @@ local Assets = require("ui_assets")
 local GameOptions = require("game_options")
 local GameVersion = require("game_version")
 local VersionWarning = require("ui_version_warning")
+local LoaderUpdate = require("loader_update")
 local C = Theme.colors
 -- Runtime UMG adapter for the native New Game dialog.  The game builds its
 -- widgets in C++, so the loader adds standard UMG children after Construct.
@@ -464,7 +465,8 @@ local function rebuild_list(screen)
 end
 
 local function update_version_warning(screen)
-    VersionWarning.update(screen,GameVersion.poll())
+    local version=GameVersion.poll()
+    VersionWarning.update(screen,version,LoaderUpdate.poll(version,UI.runtime))
 end
 
 local function build_screen(owner,tree,root,scenario_button,scenario_text,screen)
@@ -485,6 +487,7 @@ local function build_screen(owner,tree,root,scenario_button,scenario_text,screen
     local body=Theme.card(browser,tree,0,0,1200,590,C.ice)
     screen.browser_body,screen.browser_size=browser,canvas:GetParent()
     VersionWarning.create(screen,canvas,tree)
+    bind_button(screen.version_warning_restart,function()LoaderUpdate.restart(UI.runtime,owner)end)
     update_version_warning(screen)
     Theme.icon(body,tree,"mountain",screen.text_style,28,10,30,C.navy)
     screen.list_title=Theme.label(body,tree,"CUSTOM MAPS",screen.heading_style,22,C.navy,68,16,240,31)
@@ -762,7 +765,9 @@ local function scan_dialogs()
     -- downloading. This function already runs on the game thread.
     for _, screen in pairs(UI.screens) do
         if valid(screen.owner) and screen.owner:IsInViewport() then
-            update_version_warning(screen)
+            -- Tabs exist before the browser is built on first use.
+            -- Its warning widgets must not be polled during that interval.
+            if valid(screen.view) and not screen.build_failed and valid(screen.version_warning) then update_version_warning(screen) end
             local modal=screen.owner.OptionsModalRoot
             local visibility=valid(modal) and modal:GetVisibility() or 1
             local blocked=visibility~=1 and visibility~=2

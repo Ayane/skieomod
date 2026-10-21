@@ -12,6 +12,20 @@ have their own package versions. Download the
 - Prepare optional Discord release announcements after HTTPS publication checks,
   with a preview mode and receipts for confirmed messages.
 
+## [1.24.7] - 2026-10-21
+
+- Support Steam demo build 26097896, including the revised lift registration,
+  hub batching counter and larger native staff candidate records. Retain strict
+  entry-point guards and complete terrain-pad fingerprints.
+- Automatically check for newer official mod releases from the unsupported-game
+  warning while at the main menu. Download and verify the
+  release automatically, then offer **Restart game** to install and relaunch.
+  Normal exit installs without relaunching; files remain untouched while playing.
+- Back up changed code, preserve maps/settings/saves, reject altered downloads
+  and recover an interrupted installation before gameplay hooks are loaded.
+- Avoid polling warning widgets before the Custom Map browser is constructed.
+  Populate progress text and layout before showing the warning or restart button.
+
 ## [1.24.6] - 2026-10-20
 
 - Support Steam demo build 26071000 after reviewing the relocated native

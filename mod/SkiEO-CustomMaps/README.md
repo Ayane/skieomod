@@ -142,7 +142,16 @@ d'un matériau compatible par `terrain.runtime.texture_parameters`.
 La forêt portable suit l'état du bouton de masquage natif des arbres.
 
 Custom Map warns above the browser when the running game executable is not a
-qualified build, or its version cannot be verified. For 1.24.6, the qualified
-Steam demo build is 26071000. Update the mod at https://skieomod.emillon.fr.
+qualified build, or its version cannot be verified. For 1.24.7, the qualified
+Steam demo build is 26097896. See https://skieomod.emillon.fr for installation.
 The check runs once in the background and works offline. Existing native
 compatibility guards remain active when starting a map.
+
+While the warning is shown in the main menu, Custom Map checks automatically for a newer mod. It downloads and verifies the official
+release automatically, without replacing files loaded by the running game.
+**Restart game** closes the game, installs the prepared update and starts the
+same game again. Closing normally also applies the update, without relaunching.
+The update preserves maps, settings and saves, and keeps a backup of changed
+code. Interrupted installation is recovered before gameplay modules load.
+A complete hot reload is unavailable because native DLLs and hooks remain loaded.
+This feature becomes available after installing 1.24.7 with the normal installer.

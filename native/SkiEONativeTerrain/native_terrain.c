@@ -2079,6 +2079,7 @@ __declspec(dllexport) int skieo_register_placeable_hubs(void *lua_state)
         {0x04FB00F0, 0x04FB02B0, 0x0504A9A0, 0xB08}, /* build 26040817 */
         {0x04FAFD20, 0x04FAFEE0, 0x0504A990, 0xB10}, /* build 26056171 */
         {0x04FB02F0, 0x04FB04B0, 0x0504B300, 0xB10}, /* build 26071000 */
+        {0x04FA35B0, 0x04FCD150, 0x0504E0D0, 0xB60}, /* build 26097896 */
     };
     uint32_t building_rva = 0, lift_rva = 0, rebuild_rva = 0, hold_offset = 0;
     static const uint8_t building_signature[] = {
@@ -2096,6 +2097,10 @@ __declspec(dllexport) int skieo_register_placeable_hubs(void *lua_state)
         0x50, 0xFF, 0xFF, 0xFF, 0x48, 0x81, 0xEC, 0xB0,
         0x01, 0x00, 0x00, 0x48, 0x8B, 0xF9,
     };
+    static const uint8_t revised_lift_signature[] = {
+        0x48,0x89,0x5C,0x24,0x18,0x48,0x89,0x7C,0x24,0x20,0x55,
+        0x48,0x8D,0xAC,0x24,0x70,0xFF,0xFF,0xFF,0x48,0x81,0xEC,0x90,0x01,0,0,
+    };
     static const uint8_t rebuild_signature[] = {
         0x40, 0x57, 0x48, 0x83, 0xEC, 0x20, 0x83, 0xB9,
         0x38, 0x08, 0x00, 0x00, 0x00, 0x48, 0x8B, 0xF9,
@@ -2107,12 +2112,14 @@ __declspec(dllexport) int skieo_register_placeable_hubs(void *lua_state)
         memcpy(expected_rebuild, rebuild_signature, sizeof(expected_rebuild));
         expected_rebuild[8] = (uint8_t)profile[3];
         expected_rebuild[9] = (uint8_t)(profile[3] >> 8);
+        const uint8_t *lift_guard = profile[3] == 0xB60 ? revised_lift_signature
+            : profile[3] >= 0xA60 ? expanded_lift_signature : lift_signature;
+        size_t lift_guard_size = profile[3] == 0xB60 ? sizeof(revised_lift_signature) : sizeof(lift_signature);
         if (image_size >= profile[0] + sizeof(building_signature) &&
-            image_size >= profile[1] + sizeof(lift_signature) &&
+            image_size >= profile[1] + lift_guard_size &&
             image_size >= profile[2] + sizeof(rebuild_signature) &&
             memcmp(module + profile[0], building_signature, sizeof(building_signature)) == 0 &&
-            memcmp(module + profile[1], profile[3] >= 0xA60
-                ? expanded_lift_signature : lift_signature, sizeof(lift_signature)) == 0 &&
+            memcmp(module + profile[1], lift_guard, lift_guard_size) == 0 &&
             memcmp(module + profile[2], expected_rebuild, sizeof(expected_rebuild)) == 0) {
             building_rva = profile[0]; lift_rva = profile[1]; rebuild_rva = profile[2];
             hold_offset = profile[3];
@@ -2276,6 +2283,7 @@ __declspec(dllexport) int skieo_rebuild_hubs(void *lua_state)
         {0x0504A9A0, 0x05041AC0, 0xB08, 0x8ED3}, /* build 26040817 */
         {0x0504A990, 0x05041AD0, 0xB10, 0x8EB3}, /* build 26056171 */
         {0x0504B300, 0x05042440, 0xB10, 0x8EB3}, /* build 26071000 */
+        {0x0504E0D0, 0x05045510, 0xB60, 0x8AB3}, /* build 26097896 */
     };
     uint32_t rebuild_wrapper_rva = 0, hold_offset = 0;
     static const uint8_t rebuild_signature[] = {
@@ -2506,6 +2514,9 @@ __declspec(dllexport) int skieo_refresh_staff_pool(void *lua_state)
             {0x48,0x83,0xB9,0x08,0x05,0x00,0x00,0x00,0x4C,0x8B,0xF1,0x0F,0x84,0x72,0x02,0x00,0x00}},
         {0x05338A10, 0x508, 0x4D8, 0x518, 0x688, /* build 26071000 */
             {0x4C,0x8B,0xDC,0x41,0x56,0x48,0x81,0xEC,0xA0,0x05,0x00,0x00},
+            {0x48,0x83,0xB9,0x08,0x05,0x00,0x00,0x00,0x4C,0x8B,0xF1,0x0F,0x84,0x72,0x02,0x00,0x00}},
+        {0x0533DD60, 0x508, 0x4D8, 0x528, 0x688, /* build 26097896 */
+            {0x4C,0x8B,0xDC,0x41,0x56,0x48,0x81,0xEC,0xB0,0x05,0x00,0x00},
             {0x48,0x83,0xB9,0x08,0x05,0x00,0x00,0x00,0x4C,0x8B,0xF1,0x0F,0x84,0x72,0x02,0x00,0x00}},
     };
     if (nt->Signature != IMAGE_NT_SIGNATURE ||
@@ -2939,7 +2950,7 @@ __declspec(dllexport) int skieo_refresh_placeable_pads(void *lua_state)
         if (dos->e_magic == IMAGE_DOS_SIGNATURE && dos->e_lfanew > 0
             && dos->e_lfanew < 0x100000 && readable_range(module + dos->e_lfanew, sizeof(IMAGE_NT_HEADERS64))) {
             IMAGE_NT_HEADERS64 *nt = (IMAGE_NT_HEADERS64 *)(module + dos->e_lfanew);
-            const uint32_t profiles[][2] = {{0x4FE1470, 0x4FCC520}, {0x4FE0F70, 0x4FCC020}, {0x4FE0FF0, 0x4FCC230}, {0x4FE0C00, 0x4FCBE40}, {0x4FDF110, 0x4FCA360}};
+            const uint32_t profiles[][2] = {{0x4FF2D80, 0x4FE0680}, {0x4FE1470, 0x4FCC520}, {0x4FE0F70, 0x4FCC020}, {0x4FE0FF0, 0x4FCC230}, {0x4FE0C00, 0x4FCBE40}, {0x4FDF110, 0x4FCA360}};
             if (nt->Signature == IMAGE_NT_SIGNATURE && nt->OptionalHeader.Magic == IMAGE_NT_OPTIONAL_HDR64_MAGIC) {
                 for (size_t i = 0; i < sizeof(profiles)/sizeof(*profiles); ++i) {
                     uint32_t rva = profiles[i][0], clear_rva = profiles[i][1];
@@ -3007,6 +3018,7 @@ __declspec(dllexport) int skieo_refresh_skiability(void *lua_state)
         {0x053AA870, 0x053AAB52, 0x1B4}, /* build 26040817 */
         {0x053AAC70, 0x053AAF52, 0x1B4}, /* build 26056171 */
         {0x053ADA10, 0x053ADCF2, 0x1B4}, /* build 26071000 */
+        {0x053B2CF0, 0x053B2FD2, 0x1B4}, /* build 26097896 */
     };
     static const uint8_t query[]={0x40,0x55,0x53,0x56,0x48,0x8d,0x6c,0x24,0xb9,0x48,0x81,0xec,0xb0,0,0,0};
     static const uint8_t memo[]={0x44,0x3b,0xbe,0x9c,0x01,0,0,0x75,0x27,0x0f,0x28,0xc6,0xf3,0x0f,0x5c,0x86,0xa0,0x01,0,0};
@@ -3060,6 +3072,7 @@ __declspec(dllexport) int skieo_name_hubs(void *lua_state)
         {0x05040800, 0x050214E0, 0x01349860}, /* build 26040817 */
         {0x050407F0, 0x050214B0, 0x01349820}, /* build 26056171 */
         {0x05041160, 0x05021DF0, 0x01349820}, /* build 26071000 */
+        {0x05044340, 0x05027810, 0x01349B60}, /* build 26097896 */
     };
     static const uint8_t get[]={0x48,0x89,0x5c,0x24,0x08,0x48,0x89,0x6c,0x24,0x10,0x48,0x89,0x74,0x24,0x18,0x57,0x48,0x83,0xec,0x20,0x48,0x8b,0xfa,0x48,0x8d,0xb1,0xd0,0x01,0,0};
     static const uint8_t insert[]={0x48,0x89,0x5c,0x24,0x10,0x48,0x89,0x6c,0x24,0x18,0x48,0x89,0x74,0x24,0x20,0x57,0x48,0x83,0xec,0x40};
@@ -3183,6 +3196,7 @@ __declspec(dllexport) int skieo_sample_snow(void *lua_state)
         {0x04F83915,0x052EE090,0x052EC220,0x052EE2D6,56,0x28,expanded_lookup,sizeof(expanded_lookup)}, /* build 26040817 */
         {0x04F83625,0x052EE390,0x052EC520,0x052EE5D6,56,0x28,expanded_lookup,sizeof(expanded_lookup)}, /* build 26056171 */
         {0x04F83C35,0x052F0C00,0x052EED90,0x052F0E46,56,0x28,expanded_lookup,sizeof(expanded_lookup)}, /* build 26071000 */
+        {0x04F7FFF5,0x052F5A00,0x052F3B90,0x052F5C46,56,0x28,expanded_lookup,sizeof(expanded_lookup)}, /* build 26097896 */
     };
     uint32_t stride=0,ready=0;
     for(size_t i=0;exe&&i<sizeof(profiles)/sizeof(profiles[0]);i++) {

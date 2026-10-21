@@ -41,6 +41,12 @@ pipx install --force --index-url https://skieomod.emillon.fr/downloads/pypi/ ski
 skieomod setup
 ```
 
+From Custom Map 1.24.7, an unsupported-game warning also checks for newer mod
+versions automatically while at the main menu. It downloads and verifies a newer official release in the background.
+**Restart game** applies it after the game closes and relaunches the same game.
+Closing normally applies the prepared update without relaunching. Maps, settings
+and saves are preserved. Install 1.24.7 normally once to enable this feature.
+
 The installation command always selects the latest published version. `setup`
 finds your Steam installation, installs UE4SS and Custom Maps, configures Proton
 when needed. Maps are downloaded separately when you play. If detection fails, use

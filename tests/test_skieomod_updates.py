@@ -177,6 +177,18 @@ class LoaderUpdateTests(unittest.TestCase):
         self.assertIn('setup first', errors.getvalue())
         self.assertEqual(self.snapshot(), before)
 
+    def test_only_the_in_game_worker_executable_is_managed(self):
+        self.assertEqual(loader.managed_path('Scripts/skieo_updater.exe'), 'Scripts/skieo_updater.exe')
+        for name in ('Scripts/arbitrary.exe', 'skieo_updater.exe', 'Scripts/../skieo_updater.exe',
+                     'Scripts/skieo_updater.exe.bat', '.skieomod-updates/worker.exe'):
+            with self.subTest(name=name), self.assertRaises(ManifestError):
+                loader.managed_path(name)
+        files, record = self.release()
+        files['Scripts/skieo_updater.exe'] = b'test PE payload'
+        record = loader.manifest(files, '1.24.7')
+        path = self.archive(files, record)
+        self.assertEqual(loader.read_archive(path), (files, record))
+
     def example_release(self):
         projects.create('map', self.root / 'example', 'Veymont', 'community.veymont', 'Albatar (Élie Millon)')
         files, _ = self.release(loader.VERSION)

@@ -4,7 +4,7 @@ from pathlib import Path
 import re
 import unittest
 
-from tools.skieo_loader import TESTED_GAME_BUILDS
+from tools.skieo_loader import TESTED_GAME_BUILDS, VERSION
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -16,3 +16,7 @@ class SupportedBuildTests(unittest.TestCase):
         entries = re.findall(r'\["([0-9a-f]{64})"\] = \{app_id="(\d+)", build="(\d+)"\}', source)
         self.assertIn((contract['reference_executable_sha256'], '5012760', contract['reference_build']), entries)
         self.assertEqual({app: build for _, app, build in entries}, TESTED_GAME_BUILDS)
+
+    def test_in_game_updater_names_the_packaged_release(self):
+        source = (ROOT / 'mod/SkiEO-CustomMaps/Scripts/loader_version.lua').read_text()
+        self.assertIn("return '" + VERSION + "'", source)

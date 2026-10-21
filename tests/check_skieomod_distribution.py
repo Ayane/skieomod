@@ -59,7 +59,7 @@ def check(wheel, loader_archive=None, online=False):
         loader = Path(data['loader'])
         share = Path(data['data']) / 'share/skieomod'
         assert loader == share / 'SkiEO-CustomMaps'
-        for filename in ('main.lua', 'api.lua', 'compatibility.lua', 'compatibility_contracts.lua', 'trail_ratings.lua', 'object_edits.lua', 'object_catalog.lua', 'scene_objects.lua', 'native_terrain.lua', 'loading_view.lua', 'ui_assets.lua', 'ui_logo.lua', 'skieo_repository.dll', 'skieo_native_terrain.dll', 'skieo_trail_ratings.dll'):
+        for filename in ('main.lua', 'api.lua', 'compatibility.lua', 'compatibility_contracts.lua', 'trail_ratings.lua', 'object_edits.lua', 'object_catalog.lua', 'scene_objects.lua', 'native_terrain.lua', 'loading_view.lua', 'ui_assets.lua', 'ui_logo.lua', 'skieo_repository.dll', 'skieo_native_terrain.dll', 'skieo_trail_ratings.dll', 'entry.lua', 'loader_update.lua', 'loader_version.lua', 'skieo_update_bootstrap.dll', 'skieo_updater.exe'):
             assert (loader / 'Scripts' / filename).is_file(), filename
         assert (loader / 'LICENSE').is_file()
         assert (loader / 'LICENSE-MINHOOK.md').is_file()
