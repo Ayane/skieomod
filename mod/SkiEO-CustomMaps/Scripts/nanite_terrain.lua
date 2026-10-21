@@ -141,6 +141,7 @@ function Nanite.apply(terrain,schedule,done,log)
     local generation,index=terrain.generation,1
     state.nanite_components={}
     local replacements={}
+    state.nanite_replacements=replacements
     local coats={}
     local coat_material
     local function source_visibility(source,entry,visible)

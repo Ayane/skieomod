@@ -19,7 +19,7 @@ subprocess.run([sys.executable, '-m', 'unittest', 'tests.test_release_custom_map
 subprocess.run([sys.executable, '-m', 'unittest', 'tests.test_authoring_build', 'tests.test_scripting_tutorial', 'tests.test_editor_play', 'tests.test_skieomod_editor', 'tests.test_editor_preferences', 'tests.test_editor_gui', 'tests.test_native_render_mapping', 'tests.test_native_navigation', 'tests.test_native_skiability', 'tests.test_native_snow', 'tests.test_native_trail_ratings', 'tests.test_native_rating_resolver', 'tests.test_skieomod_updates', 'tests.test_update_checks', 'tests.test_scenario_checkpoints', 'tests.test_game_compatibility'], cwd=ROOT, check=True)
 with tempfile.TemporaryDirectory(prefix='custom-map-zip-tests-') as directory:
     create(directory)
-    subprocess.run([sys.executable, '-m', 'unittest', 'tests.test_native_terrain_pads', 'tests.test_native_game_options'], cwd=ROOT, check=True)
+    subprocess.run([sys.executable, '-m', 'unittest', 'tests.test_native_terrain_pads', 'tests.test_native_game_options', 'tests.test_native_surface'], cwd=ROOT, check=True)
     for path in sorted((ROOT / 'tests').glob('test_*.lua')):
         arguments = [lua, str(path)]
         if path.name in {'test_zip.lua', 'test_registry.lua', 'test_featured.lua', 'test_launch.lua'}:

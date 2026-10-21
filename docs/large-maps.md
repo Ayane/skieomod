@@ -34,12 +34,18 @@ same spacing quadruples source size and terrain work.
 | --- | --- |
 | Portable source | Your declared R16 dimensions and spacing |
 | Visible terrain and collision | Source sampled at `terrain.runtime.sample_step`, with bounded cliff refinement |
-| Native Landscape, terrain cache and snow input | 2017 × 2017 samples resampled across the full extent |
+| Native Landscape, terrain cache and snow input | 2017 × 2017 samples rasterized from the visible triangle surface across the full extent |
 
 Native spacing is `width_meters / 2016` in X and `length_meters / 2016` in Y.
 A 16 × 12 km map therefore has about 7.94 × 5.95 m native spacing. Increasing
 source resolution preserves more detail for rendering and physical collision;
-it does not add pixels to the native snow grid.
+it does not add pixels to the native snow grid. Since 1.24.8, native heights
+follow the same simplified triangles, refined cliffs and stitched edges as
+the visible ground. Snow is additionally refined near buildings and lift
+stations to keep native terrain-pad deformation local; those extra vertices
+still follow the original visible surface. Details omitted by that mesh no
+longer put the simulated ground above or below the rendered snow. The portable
+R16 is preserved.
 
 Creation automatically chooses a rendering stride targeting roughly 262,144
 base cells. For the example above, `sample_step` is 4, so its base mesh samples

@@ -652,11 +652,11 @@ host.loading_finished = function(api, success, message)
     api:after(1, function()
         if Runtime.active_api ~= api then return end
         local map = Runtime.active_map
+        local pad_owners = {}
         if success then
             local ok, failure = pcall(function()
                 local world = UEHelpers.GetWorld()
                 local restored_lifts, restored_buildings = {}, {}
-                local pad_owners = {}
                 for _, class in ipairs({ "BuildingActor", "LiftActor" }) do
                     -- FindAllOf also returns destroyed template objects
                     -- until GC; Unreal's world iterator excludes them.
@@ -739,8 +739,16 @@ host.loading_finished = function(api, success, message)
                     dismiss_load_time_month_reports(api)
                 end)
             end
-            Loading.hide()
-            log(Runtime.active_map.metadata.name .. " is ready (terrain and station)")
+            Terrain.refine_snow_for_placeables(pad_owners,function(ok,why)
+                if Runtime.active_api~=api then return end
+                if not ok then
+                    api._loading_success=false
+                    host.loading_finished(api,false,why)
+                    return
+                end
+                Loading.hide()
+                log(Runtime.active_map.metadata.name .. " is ready (terrain and station)")
+            end)
         else
             log("map loading failed: " .. tostring(message))
             Runtime.emit("map.load_failed", { message = tostring(message) })
@@ -1079,11 +1087,14 @@ local function defer_finalized_placeable_alignment(actor)
             return
         end
         -- Leave the finalizer's hook stack before changing native geometry.
-        Terrain.align_lift(actor)
-        if align_finalized_building(actor) then
+        local lift_aligned=Terrain.align_lift(actor)
+        if align_finalized_building(actor) or lift_aligned then
             local ok, detail = NativeTerrain.refresh_placeable_pads({actor})
             if not ok then log('building terrain pads refresh failed: '..tostring(detail)) end
         end
+        Terrain.refine_snow_for_placeables({actor},function(ok,why)
+            if not ok then log('snow surface refinement failed: '..tostring(why)) end
+        end)
     end
     -- UE4SS stores delayed callbacks weakly. Keep this closure (and therefore
     -- the actor wrapper) alive until it has run.

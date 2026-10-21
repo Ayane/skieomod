@@ -142,7 +142,7 @@ d'un matériau compatible par `terrain.runtime.texture_parameters`.
 La forêt portable suit l'état du bouton de masquage natif des arbres.
 
 Custom Map warns above the browser when the running game executable is not a
-qualified build, or its version cannot be verified. For 1.24.7, the qualified
+qualified build, or its version cannot be verified. For 1.24.8, the qualified
 Steam demo build is 26097896. See https://skieomod.emillon.fr for installation.
 The check runs once in the background and works offline. Existing native
 compatibility guards remain active when starting a map.

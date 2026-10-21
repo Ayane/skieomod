@@ -1,5 +1,6 @@
 local UEHelpers = require("UEHelpers")
 local Heightmap = require("heightmap")
+local Mesh = require('terrain_mesh')
 local RenderMapping = require("render_mapping")
 local Compatibility = require('compatibility')
 
@@ -7,7 +8,9 @@ local Compatibility = require('compatibility')
 -- the Landscape in a neutral world, then binds every consumer to that source:
 -- native CPU heights, G16 snow input, float32 native brush heights, packed
 -- Landscape atlases/mips, derived slope/morphology/snow maps and procedural
--- collision. No stock map supplies terrain, bounds, cache pixels or topology.
+-- collision. Native heights are rasterized from the shared visible triangle
+-- plan, including refined cliffs and seams. No stock map supplies terrain,
+-- bounds, cache pixels or topology.
 local NativeTerrain = {
     installed = false,
     install_error = nil,
@@ -283,16 +286,22 @@ local function copy_samples_native(
     end
     local flags = (state.little_endian and 1 or 0)
         + (state.row_order == "south_to_north" and 2 or 0)
-    -- Version 3 lets the helper update the samples and their complete native
-    -- sampling transform in one operation. This avoids partial writes through
-    -- UE4SS's synthetic UInt64 properties leaving the template FBox2D maxima
-    -- behind while the R16 data itself has already been replaced.
-    local job = string.pack("<c4I4I8I8I4I4I4I4I4ddddddffff", "SKNT", stage_only and 4 or 3,
+    -- Versions 5/6 carry the exact rendered triangle plan for installation /
+    -- pre-travel staging. The helper prepares every sample before committing
+    -- the native array and its complete sampling transform together.
+    local plan=state.mesh_plan
+    local job = string.pack("<c4I4I8I8I4I4I4I4I4ddddddffff", "SKNT", stage_only and 6 or 5,
         stage_only and 0 or samples:GetArrayDataAddress(), stage_only and 0 or cache:GetAddress(),
         state.width, state.height, width, height, flags,
         spacing_cm, height_scale_cm,
         state.origin_x, state.origin_y, maximum_x, maximum_y,
         origin_z, maximum_z, spacing_x, spacing_y)
+    local keys={}
+    for key in pairs(assert(plan,'terrain surface must be planned before native staging').refined) do keys[#keys+1]=key end
+    table.sort(keys)
+    local topology={job,string.pack('<I4I4I4I4',state.sample_step,plan.fine_step,#keys,0)}
+    for _,key in ipairs(keys) do topology[#topology+1]=string.pack('<I4',key) end
+    job=table.concat(topology)
     written, message = write_binary(job_path, job)
     if not written then
         os.remove(source_path)
@@ -855,6 +864,12 @@ local function raw_at(state, column, row)
 end
 
 local function resampled_raw(state, column, row, width, height)
+    if state.mesh_plan then
+        local x=state.origin_x+column*(state.width-1)*state.spacing_cm/(width-1)
+        local y=state.origin_y+row*(state.height-1)*state.spacing_cm/(height-1)
+        local z=assert(Mesh.height_at(state,x,y),'native sample is outside the terrain surface')
+        return math.floor((z-state.origin_z-state.height_offset_cm)/state.height_scale_cm+.5)
+    end
     if width == state.width and height == state.height then
         return raw_at(state, column, row)
     end
@@ -1018,6 +1033,7 @@ end
 function NativeTerrain.prepare_world(state)
     -- Refuse before staging/travel if a required private bridge moved.
     assert(NativeTerrain.check_compatibility())
+    Mesh.prepare(state)
     local source = state
     state = Heightmap.native_state(state)
     local width, height = 2017, 2017

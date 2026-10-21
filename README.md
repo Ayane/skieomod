@@ -35,7 +35,7 @@ Open **New Game → Custom Map** to browse and search maps in the game:
 Select a map and press **Play** to download missing content and required
 mapmods. Downloads are checked against the catalogue's SHA-256 and manifest.
 Downloaded maps remain playable offline. The catalogue is checked automatically
-when the browser opens, then at most once every five minutes while browsing.
+when the browser opens and refreshed while browsing.
 Map updates remain optional; locally authored files are preserved.
 
 Use **Options** before **Play** to choose sandbox, day length and days per month.
@@ -47,6 +47,8 @@ Try [Veymont](mod/SkiEO-Veymont/README.md), based on real Vercors terrain, or
 [Super Saint-Bernard](mod/SkiEO-SuperSaintBernard/README.md), a historical
 resort scenario. Game updates can require compatibility fixes; see the
 [compatibility protocol](docs/game-compatibility-testing.md).
+The [snow correction report](docs/flying-snow-1.24.8.md) explains the terrain
+and furniture fixes in 1.24.8.
 The [26097896 report](docs/game-update-26097896.md) records the current demo
 qualification, native fixes and automatic mod updates from the version warning.
 

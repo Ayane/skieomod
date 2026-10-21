@@ -7,7 +7,9 @@ local MAX_REFINED_CELLS = 16384
 
 local function indices(first, last, step)
     local result = {}
-    for index = first, last - 1, step do result[#result + 1] = index end
+    for index = first, last, step do
+        if index<last then result[#result + 1] = index end
+    end
     result[#result + 1] = last
     return result
 end
@@ -65,6 +67,12 @@ function Mesh.plan(state, step, budget)
         plan.refined[candidates[index].key] = true
     end
     return plan
+end
+
+function Mesh.prepare(state)
+    state.sample_step=math.max(1,math.floor(state.runtime.sample_step or 4))
+    state.mesh_plan=state.mesh_plan or Mesh.plan(state,state.sample_step)
+    return state.mesh_plan
 end
 
 local function refined(plan, x, y)
@@ -142,18 +150,18 @@ function Mesh.height_at(state, x, y)
 end
 
 function Mesh.build_tile(state, columns, rows, first_x, first_y, quads,
-    z_offset_cm, rock_projection, plan)
+    z_offset_cm, rock_projection, plan, sample_height)
     local last_x = math.min(#columns, first_x + quads)
     local last_y = math.min(#rows, first_y + quads)
     local uv_tile_cm = math.max(100, (state.runtime.uv_tile_meters or 20) * 100)
     local vertices, triangles, normals, uvs, cache = {}, {}, {}, {}, {}
     local function vertex(column, row)
-        local key = row * 2 * (state.width * 2) + column * 2
+        local key = string.format('%.12g:%.12g',row,column)
         if cache[key] then return cache[key] end
         local index = #vertices
         vertices[index+1] = {X=state.origin_x + column * state.spacing_cm,
             Y=state.origin_y + row * state.spacing_cm,
-            Z=height(state,column,row) + (z_offset_cm or 0)}
+            Z=(sample_height and sample_height(column,row) or height(state,column,row)) + (z_offset_cm or 0)}
         normals[index+1] = normal_at(state,column,row,plan and 1 or state.sample_step)
         uvs[index+1] = {X=column * state.spacing_cm / uv_tile_cm,
             Y=row * state.spacing_cm / uv_tile_cm}

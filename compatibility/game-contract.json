@@ -3,9 +3,9 @@
   "version": 1,
   "reference_build": "26097896",
   "reference_executable_sha256": "7577bdc68c0e40e478c25a9c8f782c8085f120365e8293ed3216f8da8988dab4",
-  "native_helper_sha256": "68d8e30396f1226230318f777052394e82da28e1099b2f77770664338a09b2aa",
+  "native_helper_sha256": "5525c07808471d4affee895436630f4c885de221e2a0787a2ccfed6086e7067c",
   "native_sources": {
-    "native/SkiEONativeTerrain/native_terrain.c": "0e8591e5ae8d3dd024fa607810059354286767b17f3237117c11681f8704766e",
+    "native/SkiEONativeTerrain/native_terrain.c": "4361ad75fd7a98ab5a5d8e8f263c5b1ddbe5e13d5f320b45f05475e1268accc3",
     "native/SkiEONativeTerrain/navigation_layout.h": "8f2db8866f2a61a734a3634f6178feb73ef0e94516d20e9900b3615b09e72f92",
     "native/SkiEONativeTerrain/render_mapping_layout.h": "5cf8d6da07c19a575f2d6a93c54156f4f0af3e6a1a8d4f0e04e7fc654f112ff9",
     "native/SkiEOTrailRatings/trail_ratings.c": "c4d23bbaad05bf966ec018e7ed3204fa683683ea1c2de8ae1e85d5ebb31796b7",
@@ -34,7 +34,8 @@
     "native/SkiEOUpdater/common.h": "cbde065587b8f176c4c24b43de350e21f456e492001e037a5fa2f7758a57fe54",
     "native/SkiEOUpdater/updater.c": "ad1fca742267ef4d5b2c99af21b24b2f0dd3436aacf0eae8aed1adc09fb1ebe3",
     "native/SkiEOUpdater/bootstrap.c": "0fc307aa2677dab372c285b07a5ad2203018603905226771c6fc45eb7fcd800c",
-    "native/SkiEOUpdater/build.sh": "30bbc3dbb8ff6b6d58649a9b46d102660f6fcb22fb806b36070e0acb5cd09c93"
+    "native/SkiEOUpdater/build.sh": "30bbc3dbb8ff6b6d58649a9b46d102660f6fcb22fb806b36070e0acb5cd09c93",
+    "native/SkiEONativeTerrain/surface_sampling.h": "e2020f8c85b71b1dccbba1efb3bb7d1d977ebb0de3faf132a49bcb91cde71684"
   },
   "guards": [
     {

@@ -1,5 +1,6 @@
 package.path='mod/SkiEO-CustomMaps/Scripts/?.lua;'..package.path
 local calls,queue={},{}
+local hold_snow,snow_finished=false,nil
 local world={IsValid=function() return true end,GetAddress=function() return 7 end}
 local function actor(name)
     return {name=name,z=0,IsValid=function() return true end,IsActorBeingDestroyed=function() return false end,
@@ -16,6 +17,10 @@ local gameplay={GetAllActorsOfClass=function(_,w,class,entries)
 end}
 package.loaded.UEHelpers={GetWorld=function() return world end,GetGameplayStatics=function() return gameplay end}
 package.loaded.terrain={unload=function() end,
+    refine_snow_for_placeables=function(owners,done)
+        assert(#owners==2 and owners[1]==building and owners[2]==lift)
+        if hold_snow then snow_finished=done else done(true) end
+    end,
     align_building=function(a) a.z=20 end,align_lift=function() end,
     align_native_trails=function() calls[#calls+1]='trails' end,
     clear_native_trail_obstacles=function() end,rebuild_trail_visuals=function() end,
@@ -76,6 +81,15 @@ while index<=#queue do
     index=index+1
 end
 assert(ski_calls==20,'unavailable snow cache was retried indefinitely')
+hold_snow=true;run()
+assert(table.concat(calls,',')=='pads,hubs,trails,uncover','loading overlay disappeared before snow was ready')
+snow_finished(true)
+assert(calls[#calls]=='hide','ready snow did not finish loading')
+run();snow_finished(false,'mesh rebuild failed')
+assert(Runtime.active_api._loading_success==false,'snow failure retained a successful loading result')
+queue[#queue].callback()
+assert(calls[#calls]=='stop' and not table.concat(calls,','):find('hide',1,true),'snow failure exposed an unfinished world')
+hold_snow=false
 failed=true;run()
 assert(table.concat(calls,',')=='pads,stop','a rejected native pad guard exposed the world')
 print('Runtime terrain pads: final saved transforms, live actor iterator, deferred ordering and fail-closed loading OK')

@@ -10,6 +10,14 @@ x86_64-w64-mingw32-gcc -shared -O2 -s -Wall -Wextra \
 
 Terrain diagnostics and supported layouts are documented in [terrain-runtime-debugging.md](../../docs/terrain-runtime-debugging.md).
 
+Terrain jobs `SKNT` v5/v6 append the rendering stride, cliff subdivision stride,
+refined-cell count, a zero reserved word and unique one-based refined-cell keys.
+The helper validates the bounded topology, then samples the same triangles and
+stitched fans as `terrain_mesh.lua`. It generates the complete native grid and
+textures before committing the cache. This keeps guests, snow and brushes on
+the displayed relief without increasing rendering density or changing map data.
+The portable sampler is checked against actual Lua-generated mesh triangles.
+
 Build 26056171 moves the hub batching counter to `+0xB10` and changes the
 navigation work counter and terrain dirty flag. The navigation resolver now
 checks the counter instruction as well as its prologue before choosing the

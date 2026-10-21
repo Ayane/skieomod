@@ -178,6 +178,12 @@ panneaux colorés, les lignes de piste et le masquage des arbres. Tester aussi
 le menu Custom Map et le retour au menu. Conserver des captures rapprochées
 et des vues générales. Une image de relief seule ne valide pas le mobilier.
 
+Piloter l'instance par UE4SS sans activer sa fenêtre. `HighResShot` permet
+de capturer le monde ; pour inclure les panneaux UMG, exécuter `Shot ShowUI`
+par `KismetSystemLibrary:ExecuteConsoleCommand`, puis récupérer l'image dans
+le dossier isolé `userdata/Saved/Screenshots/Windows`. Ne pas utiliser de
+capture qui force le focus du bureau.
+
 Pour les bâtiments sous la neige, comparer la même vue avant/après reprise,
 avec la profondeur native mesurée et la même position de bâtiment. Garder le
 moteur actif, à vitesse de simulation nulle, assez longtemps pour que la

@@ -3,6 +3,7 @@ local Heightmap = require("heightmap")
 local NativeTerrain = require("native_terrain")
 local Textures = require("textures")
 local Mesh = require("terrain_mesh")
+local SnowMesh = require('snow_mesh')
 
 -- The fresh Landscape initializes the native height, brush and snow systems.
 -- Its compiled Landscape shader variants belong to cooked levels; the neutral
@@ -77,11 +78,11 @@ end
 function Terrain.height_at(x, y)
     local state = Terrain.active
     if not state then return nil end
-    return Heightmap.height_at(state, x, y)
+    return Mesh.height_at(state, x, y)
 end
 
--- Tree roots follow the triangles actually rendered, including decimation
--- and adaptive cliff seams. Native simulation keeps its source-height API.
+-- Retained alias for map entities and scenery. Rendering, collision, native
+-- caches and public height queries share these triangles and cliff seams.
 function Terrain.surface_height_at(x, y)
     local state = Terrain.active
     if not state then return nil end
@@ -310,6 +311,12 @@ local function create_sections(state, component, generation, options, done)
     end
     local columns = state.mesh_plan and state.mesh_plan.columns or sampled_indices(state.width, step)
     local rows = state.mesh_plan and state.mesh_plan.rows or sampled_indices(state.height, step)
+    local plan=state.mesh_plan
+    local sample_height
+    if options.label=='snow shell' and state.independent_world then
+        state.snow_plan=SnowMesh.plan(state);plan=state.snow_plan
+        sample_height=function(column,row)return SnowMesh.sample(state,column,row)end
+    end
     local tiles = {}
     for first_y = 1, #rows - 1, tile_quads do
         for first_x = 1, #columns - 1, tile_quads do
@@ -360,7 +367,7 @@ local function create_sections(state, component, generation, options, done)
             local ok, message = pcall(function()
                 local vertices, triangles, normals, uvs = build_tile(
                     state, columns, rows, tile.x, tile.y, tile_quads,
-                    options.z_offset_cm, options.rock_projection, state.mesh_plan)
+                    options.z_offset_cm, options.rock_projection, plan, sample_height)
                 component:CreateMeshSection(
                     index - 1, vertices, triangles, normals, uvs, {}, {},
                     options.collision)
@@ -382,6 +389,73 @@ local function create_sections(state, component, generation, options, done)
         end)
     end
     next_tile()
+end
+
+function Terrain.refine_snow_for_placeables(owners,done)
+    done=done or function()end
+    local state=Terrain.active
+    if not state or not state.snow_plan or not valid(Terrain.snow_component) then done(true);return end
+    local regions={}
+    for _,actor in ipairs(owners)do
+        if valid(actor) and not actor:IsActorBeingDestroyed() and not actor.bIsPreview then
+            if actor:IsA('/Script/SkiResortSimulator.LiftActor') then
+                actor.Waypoints:ForEach(function(_,entry)
+                    local p=entry:get().position;regions[#regions+1]={p.X,p.Y,5000}
+                end)
+            else
+                local p=actor:K2_GetActorLocation();regions[#regions+1]={p.X,p.Y,5000}
+            end
+        end
+    end
+    local changed=SnowMesh.add_regions(state,state.snow_plan,regions)
+    local quads=math.max(8,math.min(127,math.floor(state.runtime.tile_quads or 63)))
+    local columns,rows=state.snow_plan.columns,state.snow_plan.rows
+    local tiles_x=math.ceil((#columns-1)/quads)
+    state.snow_dirty=state.snow_dirty or {};state.snow_waiters=state.snow_waiters or {}
+    for _,cell in ipairs(changed)do
+        for dy=-1,1 do for dx=-1,1 do
+            local x,y=cell[1]+dx,cell[2]+dy
+            if x>=1 and y>=1 and x<=state.snow_plan.width and y<=state.snow_plan.height then
+                local tx,ty=math.floor((x-1)/quads),math.floor((y-1)/quads)
+                state.snow_dirty[ty*tiles_x+tx]=true
+            end
+        end end
+    end
+    state.snow_waiters[#state.snow_waiters+1]=done
+    if state.snow_rebuilding then return end
+    state.snow_rebuilding=true
+    local generation=Terrain.generation
+    local function finish(ok,why)
+        state.snow_rebuilding=false;local waiters=state.snow_waiters;state.snow_waiters={}
+        for _,callback in ipairs(waiters)do callback(ok,why)end
+    end
+    local function next_section()
+        if Terrain.generation~=generation or Terrain.active~=state or not valid(Terrain.snow_component)then return end
+        local section=next(state.snow_dirty)
+        if not section then finish(true);return end
+        state.snow_dirty[section]=nil
+        local ok,why=pcall(function()
+            local x,y=section%tiles_x,math.floor(section/tiles_x)
+            local v,t,n,uv=Mesh.build_tile(state,columns,rows,x*quads+1,y*quads+1,quads,
+                state.runtime.snow_offset_centimeters or 30,false,state.snow_plan,
+                function(c,r)return SnowMesh.sample(state,c,r)end)
+            Terrain.snow_component:CreateMeshSection(section,v,t,n,uv,{},{},false)
+            for _,replacement in ipairs(state.nanite_replacements or {})do
+                if replacement.entry.layer=='snow' and valid(replacement.component) then
+                    local covered=require('nanite_terrain').covered_sections(replacement.entry)
+                    local affected=false
+                    for _,id in ipairs(covered)do if id==section then affected=true end end
+                    if affected then
+                        replacement.component:SetVisibility(false,false)
+                        for _,id in ipairs(covered)do Terrain.snow_component:SetMeshSectionVisible(id,true)end
+                    end
+                end
+            end
+        end)
+        if not ok then finish(false,tostring(why));return end
+        schedule(1,next_section)
+    end
+    schedule(1,next_section)
 end
 
 local function build_skirt(state)
@@ -616,8 +690,8 @@ function Terrain.align_building(actor)
     pcall(function()
         decorative = actor:GetClass():GetFullName():find('/Blueprints/Decorations/', 1, true) ~= nil
     end)
-    -- Small furniture follows the visible triangles. The simulation height
-    -- can differ on decimated slopes and bury a bench or table in the mesh.
+    -- Small furniture also clears the visual snow-shell base and its own
+    -- native snap buffer.
     local ground_z = decorative and Terrain.surface_height_at(location.X, location.Y)
         or Terrain.height_at(location.X, location.Y)
     if not ground_z then return false end
@@ -901,7 +975,7 @@ local function sample_curve(state, curve, points, z_offset)
         local inverse = 1.0 - t
         local x = inverse * inverse * sx + 2.0 * inverse * t * cx + t * t * ex
         local y = inverse * inverse * sy + 2.0 * inverse * t * cy + t * t * ey
-        local z = Heightmap.height_at(state, x, y)
+        local z = Mesh.height_at(state, x, y)
         if z then points[#points + 1] = { X = x, Y = y, Z = z + z_offset } end
     end
 end
@@ -919,7 +993,7 @@ local function curve_point(curve, t)
 end
 
 local function grounded_z(state, point)
-    return Heightmap.height_at(state, point.X, point.Y) or point.Z
+    return Mesh.height_at(state, point.X, point.Y) or point.Z
 end
 
 -- Preserve each quadratic curve in XY with exact de Casteljau sub-curves,
@@ -1141,8 +1215,8 @@ local function trail_ribbon(state, info, width, z_offset)
         local side_x, side_y = -dy / length * half_width, dx / length * half_width
         local left_x, left_y = point.X + side_x, point.Y + side_y
         local right_x, right_y = point.X - side_x, point.Y - side_y
-        local left_z = Heightmap.height_at(state, left_x, left_y) or point.Z - z_offset
-        local right_z = Heightmap.height_at(state, right_x, right_y) or point.Z - z_offset
+        local left_z = Mesh.height_at(state, left_x, left_y) or point.Z - z_offset
+        local right_z = Mesh.height_at(state, right_x, right_y) or point.Z - z_offset
         vertices[#vertices + 1] = { X = left_x, Y = left_y, Z = left_z + z_offset }
         vertices[#vertices + 1] = { X = right_x, Y = right_y, Z = right_z + z_offset }
         normals[#normals + 1] = { X = 0.0, Y = 0.0, Z = 1.0 }

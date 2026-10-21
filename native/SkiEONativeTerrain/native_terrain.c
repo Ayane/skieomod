@@ -10,6 +10,7 @@
 #include "navigation_layout.h"
 #include "game_options_layout.h"
 #include "terrain_pads_layout.h"
+#include "surface_sampling.h"
 
 #pragma pack(push, 1)
 typedef struct SkiEOHeightJob {
@@ -205,19 +206,6 @@ static void write_format_status(const char *message)
     if (!file) return;
     fwrite(message, 1, strlen(message), file);
     fclose(file);
-}
-
-static uint16_t source_value(
-    const uint8_t *source, const SkiEOHeightJob *job, uint32_t x, uint32_t y)
-{
-    if (job->flags & SKIEO_SOUTH_TO_NORTH) {
-        y = job->source_height - 1 - y;
-    }
-    size_t index = ((size_t)y * job->source_width + x) * 2;
-    if (job->flags & SKIEO_LITTLE_ENDIAN) {
-        return (uint16_t)(source[index] | ((uint16_t)source[index + 1] << 8));
-    }
-    return (uint16_t)(((uint16_t)source[index] << 8) | source[index + 1]);
 }
 
 static void put_u16(uint8_t *bytes, uint16_t value)
@@ -851,17 +839,49 @@ __declspec(dllexport) int skieo_copy_heightmap(void *lua_state)
     }
     SkiEOHeightJob job;
     size_t config_read = fread(&job, 1, sizeof(job), config);
-    fclose(config);
     if (config_read != sizeof(job) || memcmp(job.magic, "SKNT", 4) != 0 ||
-        (job.version != 3 && job.version != 4) ||
-        (job.version == 3 && (job.destination == 0 || job.cache == 0)) ||
-        (job.version == 4 && (job.destination != 0 || job.cache != 0)) ||
+        (job.version < 3 || job.version > 6) ||
+        ((job.version == 3 || job.version == 5) && (job.destination == 0 || job.cache == 0)) ||
+        ((job.version == 4 || job.version == 6) && (job.destination != 0 || job.cache != 0)) ||
         job.source_width < 2 || job.source_height < 2 ||
         job.target_width < 2 || job.target_height < 2 ||
         job.source_width > 16384 || job.source_height > 16384 ||
         job.target_width > 16384 || job.target_height > 16384) {
+        fclose(config);
         write_status("error: invalid native terrain job");
         return 0;
+    }
+
+    SkiEOSurface surface={0};
+    uint8_t *refined=NULL;
+    surface.width=job.source_width;surface.height=job.source_height;surface.flags=job.flags;
+    int topology_valid=1;
+    if (job.version>=5) {
+        uint32_t topology[4]={0};
+        topology_valid=fread(topology,sizeof(uint32_t),4,config)==4;
+        surface.step=topology[0];surface.fine=topology[1];
+        if (!surface.step || surface.step>64 || surface.fine!=(surface.step+3)/4 ||
+            topology[2]>16384 || topology[3] || (job.flags&~3U)) topology_valid=0;
+        if (topology_valid) {
+            surface.columns=(surface.width-2)/surface.step+1;
+            surface.rows=(surface.height-2)/surface.step+1;
+            size_t cells=(size_t)surface.columns*surface.rows;
+            refined=calloc((cells+7)/8,1);
+            if (!refined) topology_valid=0;
+            for (uint32_t i=0;topology_valid && i<topology[2];i++) {
+                uint32_t key=0;
+                if (fread(&key,4,1,config)!=1 || !key || key>cells) {topology_valid=0;break;}
+                --key;
+                if (refined[key/8]&(1U<<(key%8))) {topology_valid=0;break;}
+                refined[key/8]|=(uint8_t)(1U<<(key%8));
+            }
+            surface.refined=refined;
+        }
+    }
+    if (fgetc(config)!=EOF) topology_valid=0;
+    fclose(config);
+    if (!topology_valid) {
+        free(refined);write_status("error: invalid terrain surface topology");return 0;
     }
 
     uint8_t *cache = (uint8_t *)(uintptr_t)job.cache;
@@ -874,6 +894,7 @@ __declspec(dllexport) int skieo_copy_heightmap(void *lua_state)
     }
     if (cache && (cache_samples != job.destination || cache_width != job.target_width ||
         cache_height != job.target_height)) {
+        free(refined);
         write_status("error: native terrain cache layout changed");
         return 0;
     }
@@ -881,16 +902,19 @@ __declspec(dllexport) int skieo_copy_heightmap(void *lua_state)
     size_t source_count = (size_t)job.source_width * job.source_height;
     size_t target_count = (size_t)job.target_width * job.target_height;
     if (source_count > SIZE_MAX / 2 || target_count > SIZE_MAX / 2) {
+        free(refined);
         write_status("error: native terrain dimensions overflow");
         return 0;
     }
     FILE *source_file = _wfopen(source_path, L"rb");
     if (!source_file) {
+        free(refined);
         write_status("error: could not open native_terrain.r16");
         return 0;
     }
     uint8_t *source = (uint8_t *)malloc(source_count * 2);
     if (!source) {
+        free(refined);
         fclose(source_file);
         write_status("error: could not allocate source heightmap");
         return 0;
@@ -899,6 +923,7 @@ __declspec(dllexport) int skieo_copy_heightmap(void *lua_state)
     int trailing = fgetc(source_file);
     fclose(source_file);
     if (source_read != source_count || trailing != EOF) {
+        free(refined);
         free(source);
         write_status("error: source heightmap size mismatch");
         return 0;
@@ -907,14 +932,15 @@ __declspec(dllexport) int skieo_copy_heightmap(void *lua_state)
     /* Before travel there is no world/cache yet. Stage the same source data
        into temporary storage; Unreal will initialize its caches from the
        resulting textures and freshly constructed Landscape. */
-    uint16_t *target = cache ? (uint16_t *)(uintptr_t)job.destination
-        : (uint16_t *)malloc(target_count * 2);
+    uint16_t *target = (uint16_t *)malloc(target_count * 2);
     if (!target) {
+        free(refined);
         free(source);
         write_status("error: could not allocate staging heightmap");
         return 0;
     }
-    if (job.source_width == job.target_width &&
+    surface.bytes=source;
+    if (!surface.step && job.source_width == job.target_width &&
         job.source_height == job.target_height &&
         (job.flags & (SKIEO_LITTLE_ENDIAN | SKIEO_SOUTH_TO_NORTH)) ==
             SKIEO_LITTLE_ENDIAN) {
@@ -923,30 +949,29 @@ __declspec(dllexport) int skieo_copy_heightmap(void *lua_state)
         for (uint32_t y = 0; y < job.target_height; ++y) {
             double sy = (double)y * (job.source_height - 1) /
                 (job.target_height - 1);
-            uint32_t y0 = (uint32_t)floor(sy);
-            uint32_t y1 = y0 + 1 < job.source_height ? y0 + 1 : y0;
-            double ty = sy - y0;
             for (uint32_t x = 0; x < job.target_width; ++x) {
                 double sx = (double)x * (job.source_width - 1) /
                     (job.target_width - 1);
-                uint32_t x0 = (uint32_t)floor(sx);
-                uint32_t x1 = x0 + 1 < job.source_width ? x0 + 1 : x0;
-                double tx = sx - x0;
-                double north = source_value(source, &job, x0, y0) * (1.0 - tx) +
-                    source_value(source, &job, x1, y0) * tx;
-                double south = source_value(source, &job, x0, y1) * (1.0 - tx) +
-                    source_value(source, &job, x1, y1) * tx;
+                double value=skieo_surface_sample(&surface,sx,sy);
+                if (!isfinite(value) || value<-.000001 || value>65535.000001) {
+                    free(target);free(source);free(refined);
+                    write_status("error: invalid terrain surface sample");return 0;
+                }
                 target[(size_t)y * job.target_width + x] =
-                    (uint16_t)floor(north * (1.0 - ty) + south * ty + 0.5);
+                    (uint16_t)floor(fmax(0,fmin(65535,value)) + 0.5);
             }
         }
     }
     free(source);
-    if (cache) write_cache_header(&job);
+    free(refined);
     int generated = write_height_texture(target, job.target_width, job.target_height) &&
         (!cache || write_derived_terrain_textures(target, &job)) &&
         write_landscape_bounds(target, &job) && write_landscape_textures(target, &job);
-    if (!cache) free(target);
+    if (generated && cache) {
+        memcpy((void *)(uintptr_t)job.destination,target,target_count*2);
+        write_cache_header(&job);
+    }
+    free(target);
     if (!generated) return 0;
 
     char status[256];

@@ -12,6 +12,18 @@ have their own package versions. Download the
 - Prepare optional Discord release announcements after HTTPS publication checks,
   with a preview mode and receipts for confirmed messages.
 
+## [1.24.8] - 2026-10-21
+
+- Use the rendered terrain surface for native height, snow and brush caches,
+  as well as height queries and trail geometry. Previously, omitted source
+  details could leave guests below the visible snow or above the ground on
+  custom maps. Keep the original map data and the existing rendering density.
+- Match refined cliffs and stitched section edges in native sampling; validate
+  the complete terrain job before changing the live cache.
+- Refine the snow mesh around buildings and lift stations so native terrain
+  pads no longer stretch across large triangles and bury nearby furniture or
+  visitors. Preserve the original base surface and bound the added geometry.
+
 ## [1.24.7] - 2026-10-21
 
 - Support Steam demo build 26097896, including the revised lift registration,
