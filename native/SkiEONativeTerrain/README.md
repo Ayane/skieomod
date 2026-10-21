@@ -3,12 +3,28 @@
 Build the Windows helper from the repository root with MinGW-w64:
 
 ```sh
+python3 -m tools.native_layouts
 x86_64-w64-mingw32-gcc -shared -O2 -s -Wall -Wextra \
   native/SkiEONativeTerrain/native_terrain.c \
   -o mod/SkiEO-CustomMaps/Scripts/skieo_native_terrain.dll
 ```
 
 Terrain diagnostics and supported layouts are documented in [terrain-runtime-debugging.md](../../docs/terrain-runtime-debugging.md).
+
+Build 26111862 relocates the reviewed bridges without changing their inspected
+instructions or private field offsets. `layout_profiles.h` is generated from
+`compatibility/game-contract.json`; `layout_resolution.h` searches executable
+sections for a unique normalized code fingerprint. Only individually reviewed
+PC-relative address operands are masked. Instructions, stack sizes, field
+offsets, constants and internal branches remain exact. The deferred hub wrapper
+must branch to the independently resolved rebuild function. Cached matches are
+rechecked before use. The existing reflected fields, owner classes and memory
+bounds are still checked by each bridge.
+
+This accepts address-only relocation without adding new addresses for every
+game update. Changed or ambiguous layouts remain unsupported. The same
+fingerprints drive the Python compatibility preflight; a new executable still
+shows the unqualified-game warning until its full qualification is recorded.
 
 Terrain jobs `SKNT` v5/v6 append the rendering stride, cliff subdivision stride,
 refined-cell count, a zero reserved word and unique one-based refined-cell keys.
@@ -38,8 +54,10 @@ private bridges; changed hub/staff/snow/engine layouts still need profile review
 
 Terrain-pad registration uses the native placement method after final source
 alignment. `terrain_pads_layout.h` guards all 2,088 bytes of the reviewed
-function and all 267 bytes of its preceding component cleanup for builds
-25996759 and 26019240, including their call displacements.
+function and all 267 bytes of its preceding component cleanup. Historical
+profiles retain their exact fingerprints, including call displacements; the
+current profile also accepts the reviewed normalized fingerprint at its uniquely
+resolved address.
 The Lua caller checks reflected placement fields and live actor ownership;
 the helper validates every actor in a batch before invoking the first method.
 It does not clear the brush render target, sculpt layers or snowpack. See the
@@ -70,7 +88,8 @@ Opening `Entry` without that mode leaves an empty black world and does not test 
 
 `skieo_refresh_skiability` invalidates the minute key of `TrailMapSubsystem::HasAnySkiableTrail`, once the native snow cache reports ready. Source-world loading pauses the game clock: a false result computed before snow readback can otherwise remain cached at the same minute after 120 cm of snow is present. The `SKSK` job checks the owner class and the exact query/memo instruction signatures. It changes neither the stored result nor the snow threshold. Verified on demo build **25808900**: both historical lifts become Operating with 100 cm packed + 20 cm fresh snow, and both correctly return No Snow to Ski after clearing the native snow planes and waiting for CPU readback.
 
-These bridges return an explicit unsupported-layout error on a different executable. Reverify the layouts before extending support to another build.
+These bridges return an explicit unsupported-layout error when no reviewed
+layout matches. Qualify the complete game before announcing support for a new build.
 
 `SKIS` v2 additionally accepts a null scenario for a loaded sandbox map. It
 requires the native active scenario pointer to be null, keeps scenario identity

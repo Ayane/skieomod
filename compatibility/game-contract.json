@@ -1,11 +1,11 @@
 {
   "format": "skieo-compatibility-contract",
   "version": 1,
-  "reference_build": "26097896",
-  "reference_executable_sha256": "7577bdc68c0e40e478c25a9c8f782c8085f120365e8293ed3216f8da8988dab4",
-  "native_helper_sha256": "5525c07808471d4affee895436630f4c885de221e2a0787a2ccfed6086e7067c",
+  "reference_build": "26111862",
+  "reference_executable_sha256": "8eb1215bcf56172822974b2c98a629e200afce22f4e57cc061a90b241e878a79",
+  "native_helper_sha256": "cc7b661260f5ddbd2fbeaab4af883a3cb9d05231b3b1f782f0d3bef1a3c0eb7b",
   "native_sources": {
-    "native/SkiEONativeTerrain/native_terrain.c": "4361ad75fd7a98ab5a5d8e8f263c5b1ddbe5e13d5f320b45f05475e1268accc3",
+    "native/SkiEONativeTerrain/native_terrain.c": "70f6df1f23d719b49d266c27948d36029feac3536428e4229a386abe082f89b0",
     "native/SkiEONativeTerrain/navigation_layout.h": "8f2db8866f2a61a734a3634f6178feb73ef0e94516d20e9900b3615b09e72f92",
     "native/SkiEONativeTerrain/render_mapping_layout.h": "5cf8d6da07c19a575f2d6a93c54156f4f0af3e6a1a8d4f0e04e7fc654f112ff9",
     "native/SkiEOTrailRatings/trail_ratings.c": "c4d23bbaad05bf966ec018e7ed3204fa683683ea1c2de8ae1e85d5ebb31796b7",
@@ -27,7 +27,7 @@
     "native/SkiEOTrailRatings/rating_colors.h": "da51c09434b7c0bd8e582a56744f2ff059ec28a8c2857bb97e604ec0dc0e26d0",
     "native/SkiEOTrailRatings/rating_resolver.h": "6584711c98840bdaa275e022bc6fd9e84a5e917d6c9734b874ba3be8dcf41eab",
     "tools/trail_rating_profile.py": "7d8eb60d92a0c5e2b09c4ec28375cfe614b5785647efb62b1608bd5dabfe0428",
-    "native/SkiEONativeTerrain/terrain_pads_layout.h": "ab6dab609b7f786298ef87eeef41d30fd1830b5dea4a9b9e3e36150709ff9401",
+    "native/SkiEONativeTerrain/terrain_pads_layout.h": "5d1d889fef32a2f96f194537c89a1e33ef5fa9fc5dd81df596525289e5b590c0",
     "native/SkiEONativeTerrain/game_options_layout.h": "78ac7104084b70a31f756d4eaf5b991d18e9292dea591162bafd37e5ad076b2c",
     "native/SkiEORepository/repository.c": "96421fc3fe1169709cdcc71744f96dcc55581cd1ffd5f16520025acd3fc7c510",
     "native/SkiEORepository/build.sh": "16aca1d149576cf9c4e7f01a89681474c6c0ca201ebf82a75cc03ce78e03d57c",
@@ -35,110 +35,679 @@
     "native/SkiEOUpdater/updater.c": "ad1fca742267ef4d5b2c99af21b24b2f0dd3436aacf0eae8aed1adc09fb1ebe3",
     "native/SkiEOUpdater/bootstrap.c": "0fc307aa2677dab372c285b07a5ad2203018603905226771c6fc45eb7fcd800c",
     "native/SkiEOUpdater/build.sh": "30bbc3dbb8ff6b6d58649a9b46d102660f6fcb22fb806b36070e0acb5cd09c93",
-    "native/SkiEONativeTerrain/surface_sampling.h": "e2020f8c85b71b1dccbba1efb3bb7d1d977ebb0de3faf132a49bcb91cde71684"
+    "native/SkiEONativeTerrain/surface_sampling.h": "e2020f8c85b71b1dccbba1efb3bb7d1d977ebb0de3faf132a49bcb91cde71684",
+    "native/SkiEONativeTerrain/layout_resolution.h": "aa2d8b5c5f57090721eb12cbbf6497f9429eeb7412e7bd5a43628bf73ee023c5",
+    "native/SkiEONativeTerrain/layout_profiles.h": "72da9d530f51973759c71f99d416122dd452b5ab41e7863e349ecf5542336e42",
+    "tools/native_layouts.py": "aae8de3aa01e75b4d74da233859205617ae14b8e0e5503f75ef87b3ca7d6e9f8"
   },
   "guards": [
     {
       "id": "hubs.building",
-      "rva": "0x4fa35b0",
+      "rva": "0x4fa1870",
       "bytes": "48895c242055488d6c24a94881ecc0000000",
-      "mode": "rva"
+      "mode": "normalized_unique",
+      "normalized": {
+        "size": 511,
+        "masks": [
+          [
+            58,
+            4
+          ],
+          [
+            66,
+            4
+          ],
+          [
+            85,
+            4
+          ],
+          [
+            123,
+            4
+          ],
+          [
+            148,
+            4
+          ],
+          [
+            186,
+            4
+          ],
+          [
+            242,
+            4
+          ],
+          [
+            250,
+            4
+          ],
+          [
+            284,
+            4
+          ],
+          [
+            336,
+            4
+          ],
+          [
+            378,
+            4
+          ],
+          [
+            392,
+            4
+          ],
+          [
+            453,
+            4
+          ],
+          [
+            475,
+            4
+          ],
+          [
+            480,
+            1
+          ],
+          [
+            489,
+            4
+          ],
+          [
+            510,
+            1
+          ]
+        ],
+        "fnv1a64": "286a8d19a9ca4be8"
+      }
     },
     {
       "id": "hubs.lift",
-      "rva": "0x4fcd150",
+      "rva": "0x4fccfe0",
       "bytes": "48895c241848897c242055488dac2470ffffff4881ec90010000",
-      "mode": "rva"
+      "mode": "normalized_unique",
+      "normalized": {
+        "size": 509,
+        "masks": [
+          [
+            30,
+            4
+          ],
+          [
+            38,
+            4
+          ],
+          [
+            50,
+            4
+          ],
+          [
+            63,
+            4
+          ],
+          [
+            84,
+            4
+          ],
+          [
+            125,
+            4
+          ],
+          [
+            132,
+            4
+          ],
+          [
+            166,
+            4
+          ],
+          [
+            187,
+            4
+          ],
+          [
+            234,
+            4
+          ],
+          [
+            241,
+            4
+          ],
+          [
+            248,
+            4
+          ],
+          [
+            255,
+            4
+          ],
+          [
+            322,
+            4
+          ],
+          [
+            340,
+            4
+          ],
+          [
+            355,
+            4
+          ],
+          [
+            365,
+            4
+          ],
+          [
+            377,
+            4
+          ],
+          [
+            446,
+            4
+          ],
+          [
+            453,
+            4
+          ],
+          [
+            485,
+            4
+          ]
+        ],
+        "fnv1a64": "f6af7905e204b8fa"
+      }
     },
     {
       "id": "hubs.rebuild",
-      "rva": "0x504e0d0",
+      "rva": "0x504e8d0",
       "bytes": "40574883ec2083b9600b000000488bf9",
-      "mode": "rva"
+      "mode": "normalized_unique",
+      "normalized": {
+        "size": 511,
+        "masks": [
+          [
+            28,
+            4
+          ],
+          [
+            36,
+            4
+          ],
+          [
+            44,
+            4
+          ],
+          [
+            52,
+            4
+          ],
+          [
+            60,
+            4
+          ],
+          [
+            80,
+            4
+          ],
+          [
+            86,
+            4
+          ],
+          [
+            105,
+            4
+          ],
+          [
+            119,
+            4
+          ],
+          [
+            177,
+            4
+          ],
+          [
+            199,
+            4
+          ],
+          [
+            255,
+            4
+          ],
+          [
+            267,
+            4
+          ],
+          [
+            276,
+            4
+          ],
+          [
+            324,
+            4
+          ],
+          [
+            389,
+            1
+          ],
+          [
+            506,
+            1
+          ]
+        ],
+        "fnv1a64": "808bbaf50892655b"
+      }
     },
     {
       "id": "hubs.deferred",
-      "rva": "0x5045510",
-      "bytes": "83b9600b0000000f8eb38b0000c3cccc",
-      "mode": "rva"
+      "rva": "0x5045d10",
+      "bytes": "83b9600b0000000f8e",
+      "mode": "normalized_unique",
+      "normalized": {
+        "size": 14,
+        "masks": [
+          [
+            9,
+            4
+          ]
+        ],
+        "fnv1a64": "575699d3d1554846",
+        "rel32_target": {
+          "offset": 9,
+          "end": 13,
+          "layout": "hubs.rebuild"
+        }
+      }
     },
     {
       "id": "staff.regenerate",
-      "rva": "0x533dd60",
+      "rva": "0x533e890",
       "bytes": "4c8bdc41564881ecb0050000",
-      "mode": "rva"
+      "mode": "normalized_unique",
+      "normalized": {
+        "size": 884,
+        "masks": [
+          [
+            15,
+            4
+          ],
+          [
+            109,
+            4
+          ],
+          [
+            121,
+            4
+          ],
+          [
+            161,
+            4
+          ],
+          [
+            169,
+            4
+          ],
+          [
+            176,
+            4
+          ],
+          [
+            184,
+            4
+          ],
+          [
+            191,
+            4
+          ],
+          [
+            285,
+            4
+          ],
+          [
+            317,
+            4
+          ],
+          [
+            343,
+            4
+          ],
+          [
+            361,
+            4
+          ],
+          [
+            379,
+            4
+          ],
+          [
+            418,
+            4
+          ],
+          [
+            639,
+            4
+          ],
+          [
+            653,
+            4
+          ],
+          [
+            685,
+            4
+          ],
+          [
+            745,
+            4
+          ],
+          [
+            754,
+            4
+          ],
+          [
+            810,
+            1
+          ],
+          [
+            841,
+            1
+          ],
+          [
+            871,
+            1
+          ]
+        ],
+        "fnv1a64": "a8108061cdec4da5"
+      }
     },
     {
       "id": "staff.settings",
-      "rva": "0x533dd7e",
-      "bytes": "4883b908050000004c8bf10f8472020000",
-      "mode": "rva"
+      "rva": "0x533e8ae",
+      "bytes": "4883b908050000004c8bf10f84",
+      "mode": "normalized_unique",
+      "normalized": {
+        "size": 17,
+        "masks": [
+          [
+            13,
+            4
+          ]
+        ],
+        "fnv1a64": "2844fb874268e40f"
+      }
     },
     {
       "id": "skiability.query",
-      "rva": "0x53b2cf0",
+      "rva": "0x53b39e0",
       "bytes": "40555356488d6c24b94881ecb0000000",
-      "mode": "rva"
+      "mode": "normalized_unique",
+      "normalized": {
+        "size": 884,
+        "masks": [
+          [
+            50,
+            4
+          ],
+          [
+            87,
+            4
+          ],
+          [
+            99,
+            4
+          ],
+          [
+            107,
+            4
+          ],
+          [
+            120,
+            4
+          ],
+          [
+            501,
+            4
+          ],
+          [
+            523,
+            4
+          ],
+          [
+            652,
+            4
+          ],
+          [
+            669,
+            4
+          ],
+          [
+            693,
+            4
+          ],
+          [
+            706,
+            4
+          ],
+          [
+            714,
+            4
+          ],
+          [
+            722,
+            4
+          ],
+          [
+            761,
+            4
+          ],
+          [
+            768,
+            4
+          ],
+          [
+            782,
+            4
+          ],
+          [
+            842,
+            1
+          ],
+          [
+            872,
+            1
+          ]
+        ],
+        "fnv1a64": "f814b5e334b084cd"
+      }
     },
     {
       "id": "skiability.memo",
-      "rva": "0x53b2fd2",
+      "rva": "0x53b3cc2",
       "bytes": "443bbeb401000075270f28c6f30f5c86b8010000",
-      "mode": "rva"
+      "mode": "normalized_unique",
+      "normalized": {
+        "size": 50,
+        "masks": [
+          [
+            23,
+            4
+          ],
+          [
+            30,
+            4
+          ],
+          [
+            44,
+            4
+          ]
+        ],
+        "fnv1a64": "68c65f0ebb8372aa"
+      }
     },
     {
       "id": "hub_names.get",
-      "rva": "0x5044340",
+      "rva": "0x5044b40",
       "bytes": "48895c240848896c24104889742418574883ec20488bfa488db1d0010000",
-      "mode": "rva"
+      "mode": "normalized_unique",
+      "normalized": {
+        "size": 153,
+        "masks": [
+          [
+            42,
+            4
+          ],
+          [
+            55,
+            4
+          ],
+          [
+            96,
+            4
+          ]
+        ],
+        "fnv1a64": "d4fcd8fad1a843e1"
+      }
     },
     {
       "id": "hub_names.insert",
-      "rva": "0x5027810",
+      "rva": "0x5028010",
       "bytes": "48895c241048896c24184889742420574883ec40",
-      "mode": "rva"
+      "mode": "normalized_unique",
+      "normalized": {
+        "size": 187,
+        "masks": [
+          [
+            35,
+            4
+          ],
+          [
+            64,
+            4
+          ],
+          [
+            92,
+            4
+          ],
+          [
+            122,
+            4
+          ],
+          [
+            147,
+            4
+          ]
+        ],
+        "fnv1a64": "86f40670041f3ebb"
+      }
     },
     {
       "id": "hub_names.text",
-      "rva": "0x1349b60",
+      "rva": "0x1349ba0",
       "bytes": "488bc45741564883ec5848895810",
-      "mode": "rva"
+      "mode": "normalized_unique",
+      "normalized": {
+        "size": 128,
+        "masks": [
+          [
+            45,
+            4
+          ],
+          [
+            89,
+            4
+          ]
+        ],
+        "fnv1a64": "7725e0f2ce3112d4"
+      }
     },
     {
       "id": "navigation.tick",
-      "rva": "0x5256710",
+      "rva": "0x5257200",
       "bytes": "48895c24184889742420574883ec60488d71c80f29742450488bd9",
       "mode": "unique"
     },
     {
       "id": "navigation.changed",
-      "rva": "0x52439c0",
+      "rva": "0x52444b0",
       "bytes": "c6816008000001c6416901c3",
       "mode": "unique"
     },
     {
       "id": "snow_cpu.validity",
-      "rva": "0x4f7fff5",
+      "rva": "0x4f7fe25",
       "bytes": "0fb681a5010000418800",
-      "mode": "rva"
+      "mode": "normalized_unique",
+      "normalized": {
+        "size": 11,
+        "masks": [],
+        "fnv1a64": "9162fe1838ddb349"
+      }
     },
     {
       "id": "snow_cpu.lookup",
-      "rva": "0x52f5a00",
+      "rva": "0x52f6530",
       "bytes": "4963c0486bd0384903d2488b0a413bc9",
-      "mode": "rva"
+      "mode": "normalized_unique",
+      "normalized": {
+        "size": 718,
+        "masks": [
+          [
+            479,
+            4
+          ],
+          [
+            507,
+            4
+          ]
+        ],
+        "fnv1a64": "f1c96b14f792ed4f"
+      }
     },
     {
       "id": "snow_cpu.mapping",
-      "rva": "0x52f3b90",
+      "rva": "0x52f46c0",
       "bytes": "f20f1089f80000000f57d2f20f5c89e8000000",
-      "mode": "rva"
+      "mode": "normalized_unique",
+      "normalized": {
+        "size": 251,
+        "masks": [
+          [
+            87,
+            4
+          ],
+          [
+            158,
+            4
+          ],
+          [
+            209,
+            4
+          ],
+          [
+            236,
+            4
+          ]
+        ],
+        "fnv1a64": "31e8dfd67f6db5c6"
+      }
     },
     {
       "id": "snow_cpu.ready",
-      "rva": "0x52f5c46",
-      "bytes": "41385424200f84e3fdffff",
-      "mode": "rva"
+      "rva": "0x52f6776",
+      "bytes": "41385424200f84",
+      "mode": "normalized_unique",
+      "normalized": {
+        "size": 136,
+        "masks": [
+          [
+            7,
+            4
+          ],
+          [
+            15,
+            4
+          ]
+        ],
+        "fnv1a64": "19b77a5dc6051c2a"
+      }
     },
     {
       "id": "trail_ratings.classifier",
@@ -160,19 +729,191 @@
     },
     {
       "id": "terrain.pads",
-      "rva": "0x4ff2d80",
+      "rva": "0x4ff3310",
       "bytes": "40555657488dac2460feffff4881eca0020000",
-      "mode": "rva"
+      "mode": "normalized_unique",
+      "normalized": {
+        "size": 2088,
+        "masks": [
+          [
+            22,
+            4
+          ],
+          [
+            40,
+            4
+          ],
+          [
+            231,
+            4
+          ],
+          [
+            255,
+            4
+          ],
+          [
+            274,
+            4
+          ],
+          [
+            293,
+            4
+          ],
+          [
+            306,
+            4
+          ],
+          [
+            480,
+            4
+          ],
+          [
+            515,
+            4
+          ],
+          [
+            536,
+            4
+          ],
+          [
+            566,
+            4
+          ],
+          [
+            585,
+            4
+          ],
+          [
+            601,
+            4
+          ],
+          [
+            706,
+            4
+          ],
+          [
+            724,
+            4
+          ],
+          [
+            742,
+            4
+          ],
+          [
+            807,
+            4
+          ],
+          [
+            842,
+            4
+          ],
+          [
+            924,
+            4
+          ],
+          [
+            1044,
+            4
+          ],
+          [
+            1099,
+            4
+          ],
+          [
+            1157,
+            4
+          ],
+          [
+            1181,
+            4
+          ],
+          [
+            1197,
+            4
+          ],
+          [
+            1227,
+            4
+          ],
+          [
+            1283,
+            4
+          ],
+          [
+            1334,
+            4
+          ],
+          [
+            1342,
+            4
+          ],
+          [
+            1352,
+            4
+          ],
+          [
+            1609,
+            4
+          ],
+          [
+            1658,
+            4
+          ],
+          [
+            1668,
+            4
+          ],
+          [
+            1684,
+            4
+          ],
+          [
+            1840,
+            4
+          ],
+          [
+            1872,
+            4
+          ],
+          [
+            1895,
+            4
+          ],
+          [
+            2034,
+            4
+          ],
+          [
+            2073,
+            4
+          ]
+        ],
+        "fnv1a64": "d675c256d015e98f"
+      }
     },
     {
       "id": "terrain.pads_cleanup",
-      "rva": "0x4fe0680",
+      "rva": "0x4fe0c30",
       "bytes": "48895c240848896c2410488974241848897c242041564883ec30488b9988030000",
-      "mode": "rva"
+      "mode": "normalized_unique",
+      "normalized": {
+        "size": 267,
+        "masks": [
+          [
+            131,
+            4
+          ],
+          [
+            236,
+            4
+          ]
+        ],
+        "fnv1a64": "9067e73db275e9c7"
+      }
     },
     {
       "id": "session.game_options",
-      "rva": "0x502ea3a",
+      "rva": "0x503322a",
       "bytes": "41894578488b85b0000000f20f1000f2410f1185800000008b400841898588000000",
       "mode": "unique"
     }

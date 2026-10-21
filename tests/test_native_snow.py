@@ -26,6 +26,8 @@ class NativeSnowMemoryTests(unittest.TestCase):
 #include <math.h>
 #define __declspec(x)
 #define MAX_PATH 260
+#include "layout_profiles.h"
+static uint32_t native_layout_rva(enum SkiEOLayoutId id) {(void)id; return 0;}
 static unsigned char executable[0x5400000],cache[0x300],entries[112];
 static float samples[4096*8];
 static size_t entry_limit;
@@ -98,7 +100,7 @@ int exercise(const char *input,const char *output,int modern,int broken) {
         file = folder / 'snow.c'
         file.write_text(shim + function + harness)
         library = folder / 'snow.so'
-        subprocess.run(['cc', '-shared', '-fPIC', '-O2', '-Wall', '-Wextra', '-Werror',
+        subprocess.run(['cc', '-shared', '-fPIC', '-O2', '-Wall', '-Wextra', '-Werror', '-I', str(ROOT / 'native/SkiEONativeTerrain'),
                         '-Wno-misleading-indentation', str(file), '-lm', '-o', str(library)],
                        check=True, capture_output=True)
         cls.library = ctypes.CDLL(str(library))

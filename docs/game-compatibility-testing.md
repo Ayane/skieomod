@@ -86,10 +86,16 @@ Le contrat versionné est [game-contract.json](../compatibility/game-contract.js
 
 Les gardes sont lues dans les sections du fichier PE avec contrôle de leurs
 permissions. Les gardes `rva` restent liées à leur adresse revue ; un candidat
-retrouvé ailleurs est un indice de diagnostic. Les gardes `unique` de navigation
-et `rating_semantic` de notation acceptent les recherches prévues par leurs
-résolveurs, avec leurs validations supplémentaires. Le protocole ne modifie
-aucune adresse ni aucun profil.
+retrouvé ailleurs est un indice de diagnostic. Les gardes `normalized_unique`
+recherchent une empreinte de code dans les sections exécutables, en neutralisant
+uniquement les opérandes d'adresse relatifs explicitement revus. Les instructions,
+champs privés, constantes et branches internes restent vérifiés. Un résultat
+absent ou ambigu est refusé ; le wrapper différé des hubs doit aussi pointer
+vers la reconstruction reconnue. Le helper et le précontrôle utilisent les
+mêmes descripteurs, générés depuis le contrat avec `python3 -m tools.native_layouts`.
+Les gardes `unique` de navigation et `rating_semantic` de notation acceptent les
+recherches prévues par leurs résolveurs, avec leurs validations supplémentaires.
+Le protocole lit l'exécutable sans le modifier et ne réécrit aucun profil.
 
 Pour les ressources, le script utilise le `retoc` local déjà construit sous
 `build/nanite/retoc-target/release/retoc`, ou celui indiqué avec `--retoc` :
@@ -266,3 +272,5 @@ qualification réelle du build installé.
 La [revue du build 26097896](game-update-26097896.md) documente la qualification
 avec 1.24.7 et les essais du téléchargement, de l’installation différée et de la
 récupération des mises à jour automatiques.
+La [revue du build 26111862](game-update-26111862.md) décrit la relocalisation
+automatique contrôlée introduite en 1.24.9.

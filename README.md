@@ -49,8 +49,10 @@ resort scenario. Game updates can require compatibility fixes; see the
 [compatibility protocol](docs/game-compatibility-testing.md).
 The [snow correction report](docs/flying-snow-1.24.8.md) explains the terrain
 and furniture fixes in 1.24.8.
-The [26097896 report](docs/game-update-26097896.md) records the current demo
-qualification, native fixes and automatic mod updates from the version warning.
+The [26111862 report](docs/game-update-26111862.md) records the current demo
+qualification and guarded automatic relocation of native functions. The
+[26097896 report](docs/game-update-26097896.md) describes automatic mod updates
+from the version warning.
 
 ## Create and publish
 

@@ -24,6 +24,7 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 from tools import skieo_install as desktop, skieo_loader as loader, skieo_updates as updates
 from tools import trail_rating_profile
+from tools import native_layouts
 from tools.custom_packages import inspect_package
 from tools.compare_scenario_checkpoints import differences as checkpoint_differences
 
@@ -101,6 +102,15 @@ def inspect_guards(image, guards):
     ratings = None
     for guard in guards:
         expected = bytes.fromhex(guard['bytes'])
+        if guard.get('mode') == 'normalized_unique':
+            locations = native_layouts.resolve(image, guard, guards)
+            matched = len(locations) == 1
+            results.append(dict(id='native.' + guard['id'], status='pass' if matched else 'fail', required=True,
+                detail='unique reviewed code layout matched' if matched else 'missing, changed or ambiguous native code layout',
+                expected_rva=guard['rva'], candidate_rvas=[hex(n) for n in locations],
+                resolved_rva=hex(locations[0]) if matched else None,
+                relocated=bool(matched and locations[0] != int(guard['rva'], 0))))
+            continue
         if guard.get('mode') == 'rating_semantic':
             names={'trail_ratings.classifier':'calculate','trail_ratings.palette':'palette','trail_ratings.color':'color'}
             name=names.get(guard['id'])

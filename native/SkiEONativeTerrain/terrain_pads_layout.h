@@ -3,6 +3,7 @@
 
 #include <stddef.h>
 #include <stdint.h>
+#include "layout_profiles.h"
 
 /* Reviewed APlaceableActor pad registration, including both branches for
    conforming props and flattened buildings. Exact code fingerprints reject
@@ -23,26 +24,30 @@ static int skieo_terrain_pads_matches(const uint8_t *code, size_t size,
                                     uint32_t rva)
 {
     if (size < SKIEO_TERRAIN_PADS_BYTES) return 0;
-    uint64_t expected = rva == 0x4FF2D80 ? UINT64_C(0x6915313355AABD42)
+    uint64_t expected = rva == 0x4FF3310 ? UINT64_C(0x64D977CF941CB6A1)
+        : rva == 0x4FF2D80 ? UINT64_C(0x6915313355AABD42)
         : rva == 0x4FE1470 ? UINT64_C(0x8AB1FF5C88F7D5F9)
         : rva == 0x4FE0F70 ? UINT64_C(0x7BAAABDF7939B880)
         : rva == 0x4FE0FF0 ? UINT64_C(0x836BFA5102F90B48)
         : rva == 0x4FE0C00 ? UINT64_C(0x0879A1D98812E619)
         : rva == 0x4FDF110 ? UINT64_C(0xE916A3448ECA3D54) : 0;
-    return expected && skieo_terrain_pads_hash(code, SKIEO_TERRAIN_PADS_BYTES) == expected;
+    return (expected && skieo_terrain_pads_hash(code, SKIEO_TERRAIN_PADS_BYTES) == expected)
+        || (rva && skieo_code_layout_matches(&skieo_layouts[SKIEO_LAYOUT_TERRAIN_PADS], code, size));
 }
 
 static int skieo_terrain_pads_cleanup_matches(const uint8_t *code, size_t size,
                                             uint32_t rva)
 {
     if (size < SKIEO_TERRAIN_PADS_CLEANUP_BYTES) return 0;
-    uint64_t expected = rva == 0x4FE0680 ? UINT64_C(0x41B23876F9157D3C)
+    uint64_t expected = rva == 0x4FE0C30 ? UINT64_C(0x8F64B2F9C92C2D95)
+        : rva == 0x4FE0680 ? UINT64_C(0x41B23876F9157D3C)
         : rva == 0x4FCC520 ? UINT64_C(0xBD5FDE5E6059003A)
         : rva == 0x4FCC020 ? UINT64_C(0x36BC6A519E3F4B78)
         : rva == 0x4FCC230 ? UINT64_C(0x2CC68335B006FA28)
         : rva == 0x4FCBE40 ? UINT64_C(0xD5CE2DE6D6D72363)
         : rva == 0x4FCA360 ? UINT64_C(0x334861B36D7EC8FA) : 0;
-    return expected && skieo_terrain_pads_hash(code, SKIEO_TERRAIN_PADS_CLEANUP_BYTES) == expected;
+    return (expected && skieo_terrain_pads_hash(code, SKIEO_TERRAIN_PADS_CLEANUP_BYTES) == expected)
+        || (rva && skieo_code_layout_matches(&skieo_layouts[SKIEO_LAYOUT_TERRAIN_PADS_CLEANUP], code, size));
 }
 
 #endif

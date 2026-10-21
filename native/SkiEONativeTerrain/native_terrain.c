@@ -11,6 +11,58 @@
 #include "game_options_layout.h"
 #include "terrain_pads_layout.h"
 #include "surface_sampling.h"
+#include "layout_profiles.h"
+
+static uint32_t native_layout_rva(enum SkiEOLayoutId id)
+{
+    static uint32_t cached[SKIEO_LAYOUT_COUNT];
+    static uint8_t searched[SKIEO_LAYOUT_COUNT];
+    uint8_t *module = (uint8_t *)GetModuleHandleW(L"skieogame.exe");
+    if (!module || id >= SKIEO_LAYOUT_COUNT) return 0;
+    IMAGE_DOS_HEADER *dos = (IMAGE_DOS_HEADER *)module;
+    if (dos->e_magic != IMAGE_DOS_SIGNATURE || dos->e_lfanew <= 0 || dos->e_lfanew > 1048576) return 0;
+    IMAGE_NT_HEADERS64 *nt = (IMAGE_NT_HEADERS64 *)(module + dos->e_lfanew);
+    if (nt->Signature != IMAGE_NT_SIGNATURE || nt->OptionalHeader.Magic != IMAGE_NT_OPTIONAL_HDR64_MAGIC ||
+        !nt->FileHeader.NumberOfSections || nt->FileHeader.NumberOfSections > 96) return 0;
+    const SkiEOCodeLayout *layout = &skieo_layouts[id];
+    uint32_t jump_target = id == SKIEO_LAYOUT_HUBS_DEFERRED ? native_layout_rva(SKIEO_LAYOUT_HUBS_DEFERRED_TARGET) : 0;
+    if (id == SKIEO_LAYOUT_HUBS_DEFERRED && !jump_target) return 0;
+    if (searched[id]) {
+        uint32_t rva = cached[id];
+        if (rva && jump_target) {
+            int32_t displacement; memcpy(&displacement, module + rva + SKIEO_LAYOUT_HUBS_DEFERRED_OFFSET, 4);
+            if ((int64_t)rva + SKIEO_LAYOUT_HUBS_DEFERRED_END + displacement != jump_target) return 0;
+        }
+        return rva && skieo_code_layout_matches(layout, module + rva, layout->code_size) ? rva : 0;
+    }
+    IMAGE_SECTION_HEADER *sections = IMAGE_FIRST_SECTION(nt);
+    unsigned matches = 0;
+    uint32_t resolved = 0;
+    for (unsigned i = 0; i < nt->FileHeader.NumberOfSections; i++) {
+        IMAGE_SECTION_HEADER *section = &sections[i];
+        uint32_t start = section->VirtualAddress, size = section->Misc.VirtualSize;
+        if (!(section->Characteristics & IMAGE_SCN_MEM_EXECUTE) || start >= nt->OptionalHeader.SizeOfImage ||
+            size > nt->OptionalHeader.SizeOfImage - start) continue;
+        size_t offset = 0;
+        unsigned count = 0;
+        if (jump_target) {
+            for (size_t at = 0; at + layout->code_size <= size; at++) {
+                const uint8_t *code = module + start + at;
+                if (code[0] != layout->prefix[0] || !skieo_code_layout_matches(layout, code, size - at)) continue;
+                int32_t displacement; memcpy(&displacement, code + SKIEO_LAYOUT_HUBS_DEFERRED_OFFSET, 4);
+                if ((int64_t)start + (int64_t)at + SKIEO_LAYOUT_HUBS_DEFERRED_END + displacement != jump_target) continue;
+                offset = at;
+                if (++count == 2) break;
+            }
+        } else count = skieo_code_layout_scan(layout, module + start, size, &offset);
+        matches += count;
+        if (matches > 1) break;
+        if (count) resolved = start + (uint32_t)offset;
+    }
+    searched[id] = 1;
+    cached[id] = matches == 1 ? resolved : 0;
+    return cached[id];
+}
 
 #pragma pack(push, 1)
 typedef struct SkiEOHeightJob {
@@ -2092,7 +2144,7 @@ __declspec(dllexport) int skieo_register_placeable_hubs(void *lua_state)
        25766443, 25808900 and 25970577. The batching counter moved from 0x838
        through 0x8A8, 0x948 and 0xA60 to 0xB08 in build 25996759.
        Every profile must match all three independent signatures before any call. */
-    static const uint32_t profiles[][4] = {
+    uint32_t profiles[][4] = {
         {0x04F75EB0, 0x04F9D390, 0x04FFBB10, 0x838},
         {0x04F76210, 0x04F9D750, 0x04FFBF60, 0x838},
         {0x04F81140, 0x04FAAF20, 0x0502C9A0, 0x838},
@@ -2105,6 +2157,7 @@ __declspec(dllexport) int skieo_register_placeable_hubs(void *lua_state)
         {0x04FAFD20, 0x04FAFEE0, 0x0504A990, 0xB10}, /* build 26056171 */
         {0x04FB02F0, 0x04FB04B0, 0x0504B300, 0xB10}, /* build 26071000 */
         {0x04FA35B0, 0x04FCD150, 0x0504E0D0, 0xB60}, /* build 26097896 */
+        {0x04FA1870, 0x04FCCFE0, 0x0504E8D0, 0xB60}, /* build 26111862 */
     };
     uint32_t building_rva = 0, lift_rva = 0, rebuild_rva = 0, hold_offset = 0;
     static const uint8_t building_signature[] = {
@@ -2131,6 +2184,10 @@ __declspec(dllexport) int skieo_register_placeable_hubs(void *lua_state)
         0x38, 0x08, 0x00, 0x00, 0x00, 0x48, 0x8B, 0xF9,
     };
     size_t image_size = nt->OptionalHeader.SizeOfImage;
+    size_t latest = sizeof(profiles)/sizeof(profiles[0])-1;
+    profiles[latest][0] = native_layout_rva(SKIEO_LAYOUT_HUBS_BUILDING);
+    profiles[latest][1] = native_layout_rva(SKIEO_LAYOUT_HUBS_LIFT);
+    profiles[latest][2] = native_layout_rva(SKIEO_LAYOUT_HUBS_REBUILD);
     for (size_t index = 0; index < sizeof(profiles) / sizeof(profiles[0]); ++index) {
         const uint32_t *profile = profiles[index];
         uint8_t expected_rebuild[sizeof(rebuild_signature)];
@@ -2298,7 +2355,7 @@ __declspec(dllexport) int skieo_rebuild_hubs(void *lua_state)
 
     /* Rebuild RVA, deferred wrapper RVA, batching-counter offset and the
        wrapper's inspected relative jump displacement. */
-    static const uint32_t profiles[][4] = {
+    uint32_t profiles[][4] = {
         {0x04FFBB10, 0x04FF46F0, 0x838, 0x7413},
         {0x04FFBF60, 0x04FF4B40, 0x838, 0x7413},
         {0x0502FF60, 0x050284E0, 0x948, 0x7A73},
@@ -2308,7 +2365,8 @@ __declspec(dllexport) int skieo_rebuild_hubs(void *lua_state)
         {0x0504A9A0, 0x05041AC0, 0xB08, 0x8ED3}, /* build 26040817 */
         {0x0504A990, 0x05041AD0, 0xB10, 0x8EB3}, /* build 26056171 */
         {0x0504B300, 0x05042440, 0xB10, 0x8EB3}, /* build 26071000 */
-        {0x0504E0D0, 0x05045510, 0xB60, 0x8AB3}, /* build 26097896 */
+        {0x0504E0D0, 0x05045510, 0xB60, 0x8BB3}, /* build 26097896 */
+        {0x0504E8D0, 0x05045D10, 0xB60, 0x8BB3}, /* build 26111862 */
     };
     uint32_t rebuild_wrapper_rva = 0, hold_offset = 0;
     static const uint8_t rebuild_signature[] = {
@@ -2320,6 +2378,9 @@ __declspec(dllexport) int skieo_rebuild_hubs(void *lua_state)
         0x8E, 0x13, 0x74, 0x00, 0x00, 0xC3, 0xCC, 0xCC,
     };
     size_t image_size = nt->OptionalHeader.SizeOfImage;
+    size_t latest = sizeof(profiles)/sizeof(profiles[0])-1;
+    profiles[latest][0] = native_layout_rva(SKIEO_LAYOUT_HUBS_REBUILD);
+    profiles[latest][1] = native_layout_rva(SKIEO_LAYOUT_HUBS_DEFERRED);
     for (size_t index = 0; index < sizeof(profiles) / sizeof(profiles[0]); ++index) {
         const uint32_t *profile = profiles[index];
         uint8_t expected_rebuild[sizeof(rebuild_signature)];
@@ -2332,7 +2393,7 @@ __declspec(dllexport) int skieo_rebuild_hubs(void *lua_state)
         if (image_size >= profile[0] + sizeof(rebuild_signature) &&
             image_size >= profile[1] + sizeof(wrapper_signature) &&
             memcmp(module + profile[0], expected_rebuild, sizeof(expected_rebuild)) == 0 &&
-            memcmp(module + profile[1], expected_wrapper, sizeof(expected_wrapper)) == 0) {
+            memcmp(module + profile[1], expected_wrapper, index == latest ? 9 : sizeof(expected_wrapper)) == 0) {
             rebuild_wrapper_rva = profile[1];
             hold_offset = profile[2];
             break;
@@ -2506,7 +2567,7 @@ __declspec(dllexport) int skieo_refresh_staff_pool(void *lua_state)
         fprintf(status, "error: invalid game module"); fclose(status); return 0;
     }
     IMAGE_NT_HEADERS64 *nt = (IMAGE_NT_HEADERS64 *)(module + dos->e_lfanew);
-    static const struct {
+    struct {
         uint32_t rva, settings_offset, pool_offset, element_size, owner_size;
         uint8_t signature[12], settings_guard[17];
     } profiles[] = {
@@ -2543,16 +2604,20 @@ __declspec(dllexport) int skieo_refresh_staff_pool(void *lua_state)
         {0x0533DD60, 0x508, 0x4D8, 0x528, 0x688, /* build 26097896 */
             {0x4C,0x8B,0xDC,0x41,0x56,0x48,0x81,0xEC,0xB0,0x05,0x00,0x00},
             {0x48,0x83,0xB9,0x08,0x05,0x00,0x00,0x00,0x4C,0x8B,0xF1,0x0F,0x84,0x72,0x02,0x00,0x00}},
+        {0x0533E890, 0x508, 0x4D8, 0x528, 0x688, /* build 26111862 */
+            {0x4C,0x8B,0xDC,0x41,0x56,0x48,0x81,0xEC,0xB0,0x05,0x00,0x00},
+            {0x48,0x83,0xB9,0x08,0x05,0x00,0x00,0x00,0x4C,0x8B,0xF1,0x0F,0x84,0x72,0x02,0x00,0x00}},
     };
     if (nt->Signature != IMAGE_NT_SIGNATURE ||
         nt->OptionalHeader.Magic != IMAGE_NT_OPTIONAL_HDR64_MAGIC) {
         fprintf(status, "error: invalid staff executable header"); fclose(status); return 0;
     }
+    profiles[sizeof(profiles)/sizeof(profiles[0])-1].rva = native_layout_rva(SKIEO_LAYOUT_STAFF_REGENERATE);
     size_t profile_index = sizeof(profiles) / sizeof(profiles[0]);
     for (size_t i = 0; i < sizeof(profiles) / sizeof(profiles[0]); ++i) {
         if (nt->OptionalHeader.SizeOfImage >= profiles[i].rva + 0x375 &&
             !memcmp(module + profiles[i].rva, profiles[i].signature, sizeof(profiles[i].signature)) &&
-            !memcmp(module + profiles[i].rva + 0x1E, profiles[i].settings_guard, sizeof(profiles[i].settings_guard))) {
+            !memcmp(module + profiles[i].rva + 0x1E, profiles[i].settings_guard, i == sizeof(profiles)/sizeof(profiles[0])-1 ? 13 : sizeof(profiles[i].settings_guard))) {
             profile_index = i;
             break;
         }
@@ -2975,7 +3040,9 @@ __declspec(dllexport) int skieo_refresh_placeable_pads(void *lua_state)
         if (dos->e_magic == IMAGE_DOS_SIGNATURE && dos->e_lfanew > 0
             && dos->e_lfanew < 0x100000 && readable_range(module + dos->e_lfanew, sizeof(IMAGE_NT_HEADERS64))) {
             IMAGE_NT_HEADERS64 *nt = (IMAGE_NT_HEADERS64 *)(module + dos->e_lfanew);
-            const uint32_t profiles[][2] = {{0x4FF2D80, 0x4FE0680}, {0x4FE1470, 0x4FCC520}, {0x4FE0F70, 0x4FCC020}, {0x4FE0FF0, 0x4FCC230}, {0x4FE0C00, 0x4FCBE40}, {0x4FDF110, 0x4FCA360}};
+            uint32_t profiles[][2] = {{0x4FF3310, 0x4FE0C30}, {0x4FF2D80, 0x4FE0680}, {0x4FE1470, 0x4FCC520}, {0x4FE0F70, 0x4FCC020}, {0x4FE0FF0, 0x4FCC230}, {0x4FE0C00, 0x4FCBE40}, {0x4FDF110, 0x4FCA360}};
+            profiles[0][0] = native_layout_rva(SKIEO_LAYOUT_TERRAIN_PADS);
+            profiles[0][1] = native_layout_rva(SKIEO_LAYOUT_TERRAIN_PADS_CLEANUP);
             if (nt->Signature == IMAGE_NT_SIGNATURE && nt->OptionalHeader.Magic == IMAGE_NT_OPTIONAL_HDR64_MAGIC) {
                 for (size_t i = 0; i < sizeof(profiles)/sizeof(*profiles); ++i) {
                     uint32_t rva = profiles[i][0], clear_rva = profiles[i][1];
@@ -3035,7 +3102,7 @@ __declspec(dllexport) int skieo_refresh_skiability(void *lua_state)
     memcpy(&cls,owner+0x10,8);
     if(cls!=job.owner_class) {write_status("error: skiability owner class changed");return 0;}
     uint8_t *module=(uint8_t *)GetModuleHandleW(L"skieogame.exe");
-    static const uint32_t profiles[][3] = {
+    uint32_t profiles[][3] = {
         {0x05321560, 0x05321842, 0x19C},
         {0x0538DF30, 0x0538E212, 0x19C},
         {0x05390430, 0x05390712, 0x1B4}, /* build 25996759 */
@@ -3044,10 +3111,14 @@ __declspec(dllexport) int skieo_refresh_skiability(void *lua_state)
         {0x053AAC70, 0x053AAF52, 0x1B4}, /* build 26056171 */
         {0x053ADA10, 0x053ADCF2, 0x1B4}, /* build 26071000 */
         {0x053B2CF0, 0x053B2FD2, 0x1B4}, /* build 26097896 */
+        {0x053B39E0, 0x053B3CC2, 0x1B4}, /* build 26111862 */
     };
     static const uint8_t query[]={0x40,0x55,0x53,0x56,0x48,0x8d,0x6c,0x24,0xb9,0x48,0x81,0xec,0xb0,0,0,0};
     static const uint8_t memo[]={0x44,0x3b,0xbe,0x9c,0x01,0,0,0x75,0x27,0x0f,0x28,0xc6,0xf3,0x0f,0x5c,0x86,0xa0,0x01,0,0};
     uint32_t memo_offset=0;
+    size_t latest=sizeof(profiles)/sizeof(profiles[0])-1;
+    profiles[latest][0]=native_layout_rva(SKIEO_LAYOUT_SKIABILITY_QUERY);
+    profiles[latest][1]=native_layout_rva(SKIEO_LAYOUT_SKIABILITY_MEMO);
     for(size_t i=0;module&&i<sizeof(profiles)/sizeof(profiles[0]);i++) {
         uint8_t expected_memo[sizeof(memo)];
         uint32_t threshold_offset=profiles[i][2]+4;
@@ -3089,7 +3160,7 @@ __declspec(dllexport) int skieo_name_hubs(void *lua_state)
     if(!good||!job.owner||!job.owner_class||!readable_range(owner,0x220)) {write_status("error: invalid hub names job");return 0;}
     memcpy(&cls,owner+0x10,8);if(cls!=job.owner_class){write_status("error: hub names owner class changed");return 0;}
     uint8_t *module=(uint8_t *)GetModuleHandleW(L"skieogame.exe");
-    static const uint32_t profiles[][3] = {
+    uint32_t profiles[][3] = {
         {0x050269A0, 0x050054B0, 0x01349070},
         {0x0503C070, 0x0501E3A0, 0x01349260}, /* build 25970577 */
         {0x0503E520, 0x0501F560, 0x01349600}, /* build 25996759 */
@@ -3098,10 +3169,15 @@ __declspec(dllexport) int skieo_name_hubs(void *lua_state)
         {0x050407F0, 0x050214B0, 0x01349820}, /* build 26056171 */
         {0x05041160, 0x05021DF0, 0x01349820}, /* build 26071000 */
         {0x05044340, 0x05027810, 0x01349B60}, /* build 26097896 */
+        {0x05044B40, 0x05028010, 0x01349BA0}, /* build 26111862 */
     };
     static const uint8_t get[]={0x48,0x89,0x5c,0x24,0x08,0x48,0x89,0x6c,0x24,0x10,0x48,0x89,0x74,0x24,0x18,0x57,0x48,0x83,0xec,0x20,0x48,0x8b,0xfa,0x48,0x8d,0xb1,0xd0,0x01,0,0};
     static const uint8_t insert[]={0x48,0x89,0x5c,0x24,0x10,0x48,0x89,0x6c,0x24,0x18,0x48,0x89,0x74,0x24,0x20,0x57,0x48,0x83,0xec,0x40};
     static const uint8_t factory[]={0x48,0x8b,0xc4,0x57,0x41,0x56,0x48,0x83,0xec,0x58,0x48,0x89,0x58,0x10};
+    size_t latest=sizeof(profiles)/sizeof(profiles[0])-1;
+    profiles[latest][0]=native_layout_rva(SKIEO_LAYOUT_HUB_NAMES_GET);
+    profiles[latest][1]=native_layout_rva(SKIEO_LAYOUT_HUB_NAMES_INSERT);
+    profiles[latest][2]=native_layout_rva(SKIEO_LAYOUT_HUB_NAMES_TEXT);
     const uint32_t *profile=NULL;
     for(size_t i=0;module&&i<sizeof(profiles)/sizeof(profiles[0]);i++) {
         const uint32_t *p=profiles[i];
@@ -3210,7 +3286,7 @@ __declspec(dllexport) int skieo_sample_snow(void *lua_state)
     static const uint8_t expanded_lookup[]={0x49,0x63,0xc0,0x48,0x6b,0xd0,0x38,0x49,0x03,0xd2,0x48,0x8b,0x0a,0x41,0x3b,0xc9};
     static const uint8_t expanded_ready[]={0x41,0x38,0x54,0x24,0x20,0x0f,0x84,0xe3,0xfd,0xff,0xff};
     static const uint8_t mapping[]={0xf2,0x0f,0x10,0x89,0xf8,0,0,0,0x0f,0x57,0xd2,0xf2,0x0f,0x5c,0x89,0xe8,0,0,0};
-    static const struct {
+    struct {
         uint32_t validity_rva,lookup_rva,mapping_rva,ready_rva,stride,ready;
         const uint8_t *lookup_signature;
         size_t lookup_size;
@@ -3222,17 +3298,24 @@ __declspec(dllexport) int skieo_sample_snow(void *lua_state)
         {0x04F83625,0x052EE390,0x052EC520,0x052EE5D6,56,0x28,expanded_lookup,sizeof(expanded_lookup)}, /* build 26056171 */
         {0x04F83C35,0x052F0C00,0x052EED90,0x052F0E46,56,0x28,expanded_lookup,sizeof(expanded_lookup)}, /* build 26071000 */
         {0x04F7FFF5,0x052F5A00,0x052F3B90,0x052F5C46,56,0x28,expanded_lookup,sizeof(expanded_lookup)}, /* build 26097896 */
+        {0x04F7FE25,0x052F6530,0x052F46C0,0x052F6776,56,0x28,expanded_lookup,sizeof(expanded_lookup)}, /* build 26111862 */
     };
+    size_t latest=sizeof(profiles)/sizeof(profiles[0])-1;
+    profiles[latest].validity_rva=native_layout_rva(SKIEO_LAYOUT_SNOW_CPU_VALIDITY);
+    profiles[latest].lookup_rva=native_layout_rva(SKIEO_LAYOUT_SNOW_CPU_LOOKUP);
+    profiles[latest].mapping_rva=native_layout_rva(SKIEO_LAYOUT_SNOW_CPU_MAPPING);
+    profiles[latest].ready_rva=native_layout_rva(SKIEO_LAYOUT_SNOW_CPU_READY);
     uint32_t stride=0,ready=0;
     for(size_t i=0;exe&&i<sizeof(profiles)/sizeof(profiles[0]);i++) {
-        if(readable_range(exe+profiles[i].validity_rva,sizeof(validity))
+        if((i!=latest || profiles[i].ready_rva) && profiles[i].validity_rva && profiles[i].lookup_rva && profiles[i].mapping_rva
+            && readable_range(exe+profiles[i].validity_rva,sizeof(validity))
             &&readable_range(exe+profiles[i].lookup_rva,profiles[i].lookup_size)
             &&readable_range(exe+profiles[i].mapping_rva,sizeof(mapping))
             &&!memcmp(exe+profiles[i].validity_rva,validity,sizeof(validity))
             &&!memcmp(exe+profiles[i].lookup_rva,profiles[i].lookup_signature,profiles[i].lookup_size)
             &&!memcmp(exe+profiles[i].mapping_rva,mapping,sizeof(mapping))
             &&(!profiles[i].ready_rva || (readable_range(exe+profiles[i].ready_rva,sizeof(expanded_ready))
-                &&!memcmp(exe+profiles[i].ready_rva,expanded_ready,sizeof(expanded_ready))))) {
+                &&!memcmp(exe+profiles[i].ready_rva,expanded_ready,i==latest ? 7 : sizeof(expanded_ready))))) {
             stride=profiles[i].stride;ready=profiles[i].ready;break;
         }
     }

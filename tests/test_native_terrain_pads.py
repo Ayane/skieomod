@@ -57,11 +57,11 @@ int inspect_cleanup(const uint8_t *data, size_t size, uint32_t rva) {
 
     def test_unknown_code_and_truncated_snapshots_are_refused(self):
         raw = ctypes.create_string_buffer(0x828)
-        for rva in (0x4ff2d80, 0x4fe1470, 0x4fe0f70, 0x4fe0ff0, 0x4fe0c00, 0x4fdf110, 0, 0x4fe0c01):
+        for rva in (0x4ff3310, 0x4ff2d80, 0x4fe1470, 0x4fe0f70, 0x4fe0ff0, 0x4fe0c00, 0x4fdf110, 0, 0x4fe0c01):
             for size in range(0x829):
                 self.assertFalse(self.inspect(raw, size, rva))
         self.assertEqual(raw.raw, bytes(len(raw)))
-        for rva in (0x4fe0680, 0x4fcc520, 0x4fcc020, 0x4fcc230, 0x4fcbe40, 0x4fca360, 0):
+        for rva in (0x4fe0c30, 0x4fe0680, 0x4fcc520, 0x4fcc020, 0x4fcc230, 0x4fcbe40, 0x4fca360, 0):
             for size in range(0x10c):
                 self.assertFalse(self.inspect_cleanup(raw, size, rva))
 
@@ -69,6 +69,7 @@ int inspect_cleanup(const uint8_t *data, size_t size, uint32_t rva) {
         # Optional evidence from local licensed copies; never store game code
         # in the repository. CI still runs the portable refusal/hash tests.
         from tools.check_game_compatibility import PEImage
+        from tools import native_layouts
         from tools.skieo_install import load_config
         config = load_config()
         binary = Path(config.get('binary_dir', ROOT / 'build/no-configured-game')) / 'skieogame.exe'
@@ -79,6 +80,8 @@ int inspect_cleanup(const uint8_t *data, size_t size, uint32_t rva) {
         if binary.is_file() and hashlib.sha256(binary.read_bytes()).hexdigest() == reference['reference_executable_sha256']:
             pad_guard = next(guard for guard in reference['guards'] if guard['id'] == 'terrain.pads')
             candidates.append((binary, int(pad_guard['rva'], 0)))
+        pad_guard = next(g for g in reference['guards'] if g['id'] == 'terrain.pads')
+        cleanup_guard = next(g for g in reference['guards'] if g['id'] == 'terrain.pads_cleanup')
         found = 0
         for path, rva in candidates:
             if not path.is_file():
@@ -90,16 +93,22 @@ int inspect_cleanup(const uint8_t *data, size_t size, uint32_t rva) {
             self.assertFalse(self.inspect(raw, len(code), 0))
             for offset in range(len(code)):
                 raw[offset] = bytes([code[offset] ^ 1])
-                self.assertFalse(self.inspect(raw, len(code), rva), hex(offset))
+                layout = pad_guard['normalized']
+                allowed = (native_layouts.fingerprint(code, layout['masks']) == int(layout['fnv1a64'],16)
+                    and any(a <= offset < a+n for a,n in layout['masks']))
+                self.assertEqual(bool(self.inspect(raw, len(code), rva)), allowed, hex(offset))
                 raw[offset] = bytes([code[offset]])
             self.assertEqual(raw.raw[:-1], code)
-            cleanup_rva = {0x4ff2d80: 0x4fe0680, 0x4fe1470: 0x4fcc520, 0x4fe0f70: 0x4fcc020, 0x4fe0ff0: 0x4fcc230, 0x4fe0c00: 0x4fcbe40, 0x4fdf110: 0x4fca360}[rva]
+            cleanup_rva = {0x4ff3310: 0x4fe0c30, 0x4ff2d80: 0x4fe0680, 0x4fe1470: 0x4fcc520, 0x4fe0f70: 0x4fcc020, 0x4fe0ff0: 0x4fcc230, 0x4fe0c00: 0x4fcbe40, 0x4fdf110: 0x4fca360}[rva]
             code = PEImage(path.read_bytes()).read(cleanup_rva, 0x10b)
             raw = ctypes.create_string_buffer(code)
             self.assertTrue(self.inspect_cleanup(raw, len(code), cleanup_rva))
             for offset in range(len(code)):
                 raw[offset] = bytes([code[offset] ^ 1])
-                self.assertFalse(self.inspect_cleanup(raw, len(code), cleanup_rva), hex(offset))
+                layout = cleanup_guard['normalized']
+                allowed = (native_layouts.fingerprint(code, layout['masks']) == int(layout['fnv1a64'],16)
+                    and any(a <= offset < a+n for a,n in layout['masks']))
+                self.assertEqual(bool(self.inspect_cleanup(raw, len(code), cleanup_rva)), allowed, hex(offset))
                 raw[offset] = bytes([code[offset]])
         if not found:
             self.skipTest('No local reviewed game binary available')

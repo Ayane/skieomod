@@ -29,6 +29,8 @@ class SkiabilityMemoryTests(unittest.TestCase):
 #include <wchar.h>
 #define __declspec(x)
 #define MAX_PATH 260
+#include "layout_profiles.h"
+static uint32_t native_layout_rva(enum SkiEOLayoutId id) {(void)id; return 0;}
 static unsigned char executable[0x5400000], owner[0x200];
 static size_t owner_limit;
 static const char *job_path;
@@ -78,7 +80,7 @@ int exercise(const char *path,int modern,int broken,size_t limit) {
         file = folder / 'memo.c'
         file.write_text(shim + source[start:end] + harness)
         library = folder / 'memo.so'
-        subprocess.run(['cc', '-shared', '-fPIC', '-O2', '-Wall', '-Wextra', '-Werror',
+        subprocess.run(['cc', '-shared', '-fPIC', '-O2', '-Wall', '-Wextra', '-Werror', '-I', str(ROOT / 'native/SkiEONativeTerrain'),
                         str(file), '-o', str(library)], check=True, capture_output=True)
         cls.library = ctypes.CDLL(str(library))
         cls.library.exercise.argtypes = [ctypes.c_char_p, ctypes.c_int, ctypes.c_int, ctypes.c_size_t]

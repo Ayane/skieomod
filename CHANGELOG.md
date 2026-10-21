@@ -12,6 +12,19 @@ have their own package versions. Download the
 - Prepare optional Discord release announcements after HTTPS publication checks,
   with a preview mode and receipts for confirmed messages.
 
+## [1.24.9] - 2026-10-21
+
+- Support Steam demo build 26111862 after reviewing the native bridges and
+  their private layouts against build 26097896.
+- Find relocated native functions automatically when their reviewed code is
+  unchanged apart from address operands. Require a unique executable match,
+  preserve instruction and field-offset checks, and verify the deferred hub
+  wrapper's destination. Address-only game updates no longer require new
+  hard-coded addresses for these bridges.
+- Share the relocation fingerprints between the Windows helper and the
+  compatibility preflight. Keep the warning for game builds that have not
+  completed qualification, and refuse changed or ambiguous native layouts.
+
 ## [1.24.8] - 2026-10-21
 
 - Use the rendered terrain surface for native height, snow and brush caches,
