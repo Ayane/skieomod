@@ -274,3 +274,5 @@ avec 1.24.7 et les essais du téléchargement, de l’installation différée et
 récupération des mises à jour automatiques.
 La [revue du build 26111862](game-update-26111862.md) décrit la relocalisation
 automatique contrôlée introduite en 1.24.9.
+La [revue du build 26119568](game-update-26119568.md) détaille les changements
+de structures qui nécessitent les nouveaux profils de 1.24.10.

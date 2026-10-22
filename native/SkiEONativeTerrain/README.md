@@ -11,6 +11,14 @@ x86_64-w64-mingw32-gcc -shared -O2 -s -Wall -Wextra \
 
 Terrain diagnostics and supported layouts are documented in [terrain-runtime-debugging.md](../../docs/terrain-runtime-debugging.md).
 
+Build 26119568 changes the native ABI: the hub batching counter is `+0xB50`,
+coverage moves beside routability at `FHubMemberInfo +0x69`, and sparse member
+elements shrink from `0xA0` to `0x98` bytes. Staff candidates grow to `0x578`
+bytes, with the RNG at `+0x684`; settings and pool anchors stay at `+0x508` and
+`+0x4D8`. Navigation pairs the `+0x580` work counter with the `+0x870` dirty
+flag. These changes have their own reviewed guards; automatic relocation does
+not accept the old layouts merely because a similar entry point is found.
+
 Build 26111862 relocates the reviewed bridges without changing their inspected
 instructions or private field offsets. `layout_profiles.h` is generated from
 `compatibility/game-contract.json`; `layout_resolution.h` searches executable

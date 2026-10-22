@@ -1,12 +1,12 @@
 {
   "format": "skieo-compatibility-contract",
   "version": 1,
-  "reference_build": "26111862",
-  "reference_executable_sha256": "8eb1215bcf56172822974b2c98a629e200afce22f4e57cc061a90b241e878a79",
-  "native_helper_sha256": "cc7b661260f5ddbd2fbeaab4af883a3cb9d05231b3b1f782f0d3bef1a3c0eb7b",
+  "reference_build": "26119568",
+  "reference_executable_sha256": "5418c1ae2d0b8d8a12c37af5dae528635bc6f3f96038d4708ab10a534d4f805a",
+  "native_helper_sha256": "9b844abca0d911c7503b41159bd9bf24e670a5d81e8c7e4202a84d20f130ac57",
   "native_sources": {
-    "native/SkiEONativeTerrain/native_terrain.c": "70f6df1f23d719b49d266c27948d36029feac3536428e4229a386abe082f89b0",
-    "native/SkiEONativeTerrain/navigation_layout.h": "8f2db8866f2a61a734a3634f6178feb73ef0e94516d20e9900b3615b09e72f92",
+    "native/SkiEONativeTerrain/native_terrain.c": "38808da44eec496ef9b53052db65f2ce4c8d1d70105ee3a4a6cac671f6225c32",
+    "native/SkiEONativeTerrain/navigation_layout.h": "d4a21bb98ee3463a88916224a234fcf021add188714ff73ac64ac47ed046da54",
     "native/SkiEONativeTerrain/render_mapping_layout.h": "5cf8d6da07c19a575f2d6a93c54156f4f0af3e6a1a8d4f0e04e7fc654f112ff9",
     "native/SkiEOTrailRatings/trail_ratings.c": "c4d23bbaad05bf966ec018e7ed3204fa683683ea1c2de8ae1e85d5ebb31796b7",
     "native/SkiEOTrailRatings/rating_profile.h": "9eaa2379de2eada7eb4fb69dbab868632eb2033062ed131881fa8b004273a900",
@@ -37,17 +37,17 @@
     "native/SkiEOUpdater/build.sh": "30bbc3dbb8ff6b6d58649a9b46d102660f6fcb22fb806b36070e0acb5cd09c93",
     "native/SkiEONativeTerrain/surface_sampling.h": "e2020f8c85b71b1dccbba1efb3bb7d1d977ebb0de3faf132a49bcb91cde71684",
     "native/SkiEONativeTerrain/layout_resolution.h": "aa2d8b5c5f57090721eb12cbbf6497f9429eeb7412e7bd5a43628bf73ee023c5",
-    "native/SkiEONativeTerrain/layout_profiles.h": "72da9d530f51973759c71f99d416122dd452b5ab41e7863e349ecf5542336e42",
+    "native/SkiEONativeTerrain/layout_profiles.h": "71b4bd69333a6ceaa4543d3852ceae981621b4d4c3d91e34f326477776d0dfbb",
     "tools/native_layouts.py": "aae8de3aa01e75b4d74da233859205617ae14b8e0e5503f75ef87b3ca7d6e9f8"
   },
   "guards": [
     {
       "id": "hubs.building",
-      "rva": "0x4fa1870",
-      "bytes": "48895c242055488d6c24a94881ecc0000000",
+      "rva": "0x4fa4a80",
+      "bytes": "48895c242055488d6c24a94881ecb0000000",
       "mode": "normalized_unique",
       "normalized": {
-        "size": 511,
+        "size": 436,
         "masks": [
           [
             58,
@@ -70,99 +70,75 @@
             4
           ],
           [
-            186,
+            182,
             4
           ],
           [
-            242,
+            238,
             4
           ],
           [
-            250,
+            246,
             4
           ],
           [
-            284,
+            280,
             4
           ],
           [
-            336,
+            332,
             4
           ],
           [
-            378,
+            374,
             4
           ],
           [
-            392,
+            388,
             4
-          ],
-          [
-            453,
-            4
-          ],
-          [
-            475,
-            4
-          ],
-          [
-            480,
-            1
-          ],
-          [
-            489,
-            4
-          ],
-          [
-            510,
-            1
           ]
         ],
-        "fnv1a64": "286a8d19a9ca4be8"
+        "fnv1a64": "f5529282b1bc9a42"
       }
     },
     {
       "id": "hubs.lift",
-      "rva": "0x4fccfe0",
-      "bytes": "48895c241848897c242055488dac2470ffffff4881ec90010000",
+      "rva": "0x4fd02b0",
+      "bytes": "48895c241848897c242055488d6c24904881ec70010000488bd9",
       "mode": "normalized_unique",
       "normalized": {
-        "size": 509,
+        "size": 914,
         "masks": [
           [
-            30,
+            27,
             4
           ],
           [
-            38,
+            35,
             4
           ],
           [
-            50,
+            81,
             4
           ],
           [
-            63,
+            122,
             4
           ],
           [
-            84,
+            129,
             4
           ],
           [
-            125,
+            163,
             4
           ],
           [
-            132,
+            184,
             4
           ],
           [
-            166,
-            4
-          ],
-          [
-            187,
+            227,
             4
           ],
           [
@@ -178,49 +154,105 @@
             4
           ],
           [
-            255,
+            315,
             4
           ],
           [
-            322,
+            330,
             4
           ],
           [
-            340,
+            345,
             4
           ],
           [
-            355,
+            354,
             4
           ],
           [
-            365,
+            366,
             4
           ],
           [
-            377,
+            434,
             4
           ],
           [
-            446,
+            441,
             4
           ],
           [
-            453,
+            473,
             4
           ],
           [
-            485,
+            499,
+            4
+          ],
+          [
+            541,
+            4
+          ],
+          [
+            555,
+            4
+          ],
+          [
+            566,
+            4
+          ],
+          [
+            573,
+            4
+          ],
+          [
+            646,
+            4
+          ],
+          [
+            661,
+            4
+          ],
+          [
+            676,
+            4
+          ],
+          [
+            686,
+            4
+          ],
+          [
+            698,
+            4
+          ],
+          [
+            775,
+            4
+          ],
+          [
+            786,
+            4
+          ],
+          [
+            800,
+            4
+          ],
+          [
+            836,
+            4
+          ],
+          [
+            866,
             4
           ]
         ],
-        "fnv1a64": "f6af7905e204b8fa"
+        "fnv1a64": "0aaac3ab3a65628e"
       }
     },
     {
       "id": "hubs.rebuild",
-      "rva": "0x504e8d0",
-      "bytes": "40574883ec2083b9600b000000488bf9",
+      "rva": "0x5051830",
+      "bytes": "40574883ec2083b9500b000000488bf9",
       "mode": "normalized_unique",
       "normalized": {
         "size": 511,
@@ -294,13 +326,13 @@
             1
           ]
         ],
-        "fnv1a64": "808bbaf50892655b"
+        "fnv1a64": "63ca1f13eec1efeb"
       }
     },
     {
       "id": "hubs.deferred",
-      "rva": "0x5045d10",
-      "bytes": "83b9600b0000000f8e",
+      "rva": "0x5048d30",
+      "bytes": "83b9500b0000000f8e",
       "mode": "normalized_unique",
       "normalized": {
         "size": 14,
@@ -310,7 +342,7 @@
             4
           ]
         ],
-        "fnv1a64": "575699d3d1554846",
+        "fnv1a64": "f1121eb0bc70e016",
         "rel32_target": {
           "offset": 9,
           "end": 13,
@@ -320,11 +352,11 @@
     },
     {
       "id": "staff.regenerate",
-      "rva": "0x533e890",
-      "bytes": "4c8bdc41564881ecb0050000",
+      "rva": "0x53424a0",
+      "bytes": "4c8bdc41564881ec00060000",
       "mode": "normalized_unique",
       "normalized": {
-        "size": 884,
+        "size": 717,
         "masks": [
           [
             15,
@@ -379,48 +411,32 @@
             4
           ],
           [
-            418,
+            397,
             4
           ],
           [
-            639,
+            436,
             4
           ],
           [
-            653,
+            657,
             4
           ],
           [
-            685,
+            671,
             4
           ],
           [
-            745,
+            703,
             4
-          ],
-          [
-            754,
-            4
-          ],
-          [
-            810,
-            1
-          ],
-          [
-            841,
-            1
-          ],
-          [
-            871,
-            1
           ]
         ],
-        "fnv1a64": "a8108061cdec4da5"
+        "fnv1a64": "c9bbb449ffc674d4"
       }
     },
     {
       "id": "staff.settings",
-      "rva": "0x533e8ae",
+      "rva": "0x53424be",
       "bytes": "4883b908050000004c8bf10f84",
       "mode": "normalized_unique",
       "normalized": {
@@ -436,7 +452,7 @@
     },
     {
       "id": "skiability.query",
-      "rva": "0x53b39e0",
+      "rva": "0x53b75f0",
       "bytes": "40555356488d6c24b94881ecb0000000",
       "mode": "normalized_unique",
       "normalized": {
@@ -515,12 +531,12 @@
             1
           ]
         ],
-        "fnv1a64": "f814b5e334b084cd"
+        "fnv1a64": "b1e0d7e8b0ebd3dd"
       }
     },
     {
       "id": "skiability.memo",
-      "rva": "0x53b3cc2",
+      "rva": "0x53b78d2",
       "bytes": "443bbeb401000075270f28c6f30f5c86b8010000",
       "mode": "normalized_unique",
       "normalized": {
@@ -544,7 +560,7 @@
     },
     {
       "id": "hub_names.get",
-      "rva": "0x5044b40",
+      "rva": "0x5047b60",
       "bytes": "48895c240848896c24104889742418574883ec20488bfa488db1d0010000",
       "mode": "normalized_unique",
       "normalized": {
@@ -568,7 +584,7 @@
     },
     {
       "id": "hub_names.insert",
-      "rva": "0x5028010",
+      "rva": "0x502b290",
       "bytes": "48895c241048896c24184889742420574883ec40",
       "mode": "normalized_unique",
       "normalized": {
@@ -600,7 +616,7 @@
     },
     {
       "id": "hub_names.text",
-      "rva": "0x1349ba0",
+      "rva": "0x1349e90",
       "bytes": "488bc45741564883ec5848895810",
       "mode": "normalized_unique",
       "normalized": {
@@ -620,19 +636,19 @@
     },
     {
       "id": "navigation.tick",
-      "rva": "0x5257200",
+      "rva": "0x525a580",
       "bytes": "48895c24184889742420574883ec60488d71c80f29742450488bd9",
       "mode": "unique"
     },
     {
       "id": "navigation.changed",
-      "rva": "0x52444b0",
-      "bytes": "c6816008000001c6416901c3",
+      "rva": "0x5247820",
+      "bytes": "c6817008000001c6416901c3",
       "mode": "unique"
     },
     {
       "id": "snow_cpu.validity",
-      "rva": "0x4f7fe25",
+      "rva": "0x4f82b25",
       "bytes": "0fb681a5010000418800",
       "mode": "normalized_unique",
       "normalized": {
@@ -643,7 +659,7 @@
     },
     {
       "id": "snow_cpu.lookup",
-      "rva": "0x52f6530",
+      "rva": "0x52f9bb0",
       "bytes": "4963c0486bd0384903d2488b0a413bc9",
       "mode": "normalized_unique",
       "normalized": {
@@ -663,7 +679,7 @@
     },
     {
       "id": "snow_cpu.mapping",
-      "rva": "0x52f46c0",
+      "rva": "0x52f7d40",
       "bytes": "f20f1089f80000000f57d2f20f5c89e8000000",
       "mode": "normalized_unique",
       "normalized": {
@@ -691,7 +707,7 @@
     },
     {
       "id": "snow_cpu.ready",
-      "rva": "0x52f6776",
+      "rva": "0x52f9df6",
       "bytes": "41385424200f84",
       "mode": "normalized_unique",
       "normalized": {
@@ -711,25 +727,25 @@
     },
     {
       "id": "trail_ratings.classifier",
-      "rva": "0x539cbc0",
+      "rva": "0x53adc80",
       "bytes": "0f2f0551d7ea027203b003c30f2f05f9d7eb027203b002c30f2f05a975e0020f93c0c3",
       "mode": "rating_semantic"
     },
     {
       "id": "trail_ratings.palette",
-      "rva": "0x50d6d60",
+      "rva": "0x50e2eb0",
       "bytes": "0fb6d184c9742f83ea01741d83ea01741583fa017403b004c3803df8d14605020f94c00405c3b003c3803de8d14605010f95c0fec0c3803ddbd14605020f94c0c3",
       "mode": "rating_semantic"
     },
     {
       "id": "trail_ratings.color",
-      "rva": "0x53a3b80",
+      "rva": "0x53b4d90",
       "bytes": "40534883ec20488bd90fb6cae88f56d1ff0fb6c083f8060f879d000000488d0dbc2fc4fa8b9481f0d03b054803d1ffe233c048c743040000803f8903488bc3c7430c0000803f4883c4205bc333c0c743080000803f488903488bc3c7430c0000803f4883c4205bc333c048c7030000803f894308488bc3c7430c0000803f4883c4205bc333c0c7430c0000803f488903894308488bc34883c4205bc3c7030000803f488bc348c74304ae47613ec7430c0000803f4883c4205bc30f1005fffbdd02488bc30f11034883c4205bc3",
       "mode": "rating_semantic"
     },
     {
       "id": "terrain.pads",
-      "rva": "0x4ff3310",
+      "rva": "0x4ff6600",
       "bytes": "40555657488dac2460feffff4881eca0020000",
       "mode": "normalized_unique",
       "normalized": {
@@ -893,7 +909,7 @@
     },
     {
       "id": "terrain.pads_cleanup",
-      "rva": "0x4fe0c30",
+      "rva": "0x4fe3f20",
       "bytes": "48895c240848896c2410488974241848897c242041564883ec30488b9988030000",
       "mode": "normalized_unique",
       "normalized": {
@@ -913,7 +929,7 @@
     },
     {
       "id": "session.game_options",
-      "rva": "0x503322a",
+      "rva": "0x503663a",
       "bytes": "41894578488b85b0000000f20f1000f2410f1185800000008b400841898588000000",
       "mode": "unique"
     }

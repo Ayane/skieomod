@@ -2158,6 +2158,7 @@ __declspec(dllexport) int skieo_register_placeable_hubs(void *lua_state)
         {0x04FB02F0, 0x04FB04B0, 0x0504B300, 0xB10}, /* build 26071000 */
         {0x04FA35B0, 0x04FCD150, 0x0504E0D0, 0xB60}, /* build 26097896 */
         {0x04FA1870, 0x04FCCFE0, 0x0504E8D0, 0xB60}, /* build 26111862 */
+        {0x04FA4A80, 0x04FD02B0, 0x05051830, 0xB50}, /* build 26119568 */
     };
     uint32_t building_rva = 0, lift_rva = 0, rebuild_rva = 0, hold_offset = 0;
     static const uint8_t building_signature[] = {
@@ -2179,6 +2180,9 @@ __declspec(dllexport) int skieo_register_placeable_hubs(void *lua_state)
         0x48,0x89,0x5C,0x24,0x18,0x48,0x89,0x7C,0x24,0x20,0x55,
         0x48,0x8D,0xAC,0x24,0x70,0xFF,0xFF,0xFF,0x48,0x81,0xEC,0x90,0x01,0,0,
     };
+    static const uint8_t compact_lift_signature[] = {
+        0x48,0x89,0x5C,0x24,0x18,0x48,0x89,0x7C,0x24,0x20,0x55,0x48,0x8D,0x6C,0x24,0x90,0x48,0x81,0xEC,0x70,0x01,0x00,0x00,0x48,0x8B,0xD9,
+    };
     static const uint8_t rebuild_signature[] = {
         0x40, 0x57, 0x48, 0x83, 0xEC, 0x20, 0x83, 0xB9,
         0x38, 0x08, 0x00, 0x00, 0x00, 0x48, 0x8B, 0xF9,
@@ -2190,17 +2194,22 @@ __declspec(dllexport) int skieo_register_placeable_hubs(void *lua_state)
     profiles[latest][2] = native_layout_rva(SKIEO_LAYOUT_HUBS_REBUILD);
     for (size_t index = 0; index < sizeof(profiles) / sizeof(profiles[0]); ++index) {
         const uint32_t *profile = profiles[index];
+        uint8_t expected_building[sizeof(building_signature)];
+        memcpy(expected_building, building_signature, sizeof(expected_building));
+        if (profile[3] == 0xB50) expected_building[14] = 0xB0;
         uint8_t expected_rebuild[sizeof(rebuild_signature)];
         memcpy(expected_rebuild, rebuild_signature, sizeof(expected_rebuild));
         expected_rebuild[8] = (uint8_t)profile[3];
         expected_rebuild[9] = (uint8_t)(profile[3] >> 8);
-        const uint8_t *lift_guard = profile[3] == 0xB60 ? revised_lift_signature
+        const uint8_t *lift_guard = profile[3] == 0xB50 ? compact_lift_signature
+            : profile[3] == 0xB60 ? revised_lift_signature
             : profile[3] >= 0xA60 ? expanded_lift_signature : lift_signature;
-        size_t lift_guard_size = profile[3] == 0xB60 ? sizeof(revised_lift_signature) : sizeof(lift_signature);
+        size_t lift_guard_size = profile[3] == 0xB50 ? sizeof(compact_lift_signature)
+            : profile[3] == 0xB60 ? sizeof(revised_lift_signature) : sizeof(lift_signature);
         if (image_size >= profile[0] + sizeof(building_signature) &&
             image_size >= profile[1] + lift_guard_size &&
             image_size >= profile[2] + sizeof(rebuild_signature) &&
-            memcmp(module + profile[0], building_signature, sizeof(building_signature)) == 0 &&
+            memcmp(module + profile[0], expected_building, sizeof(expected_building)) == 0 &&
             memcmp(module + profile[1], lift_guard, lift_guard_size) == 0 &&
             memcmp(module + profile[2], expected_rebuild, sizeof(expected_rebuild)) == 0) {
             building_rva = profile[0]; lift_rva = profile[1]; rebuild_rva = profile[2];
@@ -2367,6 +2376,7 @@ __declspec(dllexport) int skieo_rebuild_hubs(void *lua_state)
         {0x0504B300, 0x05042440, 0xB10, 0x8EB3}, /* build 26071000 */
         {0x0504E0D0, 0x05045510, 0xB60, 0x8BB3}, /* build 26097896 */
         {0x0504E8D0, 0x05045D10, 0xB60, 0x8BB3}, /* build 26111862 */
+        {0x05051830, 0x05048D30, 0xB50, 0x8AF3}, /* build 26119568 */
     };
     uint32_t rebuild_wrapper_rva = 0, hold_offset = 0;
     static const uint8_t rebuild_signature[] = {
@@ -2423,6 +2433,11 @@ __declspec(dllexport) int skieo_rebuild_hubs(void *lua_state)
     typedef void (*SkiEORebuildHubs)(void *);
     SkiEORebuildHubs rebuild =
         (SkiEORebuildHubs)(module + rebuild_wrapper_rva);
+    /* 26119568 packs coverage beside routability (+0x69), shrinking
+       FHubMemberInfo to 0x80 and its sparse-set element to 0x98 bytes.
+       Reflected IDs/position/type/routability retain their offsets. */
+    size_t member_stride = hold_offset == 0xB50 ? 0x98 : 0xA0;
+    size_t coverage_offset = hold_offset == 0xB50 ? 0x69 : 0x80;
     uint32_t members_before = 0, members_max_before = 0;
     uint32_t members_free_before = 0;
     uint32_t clusters_before = 0, clusters_max_before = 0;
@@ -2453,11 +2468,11 @@ __declspec(dllexport) int skieo_rebuild_hubs(void *lua_state)
             dump_path, MAX_PATH, L"native_hubs.dump")
             ? _wfopen(dump_path, L"wb") : NULL;
         for (uint32_t index = 0; index < members_before; ++index) {
-            uint8_t *info = elements + (size_t)index * 0xA0 + 0x10;
+            uint8_t *info = elements + (size_t)index * member_stride + 0x10;
             uint8_t type = info[0x10];
             if (type < 8) ++type_counts[type];
             if (info[0x68]) ++routable_count;
-            if (info[0x80]) ++coverage_count;
+            if (info[coverage_offset]) ++coverage_count;
             uint64_t hub_words[2], owner_words[2];
             memcpy(owner_words, info + 0x34, sizeof(owner_words));
             memcpy(hub_words, info + 0x58, sizeof(hub_words));
@@ -2478,13 +2493,13 @@ __declspec(dllexport) int skieo_rebuild_hubs(void *lua_state)
                     "%u,%u,%.3f,%.3f,%.3f,%.3f,%u,%u,%016llx%016llx\n",
                     index, (unsigned)type,
                     location[0], location[1], location[2], extent,
-                    (unsigned)info[0x68], (unsigned)info[0x80],
+                    (unsigned)info[0x68], (unsigned)info[coverage_offset],
                     (unsigned long long)hub_words[1],
                     (unsigned long long)hub_words[0]);
             }
             for (uint32_t other = 0; other < index; ++other) {
                 uint8_t *other_info =
-                    elements + (size_t)other * 0xA0 + 0x10;
+                    elements + (size_t)other * member_stride + 0x10;
                 double other_location[3];
                 float other_extent;
                 memcpy(other_location, other_info + 0x18,
@@ -2606,6 +2621,9 @@ __declspec(dllexport) int skieo_refresh_staff_pool(void *lua_state)
             {0x48,0x83,0xB9,0x08,0x05,0x00,0x00,0x00,0x4C,0x8B,0xF1,0x0F,0x84,0x72,0x02,0x00,0x00}},
         {0x0533E890, 0x508, 0x4D8, 0x528, 0x688, /* build 26111862 */
             {0x4C,0x8B,0xDC,0x41,0x56,0x48,0x81,0xEC,0xB0,0x05,0x00,0x00},
+            {0x48,0x83,0xB9,0x08,0x05,0x00,0x00,0x00,0x4C,0x8B,0xF1,0x0F,0x84,0x72,0x02,0x00,0x00}},
+        {0x053424A0, 0x508, 0x4D8, 0x578, 0x688, /* build 26119568 */
+            {0x4C,0x8B,0xDC,0x41,0x56,0x48,0x81,0xEC,0x00,0x06,0x00,0x00},
             {0x48,0x83,0xB9,0x08,0x05,0x00,0x00,0x00,0x4C,0x8B,0xF1,0x0F,0x84,0x72,0x02,0x00,0x00}},
     };
     if (nt->Signature != IMAGE_NT_SIGNATURE ||

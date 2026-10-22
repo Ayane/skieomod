@@ -12,6 +12,15 @@ have their own package versions. Download the
 - Prepare optional Discord release announcements after HTTPS publication checks,
   with a preview mode and receipts for confirmed messages.
 
+## [1.24.10] - 2026-10-22
+
+- Support Steam demo build 26119568. Adapt the revised hub member layout and
+  batching counter, larger staff candidate records and navigation state.
+- Review the recompiled building/lift registration and skiability code; retain
+  strict native fingerprints and automatic relocation for unchanged layouts.
+- Keep native hub diagnostics aligned with the compact member records and
+  pair the new navigation counter with its matching terrain-change handler.
+
 ## [1.24.9] - 2026-10-21
 
 - Support Steam demo build 26111862 after reviewing the native bridges and
