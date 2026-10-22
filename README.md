@@ -49,7 +49,7 @@ resort scenario. Game updates can require compatibility fixes; see the
 [compatibility protocol](docs/game-compatibility-testing.md).
 The [snow correction report](docs/flying-snow-1.24.8.md) explains the terrain
 and furniture fixes in 1.24.8.
-The [26119568 report](docs/game-update-26119568.md) records the current demo
+The [26143813 report](docs/game-update-26143813.md) records the current demo
 qualification and revised native layouts. The
 [26111862 report](docs/game-update-26111862.md) describes guarded automatic
 relocation of native functions. The

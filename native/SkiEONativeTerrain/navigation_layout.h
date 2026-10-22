@@ -46,6 +46,11 @@ static const uint8_t *skieo_navigation_changed_signature(
     static const uint8_t updated_changed[SKIEO_NAVIGATION_CHANGED_BYTES] = {
         0xC6,0x81,0x70,0x08,0x00,0x00,0x01,0xC6,0x41,0x69,0x01,0xC3,
     };
+    /* Build 26141846 extends navigation state again. */
+    static const uint8_t routing_counter[] = {0xC7,0x83,0x90,0x05,0,0,0,0,0,0};
+    static const uint8_t routing_changed[SKIEO_NAVIGATION_CHANGED_BYTES] = {
+        0xC6,0x81,0x80,0x08,0x00,0x00,0x01,0xC6,0x41,0x69,0x01,0xC3,
+    };
     if ((size >= sizeof(legacy_tick) && !memcmp(tick, legacy_tick, sizeof(legacy_tick)))
         || (size >= sizeof(paused_tick) && !memcmp(tick, paused_tick, sizeof(paused_tick))))
         return legacy_changed;
@@ -53,6 +58,7 @@ static const uint8_t *skieo_navigation_changed_signature(
         if (!memcmp(tick + 0x3D, expanded_counter, sizeof(expanded_counter))) return expanded_changed;
         if (!memcmp(tick + 0x3D, current_counter, sizeof(current_counter))) return current_changed;
         if (!memcmp(tick + 0x3D, updated_counter, sizeof(updated_counter))) return updated_changed;
+        if (!memcmp(tick + 0x3D, routing_counter, sizeof(routing_counter))) return routing_changed;
     }
     return NULL;
 }

@@ -276,3 +276,6 @@ La [revue du build 26111862](game-update-26111862.md) décrit la relocalisation
 automatique contrôlée introduite en 1.24.9.
 La [revue du build 26119568](game-update-26119568.md) détaille les changements
 de structures qui nécessitent les nouveaux profils de 1.24.10.
+La [revue des builds 26141846 / 26143813](game-update-26143813.md) documente le nouveau champ
+privé des hubs, les profils distincts malgré un compteur inchangé, ainsi que
+les déplacements du RNG et de l'état de navigation dans 1.24.11.

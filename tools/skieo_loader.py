@@ -17,7 +17,7 @@ else:
     from custom_packages import inspect_package, pack_package, resolve
     from custom_maps import ManifestError, inspect_archive, load_manifest, pack, safe_relative_path, semver_compare, validate_manifest, validate_zip
 
-VERSION = '1.24.10'
+VERSION = '1.24.11'
 NAME = 'SkiEO-CustomMaps'
 RECORD = 'loader-release.json'
 MAX_ARCHIVE_BYTES = 64 * 1024 * 1024
@@ -29,7 +29,7 @@ UPDATE_URL = DOWNLOAD_BASE + 'loader-latest.json'
 # Earlier CLIs cannot install this release; upgrade the tools first.
 MINIMUM_UPDATE_CLI = '1.24.7'
 # Steam revisions verified in the game, rather than inferred from UE versions.
-TESTED_GAME_BUILDS = {'5012760': '26119568'}
+TESTED_GAME_BUILDS = {'5012760': '26143813'}
 
 
 def update_feed(archive, record):

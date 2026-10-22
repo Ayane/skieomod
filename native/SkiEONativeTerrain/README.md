@@ -11,6 +11,18 @@ x86_64-w64-mingw32-gcc -shared -O2 -s -Wall -Wextra \
 
 Terrain diagnostics and supported layouts are documented in [terrain-runtime-debugging.md](../../docs/terrain-runtime-debugging.md).
 
+Build 26143813 relocates the reviewed 26141846 bridges without changing their
+normalized fingerprints or private layouts; it uses the same helper binary.
+
+Build 26141846 adds a private `uint16` at `FHubMemberInfo +0x80`, growing the
+structure to `0x88` bytes and its sparse-set elements back to `0xA0` bytes.
+Coverage stays at `+0x69` and the batching counter at `+0xB50`: select member
+layouts by the reviewed profile, rather than inferring them from that counter.
+Native building and lift registration construct the records. Their recompiled
+functions have new complete fingerprints. The staff RNG moves to `+0x6E0`,
+while candidate size and reflected anchors stay unchanged. Navigation pairs
+the `+0x590` work counter with the `+0x880` dirty flag.
+
 Build 26119568 changes the native ABI: the hub batching counter is `+0xB50`,
 coverage moves beside routability at `FHubMemberInfo +0x69`, and sparse member
 elements shrink from `0xA0` to `0x98` bytes. Staff candidates grow to `0x578`

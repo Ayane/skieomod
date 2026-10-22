@@ -2144,7 +2144,7 @@ __declspec(dllexport) int skieo_register_placeable_hubs(void *lua_state)
        25766443, 25808900 and 25970577. The batching counter moved from 0x838
        through 0x8A8, 0x948 and 0xA60 to 0xB08 in build 25996759.
        Every profile must match all three independent signatures before any call. */
-    uint32_t profiles[][4] = {
+    uint32_t profiles[][5] = {
         {0x04F75EB0, 0x04F9D390, 0x04FFBB10, 0x838},
         {0x04F76210, 0x04F9D750, 0x04FFBF60, 0x838},
         {0x04F81140, 0x04FAAF20, 0x0502C9A0, 0x838},
@@ -2158,7 +2158,8 @@ __declspec(dllexport) int skieo_register_placeable_hubs(void *lua_state)
         {0x04FB02F0, 0x04FB04B0, 0x0504B300, 0xB10}, /* build 26071000 */
         {0x04FA35B0, 0x04FCD150, 0x0504E0D0, 0xB60}, /* build 26097896 */
         {0x04FA1870, 0x04FCCFE0, 0x0504E8D0, 0xB60}, /* build 26111862 */
-        {0x04FA4A80, 0x04FD02B0, 0x05051830, 0xB50}, /* build 26119568 */
+        {0x04FA4A80, 0x04FD02B0, 0x05051830, 0xB50, 1}, /* build 26119568 */
+        {0x04FA6490, 0x04FCEF50, 0x05053EF0, 0xB50, 2}, /* build 26141846 */
     };
     uint32_t building_rva = 0, lift_rva = 0, rebuild_rva = 0, hold_offset = 0;
     static const uint8_t building_signature[] = {
@@ -2183,6 +2184,9 @@ __declspec(dllexport) int skieo_register_placeable_hubs(void *lua_state)
     static const uint8_t compact_lift_signature[] = {
         0x48,0x89,0x5C,0x24,0x18,0x48,0x89,0x7C,0x24,0x20,0x55,0x48,0x8D,0x6C,0x24,0x90,0x48,0x81,0xEC,0x70,0x01,0x00,0x00,0x48,0x8B,0xD9,
     };
+    static const uint8_t routing_lift_signature[] = {
+        0x40,0x55,0x53,0x57,0x48,0x8D,0xAC,0x24,0x70,0xFF,0xFF,0xFF,0x48,0x81,0xEC,0x90,0x01,0x00,0x00,
+    };
     static const uint8_t rebuild_signature[] = {
         0x40, 0x57, 0x48, 0x83, 0xEC, 0x20, 0x83, 0xB9,
         0x38, 0x08, 0x00, 0x00, 0x00, 0x48, 0x8B, 0xF9,
@@ -2196,15 +2200,17 @@ __declspec(dllexport) int skieo_register_placeable_hubs(void *lua_state)
         const uint32_t *profile = profiles[index];
         uint8_t expected_building[sizeof(building_signature)];
         memcpy(expected_building, building_signature, sizeof(expected_building));
-        if (profile[3] == 0xB50) expected_building[14] = 0xB0;
+        if (profile[4] == 1) expected_building[14] = 0xB0;
         uint8_t expected_rebuild[sizeof(rebuild_signature)];
         memcpy(expected_rebuild, rebuild_signature, sizeof(expected_rebuild));
         expected_rebuild[8] = (uint8_t)profile[3];
         expected_rebuild[9] = (uint8_t)(profile[3] >> 8);
-        const uint8_t *lift_guard = profile[3] == 0xB50 ? compact_lift_signature
+        const uint8_t *lift_guard = profile[4] == 2 ? routing_lift_signature
+            : profile[4] == 1 ? compact_lift_signature
             : profile[3] == 0xB60 ? revised_lift_signature
             : profile[3] >= 0xA60 ? expanded_lift_signature : lift_signature;
-        size_t lift_guard_size = profile[3] == 0xB50 ? sizeof(compact_lift_signature)
+        size_t lift_guard_size = profile[4] == 2 ? sizeof(routing_lift_signature)
+            : profile[4] == 1 ? sizeof(compact_lift_signature)
             : profile[3] == 0xB60 ? sizeof(revised_lift_signature) : sizeof(lift_signature);
         if (image_size >= profile[0] + sizeof(building_signature) &&
             image_size >= profile[1] + lift_guard_size &&
@@ -2364,7 +2370,7 @@ __declspec(dllexport) int skieo_rebuild_hubs(void *lua_state)
 
     /* Rebuild RVA, deferred wrapper RVA, batching-counter offset and the
        wrapper's inspected relative jump displacement. */
-    uint32_t profiles[][4] = {
+    uint32_t profiles[][5] = {
         {0x04FFBB10, 0x04FF46F0, 0x838, 0x7413},
         {0x04FFBF60, 0x04FF4B40, 0x838, 0x7413},
         {0x0502FF60, 0x050284E0, 0x948, 0x7A73},
@@ -2376,9 +2382,10 @@ __declspec(dllexport) int skieo_rebuild_hubs(void *lua_state)
         {0x0504B300, 0x05042440, 0xB10, 0x8EB3}, /* build 26071000 */
         {0x0504E0D0, 0x05045510, 0xB60, 0x8BB3}, /* build 26097896 */
         {0x0504E8D0, 0x05045D10, 0xB60, 0x8BB3}, /* build 26111862 */
-        {0x05051830, 0x05048D30, 0xB50, 0x8AF3}, /* build 26119568 */
+        {0x05051830, 0x05048D30, 0xB50, 0x8AF3, 1}, /* build 26119568 */
+        {0x05053EF0, 0x05049E30, 0xB50, 0xA0B3, 2}, /* build 26141846 */
     };
-    uint32_t rebuild_wrapper_rva = 0, hold_offset = 0;
+    uint32_t rebuild_wrapper_rva = 0, hold_offset = 0, member_layout = 0;
     static const uint8_t rebuild_signature[] = {
         0x40, 0x57, 0x48, 0x83, 0xEC, 0x20, 0x83, 0xB9,
         0x38, 0x08, 0x00, 0x00, 0x00, 0x48, 0x8B, 0xF9,
@@ -2405,7 +2412,7 @@ __declspec(dllexport) int skieo_rebuild_hubs(void *lua_state)
             memcmp(module + profile[0], expected_rebuild, sizeof(expected_rebuild)) == 0 &&
             memcmp(module + profile[1], expected_wrapper, index == latest ? 9 : sizeof(expected_wrapper)) == 0) {
             rebuild_wrapper_rva = profile[1];
-            hold_offset = profile[2];
+            hold_offset = profile[2]; member_layout = profile[4];
             break;
         }
     }
@@ -2436,8 +2443,10 @@ __declspec(dllexport) int skieo_rebuild_hubs(void *lua_state)
     /* 26119568 packs coverage beside routability (+0x69), shrinking
        FHubMemberInfo to 0x80 and its sparse-set element to 0x98 bytes.
        Reflected IDs/position/type/routability retain their offsets. */
-    size_t member_stride = hold_offset == 0xB50 ? 0x98 : 0xA0;
-    size_t coverage_offset = hold_offset == 0xB50 ? 0x69 : 0x80;
+    /* 26141846 adds a uint16 at +0x80, growing elements back to 0xA0
+       without changing the batching counter. Select by the reviewed profile. */
+    size_t member_stride = member_layout == 1 ? 0x98 : 0xA0;
+    size_t coverage_offset = member_layout ? 0x69 : 0x80;
     uint32_t members_before = 0, members_max_before = 0;
     uint32_t members_free_before = 0;
     uint32_t clusters_before = 0, clusters_max_before = 0;
@@ -2623,6 +2632,9 @@ __declspec(dllexport) int skieo_refresh_staff_pool(void *lua_state)
             {0x4C,0x8B,0xDC,0x41,0x56,0x48,0x81,0xEC,0xB0,0x05,0x00,0x00},
             {0x48,0x83,0xB9,0x08,0x05,0x00,0x00,0x00,0x4C,0x8B,0xF1,0x0F,0x84,0x72,0x02,0x00,0x00}},
         {0x053424A0, 0x508, 0x4D8, 0x578, 0x688, /* build 26119568 */
+            {0x4C,0x8B,0xDC,0x41,0x56,0x48,0x81,0xEC,0x00,0x06,0x00,0x00},
+            {0x48,0x83,0xB9,0x08,0x05,0x00,0x00,0x00,0x4C,0x8B,0xF1,0x0F,0x84,0x72,0x02,0x00,0x00}},
+        {0x053490A0, 0x508, 0x4D8, 0x578, 0x6E4, /* build 26141846 */
             {0x4C,0x8B,0xDC,0x41,0x56,0x48,0x81,0xEC,0x00,0x06,0x00,0x00},
             {0x48,0x83,0xB9,0x08,0x05,0x00,0x00,0x00,0x4C,0x8B,0xF1,0x0F,0x84,0x72,0x02,0x00,0x00}},
     };

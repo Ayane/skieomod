@@ -1,12 +1,12 @@
 {
   "format": "skieo-compatibility-contract",
   "version": 1,
-  "reference_build": "26119568",
-  "reference_executable_sha256": "5418c1ae2d0b8d8a12c37af5dae528635bc6f3f96038d4708ab10a534d4f805a",
-  "native_helper_sha256": "9b844abca0d911c7503b41159bd9bf24e670a5d81e8c7e4202a84d20f130ac57",
+  "reference_build": "26143813",
+  "reference_executable_sha256": "831667e59b6e64df1baecd543d98c719d5f8219ce1f3ac9648a641887dbe135f",
+  "native_helper_sha256": "9e300681a8d1f8325a988ef29cc725b25f675607aaaaf7d1f2138bbc6d17ea8b",
   "native_sources": {
-    "native/SkiEONativeTerrain/native_terrain.c": "38808da44eec496ef9b53052db65f2ce4c8d1d70105ee3a4a6cac671f6225c32",
-    "native/SkiEONativeTerrain/navigation_layout.h": "d4a21bb98ee3463a88916224a234fcf021add188714ff73ac64ac47ed046da54",
+    "native/SkiEONativeTerrain/native_terrain.c": "0f24a241fbdefaf71401ac3c1185c6ae6647b2fe1c5e59014cf43ed61eacae2c",
+    "native/SkiEONativeTerrain/navigation_layout.h": "ae2ae1c9daf46e17a6deb9a401ade531b06709cd88d92bd76952ec915b2cd1d6",
     "native/SkiEONativeTerrain/render_mapping_layout.h": "5cf8d6da07c19a575f2d6a93c54156f4f0af3e6a1a8d4f0e04e7fc654f112ff9",
     "native/SkiEOTrailRatings/trail_ratings.c": "c4d23bbaad05bf966ec018e7ed3204fa683683ea1c2de8ae1e85d5ebb31796b7",
     "native/SkiEOTrailRatings/rating_profile.h": "9eaa2379de2eada7eb4fb69dbab868632eb2033062ed131881fa8b004273a900",
@@ -37,17 +37,17 @@
     "native/SkiEOUpdater/build.sh": "30bbc3dbb8ff6b6d58649a9b46d102660f6fcb22fb806b36070e0acb5cd09c93",
     "native/SkiEONativeTerrain/surface_sampling.h": "e2020f8c85b71b1dccbba1efb3bb7d1d977ebb0de3faf132a49bcb91cde71684",
     "native/SkiEONativeTerrain/layout_resolution.h": "aa2d8b5c5f57090721eb12cbbf6497f9429eeb7412e7bd5a43628bf73ee023c5",
-    "native/SkiEONativeTerrain/layout_profiles.h": "71b4bd69333a6ceaa4543d3852ceae981621b4d4c3d91e34f326477776d0dfbb",
+    "native/SkiEONativeTerrain/layout_profiles.h": "355e3baac370f4025936a9e4fd5b752e35d82965906fb58dfff39cf4a66fd761",
     "tools/native_layouts.py": "aae8de3aa01e75b4d74da233859205617ae14b8e0e5503f75ef87b3ca7d6e9f8"
   },
   "guards": [
     {
       "id": "hubs.building",
-      "rva": "0x4fa4a80",
-      "bytes": "48895c242055488d6c24a94881ecb0000000",
+      "rva": "0x4fa6750",
+      "bytes": "48895c242055488d6c24a94881ecc0000000",
       "mode": "normalized_unique",
       "normalized": {
-        "size": 436,
+        "size": 445,
         "masks": [
           [
             58,
@@ -70,91 +70,87 @@
             4
           ],
           [
-            182,
+            191,
             4
           ],
           [
-            238,
+            247,
             4
           ],
           [
-            246,
+            255,
             4
           ],
           [
-            280,
+            289,
             4
           ],
           [
-            332,
+            341,
             4
           ],
           [
-            374,
+            383,
             4
           ],
           [
-            388,
+            397,
             4
           ]
         ],
-        "fnv1a64": "f5529282b1bc9a42"
+        "fnv1a64": "5d7ac0b54311dcfe"
       }
     },
     {
       "id": "hubs.lift",
-      "rva": "0x4fd02b0",
-      "bytes": "48895c241848897c242055488d6c24904881ec70010000488bd9",
+      "rva": "0x4fcf210",
+      "bytes": "40555357488dac2470ffffff4881ec90010000488bd9e8",
       "mode": "normalized_unique",
       "normalized": {
-        "size": 914,
+        "size": 943,
         "masks": [
           [
-            27,
+            23,
             4
           ],
           [
-            35,
+            31,
             4
           ],
           [
-            81,
+            85,
             4
           ],
           [
-            122,
+            126,
             4
           ],
           [
-            129,
+            133,
             4
           ],
           [
-            163,
+            167,
             4
           ],
           [
-            184,
+            188,
             4
           ],
           [
-            227,
+            242,
             4
           ],
           [
-            234,
+            249,
             4
           ],
           [
-            241,
+            256,
             4
           ],
           [
-            248,
-            4
-          ],
-          [
-            315,
+            263,
             4
           ],
           [
@@ -162,96 +158,100 @@
             4
           ],
           [
-            345,
+            348,
             4
           ],
           [
-            354,
+            363,
             4
           ],
           [
-            366,
+            373,
             4
           ],
           [
-            434,
+            385,
             4
           ],
           [
-            441,
+            454,
             4
           ],
           [
-            473,
+            461,
             4
           ],
           [
-            499,
+            493,
             4
           ],
           [
-            541,
+            518,
             4
           ],
           [
-            555,
+            568,
             4
           ],
           [
-            566,
+            582,
             4
           ],
           [
-            573,
+            593,
             4
           ],
           [
-            646,
+            600,
             4
           ],
           [
-            661,
+            673,
             4
           ],
           [
-            676,
+            691,
             4
           ],
           [
-            686,
+            706,
             4
           ],
           [
-            698,
+            716,
             4
           ],
           [
-            775,
+            728,
             4
           ],
           [
-            786,
+            814,
             4
           ],
           [
-            800,
+            825,
             4
           ],
           [
-            836,
+            839,
             4
           ],
           [
-            866,
+            875,
+            4
+          ],
+          [
+            905,
             4
           ]
         ],
-        "fnv1a64": "0aaac3ab3a65628e"
+        "fnv1a64": "0233d676564e2e77"
       }
     },
     {
       "id": "hubs.rebuild",
-      "rva": "0x5051830",
+      "rva": "0x50541b0",
       "bytes": "40574883ec2083b9500b000000488bf9",
       "mode": "normalized_unique",
       "normalized": {
@@ -331,7 +331,7 @@
     },
     {
       "id": "hubs.deferred",
-      "rva": "0x5048d30",
+      "rva": "0x504a0f0",
       "bytes": "83b9500b0000000f8e",
       "mode": "normalized_unique",
       "normalized": {
@@ -352,7 +352,7 @@
     },
     {
       "id": "staff.regenerate",
-      "rva": "0x53424a0",
+      "rva": "0x5349450",
       "bytes": "4c8bdc41564881ec00060000",
       "mode": "normalized_unique",
       "normalized": {
@@ -431,12 +431,12 @@
             4
           ]
         ],
-        "fnv1a64": "c9bbb449ffc674d4"
+        "fnv1a64": "38c5effc7bbed170"
       }
     },
     {
       "id": "staff.settings",
-      "rva": "0x53424be",
+      "rva": "0x534946e",
       "bytes": "4883b908050000004c8bf10f84",
       "mode": "normalized_unique",
       "normalized": {
@@ -452,7 +452,7 @@
     },
     {
       "id": "skiability.query",
-      "rva": "0x53b75f0",
+      "rva": "0x53c5590",
       "bytes": "40555356488d6c24b94881ecb0000000",
       "mode": "normalized_unique",
       "normalized": {
@@ -536,7 +536,7 @@
     },
     {
       "id": "skiability.memo",
-      "rva": "0x53b78d2",
+      "rva": "0x53c5872",
       "bytes": "443bbeb401000075270f28c6f30f5c86b8010000",
       "mode": "normalized_unique",
       "normalized": {
@@ -560,7 +560,7 @@
     },
     {
       "id": "hub_names.get",
-      "rva": "0x5047b60",
+      "rva": "0x5048dd0",
       "bytes": "48895c240848896c24104889742418574883ec20488bfa488db1d0010000",
       "mode": "normalized_unique",
       "normalized": {
@@ -584,7 +584,7 @@
     },
     {
       "id": "hub_names.insert",
-      "rva": "0x502b290",
+      "rva": "0x50297e0",
       "bytes": "48895c241048896c24184889742420574883ec40",
       "mode": "normalized_unique",
       "normalized": {
@@ -616,7 +616,7 @@
     },
     {
       "id": "hub_names.text",
-      "rva": "0x1349e90",
+      "rva": "0x134a210",
       "bytes": "488bc45741564883ec5848895810",
       "mode": "normalized_unique",
       "normalized": {
@@ -636,19 +636,19 @@
     },
     {
       "id": "navigation.tick",
-      "rva": "0x525a580",
+      "rva": "0x525f710",
       "bytes": "48895c24184889742420574883ec60488d71c80f29742450488bd9",
       "mode": "unique"
     },
     {
       "id": "navigation.changed",
-      "rva": "0x5247820",
-      "bytes": "c6817008000001c6416901c3",
+      "rva": "0x524cb20",
+      "bytes": "c6818008000001c6416901c3",
       "mode": "unique"
     },
     {
       "id": "snow_cpu.validity",
-      "rva": "0x4f82b25",
+      "rva": "0x4f83545",
       "bytes": "0fb681a5010000418800",
       "mode": "normalized_unique",
       "normalized": {
@@ -659,7 +659,7 @@
     },
     {
       "id": "snow_cpu.lookup",
-      "rva": "0x52f9bb0",
+      "rva": "0x52febb0",
       "bytes": "4963c0486bd0384903d2488b0a413bc9",
       "mode": "normalized_unique",
       "normalized": {
@@ -679,7 +679,7 @@
     },
     {
       "id": "snow_cpu.mapping",
-      "rva": "0x52f7d40",
+      "rva": "0x52fcd40",
       "bytes": "f20f1089f80000000f57d2f20f5c89e8000000",
       "mode": "normalized_unique",
       "normalized": {
@@ -707,7 +707,7 @@
     },
     {
       "id": "snow_cpu.ready",
-      "rva": "0x52f9df6",
+      "rva": "0x52fedf6",
       "bytes": "41385424200f84",
       "mode": "normalized_unique",
       "normalized": {
@@ -727,25 +727,25 @@
     },
     {
       "id": "trail_ratings.classifier",
-      "rva": "0x53adc80",
+      "rva": "0x53bbc20",
       "bytes": "0f2f0551d7ea027203b003c30f2f05f9d7eb027203b002c30f2f05a975e0020f93c0c3",
       "mode": "rating_semantic"
     },
     {
       "id": "trail_ratings.palette",
-      "rva": "0x50e2eb0",
+      "rva": "0x50f82e0",
       "bytes": "0fb6d184c9742f83ea01741d83ea01741583fa017403b004c3803df8d14605020f94c00405c3b003c3803de8d14605010f95c0fec0c3803ddbd14605020f94c0c3",
       "mode": "rating_semantic"
     },
     {
       "id": "trail_ratings.color",
-      "rva": "0x53b4d90",
+      "rva": "0x53c2d30",
       "bytes": "40534883ec20488bd90fb6cae88f56d1ff0fb6c083f8060f879d000000488d0dbc2fc4fa8b9481f0d03b054803d1ffe233c048c743040000803f8903488bc3c7430c0000803f4883c4205bc333c0c743080000803f488903488bc3c7430c0000803f4883c4205bc333c048c7030000803f894308488bc3c7430c0000803f4883c4205bc333c0c7430c0000803f488903894308488bc34883c4205bc3c7030000803f488bc348c74304ae47613ec7430c0000803f4883c4205bc30f1005fffbdd02488bc30f11034883c4205bc3",
       "mode": "rating_semantic"
     },
     {
       "id": "terrain.pads",
-      "rva": "0x4ff6600",
+      "rva": "0x4ff5ba0",
       "bytes": "40555657488dac2460feffff4881eca0020000",
       "mode": "normalized_unique",
       "normalized": {
@@ -909,7 +909,7 @@
     },
     {
       "id": "terrain.pads_cleanup",
-      "rva": "0x4fe3f20",
+      "rva": "0x4fe2420",
       "bytes": "48895c240848896c2410488974241848897c242041564883ec30488b9988030000",
       "mode": "normalized_unique",
       "normalized": {
@@ -929,7 +929,7 @@
     },
     {
       "id": "session.game_options",
-      "rva": "0x503663a",
+      "rva": "0x50369ca",
       "bytes": "41894578488b85b0000000f20f1000f2410f1185800000008b400841898588000000",
       "mode": "unique"
     }

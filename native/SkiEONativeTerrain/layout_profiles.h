@@ -22,10 +22,10 @@ enum SkiEOLayoutId {
     SKIEO_LAYOUT_TERRAIN_PADS_CLEANUP,
     SKIEO_LAYOUT_COUNT
 };
-static const uint8_t skieo_prefix_0[] = {0x48,0x89,0x5c,0x24,0x20,0x55,0x48,0x8d,0x6c,0x24,0xa9,0x48,0x81,0xec,0xb0,0x00,0x00,0x00};
-static const SkiEOAddressMask skieo_masks_0[] = {{58,4},{66,4},{85,4},{123,4},{148,4},{182,4},{238,4},{246,4},{280,4},{332,4},{374,4},{388,4}};
-static const uint8_t skieo_prefix_1[] = {0x48,0x89,0x5c,0x24,0x18,0x48,0x89,0x7c,0x24,0x20,0x55,0x48,0x8d,0x6c,0x24,0x90,0x48,0x81,0xec,0x70,0x01,0x00,0x00,0x48,0x8b,0xd9};
-static const SkiEOAddressMask skieo_masks_1[] = {{27,4},{35,4},{81,4},{122,4},{129,4},{163,4},{184,4},{227,4},{234,4},{241,4},{248,4},{315,4},{330,4},{345,4},{354,4},{366,4},{434,4},{441,4},{473,4},{499,4},{541,4},{555,4},{566,4},{573,4},{646,4},{661,4},{676,4},{686,4},{698,4},{775,4},{786,4},{800,4},{836,4},{866,4}};
+static const uint8_t skieo_prefix_0[] = {0x48,0x89,0x5c,0x24,0x20,0x55,0x48,0x8d,0x6c,0x24,0xa9,0x48,0x81,0xec,0xc0,0x00,0x00,0x00};
+static const SkiEOAddressMask skieo_masks_0[] = {{58,4},{66,4},{85,4},{123,4},{148,4},{191,4},{247,4},{255,4},{289,4},{341,4},{383,4},{397,4}};
+static const uint8_t skieo_prefix_1[] = {0x40,0x55,0x53,0x57,0x48,0x8d,0xac,0x24,0x70,0xff,0xff,0xff,0x48,0x81,0xec,0x90,0x01,0x00,0x00,0x48,0x8b,0xd9,0xe8};
+static const SkiEOAddressMask skieo_masks_1[] = {{23,4},{31,4},{85,4},{126,4},{133,4},{167,4},{188,4},{242,4},{249,4},{256,4},{263,4},{330,4},{348,4},{363,4},{373,4},{385,4},{454,4},{461,4},{493,4},{518,4},{568,4},{582,4},{593,4},{600,4},{673,4},{691,4},{706,4},{716,4},{728,4},{814,4},{825,4},{839,4},{875,4},{905,4}};
 static const uint8_t skieo_prefix_2[] = {0x40,0x57,0x48,0x83,0xec,0x20,0x83,0xb9,0x50,0x0b,0x00,0x00,0x00,0x48,0x8b,0xf9};
 static const SkiEOAddressMask skieo_masks_2[] = {{28,4},{36,4},{44,4},{52,4},{60,4},{80,4},{86,4},{105,4},{119,4},{177,4},{199,4},{255,4},{267,4},{276,4},{324,4},{389,1},{506,1}};
 static const uint8_t skieo_prefix_3[] = {0x83,0xb9,0x50,0x0b,0x00,0x00,0x00,0x0f,0x8e};
@@ -57,11 +57,11 @@ static const SkiEOAddressMask skieo_masks_15[] = {{22,4},{40,4},{231,4},{255,4},
 static const uint8_t skieo_prefix_16[] = {0x48,0x89,0x5c,0x24,0x08,0x48,0x89,0x6c,0x24,0x10,0x48,0x89,0x74,0x24,0x18,0x48,0x89,0x7c,0x24,0x20,0x41,0x56,0x48,0x83,0xec,0x30,0x48,0x8b,0x99,0x88,0x03,0x00,0x00};
 static const SkiEOAddressMask skieo_masks_16[] = {{131,4},{236,4}};
 static const SkiEOCodeLayout skieo_layouts[] = {
-    {skieo_prefix_0,18,436,skieo_masks_0,12,UINT64_C(0xF5529282B1BC9A42)},
-    {skieo_prefix_1,26,914,skieo_masks_1,34,UINT64_C(0x0AAAC3AB3A65628E)},
+    {skieo_prefix_0,18,445,skieo_masks_0,12,UINT64_C(0x5D7AC0B54311DCFE)},
+    {skieo_prefix_1,23,943,skieo_masks_1,34,UINT64_C(0x0233D676564E2E77)},
     {skieo_prefix_2,16,511,skieo_masks_2,17,UINT64_C(0x63CA1F13EEC1EFEB)},
     {skieo_prefix_3,9,14,skieo_masks_3,1,UINT64_C(0xF1121EB0BC70E016)},
-    {skieo_prefix_4,12,717,skieo_masks_4,18,UINT64_C(0xC9BBB449FFC674D4)},
+    {skieo_prefix_4,12,717,skieo_masks_4,18,UINT64_C(0x38C5EFFC7BBED170)},
     {skieo_prefix_5,13,17,skieo_masks_5,1,UINT64_C(0x2844FB874268E40F)},
     {skieo_prefix_6,16,884,skieo_masks_6,18,UINT64_C(0xB1E0D7E8B0EBD3DD)},
     {skieo_prefix_7,20,50,skieo_masks_7,3,UINT64_C(0x68C65F0EBB8372AA)},
