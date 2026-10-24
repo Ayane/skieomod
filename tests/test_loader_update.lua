@@ -8,10 +8,12 @@ end}
 package.loaded.loading={active=false}
 local U=require('loader_update')
 local function copy(value)return json.decode(json.encode(value))end
-local record={format='skieomod-loader',version=1,release='1.25.0',files={}}
+local major,minor,patch=U.current:match('^(%d+)%.(%d+)%.(%d+)$')
+local next_release=string.format('%d.%d.%d',major,minor,tonumber(patch)+1)
+local record={format='skieomod-loader',version=1,release=next_release,files={}}
 for _,p in ipairs({'main.lua','entry.lua','skieo_repository.dll','skieo_native_terrain.dll','skieo_updater.exe','skieo_update_bootstrap.dll'}) do record.files['Scripts/'..p]=string.rep('a',64) end
 local feed={format='skieomod-loader-update',version=1,release=record.release,loader=record,
-    url='https://skieomod.emillon.fr/downloads/CustomMap-Mod-1.25.0.zip',sha256=string.rep('b',64),size=123}
+    url='https://skieomod.emillon.fr/downloads/CustomMap-Mod-'..next_release..'.zip',sha256=string.rep('b',64),size=123}
 assert(U.validate_feed(feed)==feed)
 for _,path in ipairs({'Scripts/../evil.lua','Scripts/config.json','Scripts/arbitrary.exe','.hidden/code.lua','Scripts/CON.lua','/absolute.lua','Scripts/a\\b.lua','Scripts/a.lua.'}) do
     assert(not U.managed(path),path)

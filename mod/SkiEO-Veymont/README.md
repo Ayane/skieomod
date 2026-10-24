@@ -1,7 +1,7 @@
-# SkiEO Veymont 0.7.7
+# SkiEO Veymont 0.8.0
 
 Par **Albatar (Élie Millon)**, également auteur de Custom Map et de `skieomod`.
-Veymont et son mapmod de renards sont distribués comme deux archives séparées.
+Veymont, les renards et les téléskis sont distribués dans trois archives séparées.
 
 Carte source pour Ski-E-O!, centrée sur
 Gresse-en-Vercors, le Grand Veymont et le Mont Aiguille.
@@ -14,19 +14,45 @@ la touche de test **F7** pour centrer la caméra sur chaque animal à tour de r�
 
 ## Installation de développement
 
-Depuis la racine du dépôt, construire et installer la carte ainsi que sa
-dépendance locale, puis lancer le jeu :
+Depuis la racine du dépôt, construire et installer la carte ainsi que ses
+dépendances locales, puis lancer le jeu :
 
 ```bash
-skieomod run mod/SkiEO-Veymont --dependency mod/SkiEO-Foxes
+skieomod run mod/SkiEO-Veymont --dependency mod/SkiEO-Foxes --dependency mod/SkiEO-SurfaceLifts
 ```
 
-Pour préparer les deux archives portables séparément :
+Pour préparer les trois archives portables séparément :
 
 ```bash
 skieomod build mod/SkiEO-Foxes --check-scripts
-skieomod build mod/SkiEO-Veymont --dependency mod/SkiEO-Foxes --check-scripts
+skieomod build mod/SkiEO-SurfaceLifts --check-scripts
+skieomod build mod/SkiEO-Veymont --dependency mod/SkiEO-Foxes --dependency mod/SkiEO-SurfaceLifts --check-scripts
 ```
+
+## Remontées mécaniques
+
+La version 0.8.0 adapte les huit téléskis avec le mapmod `community.surface-lifts` :
+gares Poma, perches animées, pylônes, câbles et transport debout au niveau de la
+neige. Le Pré Levé reçoit sa gare couverte et ses deux virages. Les caractéristiques
+et les approximations sont détaillées dans [le guide](../../docs/surface-lifts.md).
+Le Blanchon reçoit ses gares sur portique, dont la salle des machines vitrée.
+Vus du départ vers le sommet, Pré Levé, Blavet et Alleyrons montent à gauche ;
+Pierre Blanche et le Blanchon montent à droite. Les deux paires Pras et Bessards
+sont en miroir, avec les brins montants au centre et les retours à l’extérieur.
+Les nouvelles parties utilisent le télésiège natif deux places pour le Blanchon
+et tous les points intermédiaires OSM des axes. Les objets existants d'une
+sauvegarde ne sont pas remplacés ; leur identité et les suppressions sont conservées.
+Le chargeur de cette branche prend en charge les versions Steam **26143813**
+et **26178224**, avec UE4SS **1181** pour éviter la rétention des tables Lua.
+
+## Pistes et vue initiale
+
+La carte configure les quatre couleurs avec `api.game:set_trail_rating_system` :
+vert pour les pistes novices, bleu pour les faciles, rouge pour les intermédiaires
+et noir pour les avancées et le freeride. Les sept pistes OSM intermédiaires sont
+distinctes des six pistes faciles. La palette est appliquée aussi à la reprise
+d'une sauvegarde. Une nouvelle partie oriente la caméra native vers le front de
+neige ; une reprise conserve le cadrage enregistré par le joueur.
 
 ## Sources
 
@@ -137,4 +163,4 @@ Les renards alternent recherche de nourriture, écoute, chasse et repos. Ils
 retirent vers un endroit calme lorsqu'ils sont dérangés. La caméra n'est pas
 considérée comme une personne.
 Voir le [guide mapmods](../../docs/mapmods.md) pour les habitats, animations et
-le lancement local avec `--dependency mod/SkiEO-Foxes`.
+le lancement local avec `--dependency mod/SkiEO-Foxes --dependency mod/SkiEO-SurfaceLifts`.

@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "skieo-custom-map"
-version = "1.24.11"
+version = "1.25.0"
 description = "Create, build, run and prepare Ski-E-O! maps and mods for Steam Workshop"
 authors = [{name = "Albatar (Élie Millon)"}]
 license = "BSD-3-Clause"
@@ -27,6 +27,6 @@ package-dir = {"" = "tools"}
 
 [tool.setuptools.data-files]
 "share/skieomod/SkiEO-CustomMaps" = ["mod/SkiEO-CustomMaps/README.md", "mod/SkiEO-CustomMaps/LICENSE", "mod/SkiEO-CustomMaps/LICENSE-miniz.txt", "mod/SkiEO-CustomMaps/LICENSE-MINHOOK.md", "docs/getting-started.md"]
-"share/skieomod/SkiEO-CustomMaps/Scripts" = ["mod/SkiEO-CustomMaps/Scripts/*.lua", "mod/SkiEO-CustomMaps/Scripts/skieo_repository.dll", "mod/SkiEO-CustomMaps/Scripts/skieo_native_terrain.dll", "mod/SkiEO-CustomMaps/Scripts/skieo_trail_ratings.dll", "mod/SkiEO-CustomMaps/Scripts/skieo_update_bootstrap.dll", "mod/SkiEO-CustomMaps/Scripts/skieo_updater.exe"]
-"share/skieomod/docs" = ["CHANGELOG.md", "docs/discord-releases.md", "docs/getting-started.md", "docs/large-maps.md", "docs/terrain-repairs.md", "docs/vegetation.md", "docs/custom-map-cli.md", "docs/custom-map-repository.md", "docs/custom-map-format.md", "docs/steam-workshop.md", "docs/editor.md", "docs/editor-tutorial.md", "docs/scripts-and-scenarios.md", "docs/mapmods.md", "docs/mapmod-tutorial.md"]
+"share/skieomod/SkiEO-CustomMaps/Scripts" = ["mod/SkiEO-CustomMaps/Scripts/*.lua", "mod/SkiEO-CustomMaps/Scripts/skieo_repository.dll", "mod/SkiEO-CustomMaps/Scripts/skieo_native_terrain.dll", "mod/SkiEO-CustomMaps/Scripts/skieo_trail_ratings.dll", "mod/SkiEO-CustomMaps/Scripts/skieo_surface_lifts.dll", "mod/SkiEO-CustomMaps/Scripts/skieo_update_bootstrap.dll", "mod/SkiEO-CustomMaps/Scripts/skieo_updater.exe"]
+"share/skieomod/docs" = ["CHANGELOG.md", "docs/discord-releases.md", "docs/getting-started.md", "docs/large-maps.md", "docs/terrain-repairs.md", "docs/vegetation.md", "docs/custom-map-cli.md", "docs/custom-map-repository.md", "docs/custom-map-format.md", "docs/steam-workshop.md", "docs/editor.md", "docs/editor-tutorial.md", "docs/scripts-and-scenarios.md", "docs/mapmods.md", "docs/surface-lifts.md", "docs/mapmod-tutorial.md"]
 "share/skieomod/schemas" = ["schemas/custom-map.schema.json", "schemas/custom-mod.schema.json", "schemas/workshop-client.schema.json", "schemas/vegetation.schema.json", "schemas/triggers.schema.json", "schemas/resources.schema.json", "schemas/scene.schema.json"]

@@ -24,6 +24,7 @@ ExecuteInGameThread=function(cb)queued[#queued+1]=cb end
 ExecuteWithDelay=function(_,cb)delayed[#delayed+1]=cb end
 local held,completed=0,0
 local api={
+    game={set_trail_rating_system=function()end},
     hold_loading=function()held=held+1;return function(message)
         assert(message=='resort classes are unavailable','invalid-world guard was not reached')
         completed=completed+1

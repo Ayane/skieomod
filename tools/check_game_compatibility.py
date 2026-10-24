@@ -25,6 +25,7 @@ if str(ROOT) not in sys.path:
 from tools import skieo_install as desktop, skieo_loader as loader, skieo_updates as updates
 from tools import trail_rating_profile
 from tools import native_layouts
+from tools.compatibility_process import GIB, Limits
 from tools.custom_packages import inspect_package
 from tools.compare_scenario_checkpoints import differences as checkpoint_differences
 
@@ -326,7 +327,7 @@ def ingest_live(report, data, contract):
         check(report, 'live.session', 'fail', 'missing, incomplete or stale UE4SS result')
         return
     items = data.get('checks', [])
-    expected = {'live.reflection', 'live.heartbeat', 'live.isolation'}
+    expected = {'live.reflection', 'live.heartbeat', 'live.isolation', 'live.output_lifetime'}
     if data.get('error'):
         check(report, 'live.exception', 'fail', str(data['error']))
     if data.get('maps_enabled') is True:
@@ -366,12 +367,11 @@ def inspect_native_log(report, log_path, maps_ran):
               'native guard and map-loader errors', lines=lines[-30:])
 
 
-def run_live(config, contract, report, output, *, timeout=900, interactive=False):
+def run_live(config, contract, report, output, *, timeout=900, interactive=False, memory_limit_gib=12):
     allow_maps = not any(x['required'] and x['status'] != 'pass' for x in report['checks'])
     live_config, ue = prepare_live(config, contract, report, output, allow_maps, interactive)
     token = secrets.token_hex(16)
     arguments, environment, cwd = desktop.editor_launch_plan(live_config, token)
-    desktop.ensure_editor_steam(environment)
     if sys.platform.startswith('linux'):
         environment['STEAM_COMPAT_DATA_PATH'] = str(output / 'compatdata')
     arguments += ['-windowed', '-ResX=1280', '-ResY=720', '-nosplash', '-NoSound',
@@ -380,6 +380,14 @@ def run_live(config, contract, report, output, *, timeout=900, interactive=False
     # Avoid Steam Cloud / native slot reuse by verifying the actual save path
     # in the UE4SS probe before it is allowed to open a map.
     environment['WINEDEBUG'] = '-all'
+    limits = Limits(output, limit=memory_limit_gib * GIB) if sys.platform.startswith('linux') else None
+    if limits:
+        try:
+            arguments = limits.prepare(arguments, environment)
+        except RuntimeError as error:
+            check(report, 'live.memory', 'blocked', str(error))
+            return
+    desktop.ensure_editor_steam(environment)
     process = None
     keep_open = False
     maps_ran = False
@@ -389,6 +397,9 @@ def run_live(config, contract, report, output, *, timeout=900, interactive=False
             process = subprocess.Popen(arguments, env=environment, cwd=cwd, stdout=log,
                                        stderr=subprocess.STDOUT, start_new_session=True)
         while time.monotonic() - started < timeout:
+            if limits and limits.sample():
+                check(report, 'live.memory', 'fail', limits.reason)
+                break
             if crash_files(ue, output):
                 check(report, 'live.crash', 'fail', 'new crash dump in the isolated test process')
                 break
@@ -415,6 +426,8 @@ def run_live(config, contract, report, output, *, timeout=900, interactive=False
     finally:
         # Only our own token/executable/process group may be terminated.
         if process and not keep_open:
+            if limits:
+                limits.stop()
             desktop.stop_editor_launch(process, token=token, binary=Path(live_config['binary_dir']) / 'skieogame.exe')
         if (ue / 'UE4SS.log').is_file():
             shutil.copy2(ue / 'UE4SS.log', output / 'UE4SS.log')
@@ -427,6 +440,8 @@ def run_live(config, contract, report, output, *, timeout=900, interactive=False
     inspect_native_log(report, log_path, maps_ran)
     if keep_open:
         if any(item['required'] and item['status'] == 'fail' for item in report['checks']):
+            if limits:
+                limits.stop()
             desktop.stop_editor_launch(process, token=token, binary=Path(live_config['binary_dir']) / 'skieogame.exe')
             return
         print('Isolated game retained for manual review. Close with --close --output ' + str(output), flush=True)
@@ -543,6 +558,8 @@ def main(argv=None):
     parser.add_argument('--interactive', action='store_true', help='keep a successful isolated game open for manual review')
     parser.add_argument('--close', action='store_true', help='ask UE4SS to quit the test game in --output')
     parser.add_argument('--timeout', type=int, default=900, help='live process deadline in seconds')
+    parser.add_argument('--memory-limit-gib', type=int, choices=range(2, 13), default=12,
+                        help='Linux test memory cap; retains 8 GiB of system headroom (default: 12)')
     parser.add_argument('--review', type=Path, help='finish an existing run using manual evidence; requires --output')
     args = parser.parse_args(argv)
     if args.timeout < 30 or args.timeout > 3600:
@@ -594,7 +611,8 @@ def main(argv=None):
             try:
                 inspect_static(config, contract, report, output, retoc, previous)
                 if args.live:
-                    run_live(config, contract, report, output, timeout=args.timeout, interactive=args.interactive)
+                    run_live(config, contract, report, output, timeout=args.timeout, interactive=args.interactive,
+                             memory_limit_gib=args.memory_limit_gib)
                 else:
                     check(report, 'live.session', 'pending', 'run with --live for UE4SS reflection, maps and GC')
                 unchanged = sha256(Path(config['binary_dir']) / 'skieogame.exe') == report['fingerprints']['executable']

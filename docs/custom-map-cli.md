@@ -402,9 +402,16 @@ répertoire de travail. `--loader-archive ARCHIVE` permet de reprendre le code
 vérifié d’une publication existante pour une mise à jour de la CLI,
 sans embarquer des changements du jeu encore en cours.
 
-UE4SS utilise le build testé `UE4SS_v3.0.1-1152-ge3ba1016.zip`, conservé sous
-une URL versionnée sur `skieomod.emillon.fr`. `setup` vérifie son SHA-256 ;
-une rotation du tag GitHub `experimental-latest` ne change pas le build installé.
+UE4SS utilise `UE4SS_v3.0.1-1181-g83330635.zip`, qui corrige la
+[rétention des tableaux de sortie Lua](https://github.com/UE4SS-RE/RE-UE4SS/issues/1446).
+`setup` vérifie son SHA-256 et remplace uniquement la DLL de l'ancien build
+1152 connu, après sauvegarde dans `UE4SS.dll.1152-e3ba1016.bak`. Les paramètres,
+le proxy et les autres mods sont préservés. Les autres versions déjà installées
+ne sont pas remplacées automatiquement. Fermer le jeu avant cette mise à jour.
+L'archive est conservée sous une URL versionnée sur `skieomod.emillon.fr` ;
+si elle n'y est pas encore publiée, la même archive officielle est recherchée
+sur GitHub, avec le même nom et le même SHA-256. Une rotation du tag
+`experimental-latest` ne permet pas d'installer un binaire différent.
 La construction exige cette archive locale et la copie dans les téléchargements
 ainsi que dans les sources du ZIP des outils. Pour la première construction :
 

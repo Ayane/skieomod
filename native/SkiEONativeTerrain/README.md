@@ -14,6 +14,12 @@ Terrain diagnostics and supported layouts are documented in [terrain-runtime-deb
 Build 26143813 relocates the reviewed 26141846 bridges without changing their
 normalized fingerprints or private layouts; it uses the same helper binary.
 
+The pending 26178224 profile moves StaffSubsystem.Settings to +0x4F8 and its
+RNG to +0x6D4, while the hiring array stays at +0x4D8. Candidate records grow
+from 0x578 to 0x588 bytes. The regenerated full function fingerprint retains
+these field accesses and the new destruction path. Other relocation fingerprints
+still match. This static review alone does not qualify the build for release.
+
 Build 26141846 adds a private `uint16` at `FHubMemberInfo +0x80`, growing the
 structure to `0x88` bytes and its sparse-set elements back to `0xA0` bytes.
 Coverage stays at `+0x69` and the batching counter at `+0xB50`: select member

@@ -28,6 +28,8 @@ PANINI_TRAILER_WAY = "131619246"
 FRONT_RETAIL_BUILDING_WAY = "131619464"
 SUN_VALLEY_NODE = "6658126749"
 GRILLET_SPORTS_NODE = "5756060569"
+TRAIL_DIFFICULTY = {"novice": 0, "easy": 1, "intermediate": 2,
+                    "advanced": 3, "expert": 3, "freeride": 3}
 
 
 @dataclass(frozen=True)
@@ -289,7 +291,10 @@ def write_lua(path: Path, lifts, trails, ticket, ticket_yaw, snowcat_shed,
         lines += ["    {", f"        name = {lua_string(lift['name'])},",
                   f"        real_type = {lua_string(lift['real_type'])},",
                   f"        bottom = {lua_point(lift['bottom'])},",
-                  f"        top = {lua_point(lift['top'])},", "    },"]
+                  f"        top = {lua_point(lift['top'])},", "        route = {"]
+        for point in lift.get('route', [lift['bottom'], lift['top']]):
+            lines.append(f"            {lua_point(point)},")
+        lines += ["        },", "    },"]
     lines += ["}", "", "data.trails = {"]
     for trail in trails:
         lines += ["    {", f"        name = {lua_string(trail['name'])},",
@@ -435,15 +440,15 @@ def main():
     for _, refs, tags in sorted(aerialways, key=lambda value: value[2].get("name", "")):
         if len(refs) < 2:
             continue
-        first = point_record(projected, heights, refs[0], grid)
-        last = point_record(projected, heights, refs[-1], grid)
-        bottom, top = (first, last) if first["z"] < last["z"] else (last, first)
+        route = [point_record(projected, heights, ref, grid) for ref in refs]
+        if route[0]['z'] > route[-1]['z']:
+            route.reverse()
+        bottom, top = route[0], route[-1]
         lifts.append({"name": tags.get("name", "Lift"),
-                      "real_type": tags["aerialway"], "bottom": bottom, "top": top})
+                      "real_type": tags["aerialway"], "bottom": bottom, "top": top,
+                      "route": route})
 
-    difficulty = {"novice": 0, "easy": 1, "intermediate": 1,
-                  "advanced": 3, "expert": 3, "freeride": 3}
-    width = {0: 3400.0, 1: 3000.0, 2: 2600.0, 3: 2300.0}
+    width = {0: 3400.0, 1: 3000.0, 2: 3000.0, 3: 2300.0}
     trails = []
     for _, refs, tags in sorted(pistes, key=lambda value: value[2].get("name", "")):
         route = [point_record(projected, heights, ref, grid) for ref in refs if ref in projected]
@@ -458,7 +463,7 @@ def main():
             control = {"x": middle_x, "y": middle_y,
                        "z": sample_height(heights, middle_x, middle_y, grid)}
             curves.append({"start": start, "control": control, "finish": finish})
-        level = difficulty.get(tags.get("piste:difficulty", "intermediate"), 1)
+        level = TRAIL_DIFFICULTY.get(tags.get("piste:difficulty", "intermediate"), 1)
         trails.append({"name": tags.get("name") or "Unnamed trail",
                        "difficulty": level, "width": width[level],
                        "curves": curves})

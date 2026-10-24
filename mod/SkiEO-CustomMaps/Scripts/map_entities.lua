@@ -95,7 +95,7 @@ function Entities.environment(api,x,y,support_only)
             if spacing then state.snow_spacing=spacing end
             state.snow_cache[key]=depth or false
         end
-        result=setmetatable({snow_cm=depth and depth.total or 0,packed_cm=depth and depth.packed or 0,
+        result=setmetatable({snow_ready=depth~=nil and depth~=false,snow_cm=depth and depth.total or 0,packed_cm=depth and depth.packed or 0,
             fresh_cm=depth and depth.fresh or 0},{__index=result})
     else result=setmetatable({snow_cm=0,packed_cm=0,fresh_cm=0},{__index=result}) end
     -- Snow depth is physical data; a material can render a slightly different

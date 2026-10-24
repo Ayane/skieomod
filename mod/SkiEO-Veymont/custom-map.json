@@ -7,7 +7,7 @@
   "id": "community.veymont",
   "metadata": {
     "name": "Veymont",
-    "version": "0.7.7",
+    "version": "0.8.0",
     "authors": [
       "Albatar (Élie Millon)"
     ],
@@ -594,12 +594,486 @@
           ]
         }
       ]
+    },
+    "community.surface-lifts": {
+      "lifts": [
+        {
+          "name": "Alleyrons",
+          "osm_way": "164060063",
+          "route": [
+            [
+              44750.52,
+              -9813.69,
+              133826.625
+            ],
+            [
+              24580.14,
+              64188.27,
+              151599.936
+            ],
+            [
+              3107.16,
+              97749.21,
+              167474.463
+            ],
+            [
+              853.01,
+              101304.63,
+              167851.507
+            ]
+          ],
+          "kind": "detachable_platter",
+          "speed_mps": 4,
+          "capacity_per_hour": 720,
+          "pylons": 12,
+          "drive": "open",
+          "return_station": "lattice",
+          "year": 1965,
+          "source": "https://www.remontees-mecaniques.net/bdd/reportage-tkd-des-alleyrons-poma-8992.html",
+          "supports_surveyed": false,
+          "ascent_side": "left"
+        },
+        {
+          "name": "Bessards 1",
+          "osm_way": "213110412",
+          "route": [
+            [
+              8978.64,
+              -73922.81,
+              125071.578
+            ],
+            [
+              -17694.56,
+              -83315.04,
+              129011.461
+            ]
+          ],
+          "kind": "fixed_platter",
+          "speed_mps": 2,
+          "capacity_per_hour": 514,
+          "pylons": 4,
+          "drive": "open",
+          "return_station": "floating",
+          "year": 1983,
+          "source": "OpenStreetMap alignment; speed/supports are modelling assumptions",
+          "supports_surveyed": false,
+          "ascent_side": "right"
+        },
+        {
+          "name": "Bessards 2",
+          "osm_way": "213110410",
+          "route": [
+            [
+              9050.33,
+              -74516.31,
+              125061.536
+            ],
+            [
+              -17423.07,
+              -83959.43,
+              129097.162
+            ]
+          ],
+          "kind": "fixed_platter",
+          "speed_mps": 2,
+          "capacity_per_hour": 514,
+          "pylons": 4,
+          "drive": "open",
+          "return_station": "floating",
+          "year": 1983,
+          "source": "OpenStreetMap alignment; speed/supports are modelling assumptions",
+          "supports_surveyed": false,
+          "ascent_side": "left"
+        },
+        {
+          "name": "Blavet",
+          "osm_way": "213110387",
+          "route": [
+            [
+              20562.75,
+              -63917.57,
+              124942.063
+            ],
+            [
+              33641.07,
+              -24792.34,
+              136544.305
+            ]
+          ],
+          "kind": "detachable_platter",
+          "speed_mps": 3.5,
+          "capacity_per_hour": 900,
+          "pylons": 5,
+          "drive": "open",
+          "return_station": "floating",
+          "year": 1965,
+          "source": "https://www.remontees-mecaniques.net/bdd/reportage-tkd-du-blavet-poma-3582.html",
+          "supports_surveyed": false,
+          "ascent_side": "left"
+        },
+        {
+          "name": "Pierre Blanche",
+          "osm_way": "213110417",
+          "route": [
+            [
+              -57017.77,
+              -81045.4,
+              137897.035
+            ],
+            [
+              -63101.63,
+              -79769.58,
+              138812.254
+            ],
+            [
+              -73365.07,
+              -77418.24,
+              140905.675
+            ],
+            [
+              -85582.76,
+              -74893.17,
+              145815.12
+            ],
+            [
+              -93673.58,
+              -73165.36,
+              147111.639
+            ],
+            [
+              -105565.29,
+              -70693.38,
+              152281.281
+            ],
+            [
+              -114055.16,
+              -68868.58,
+              154560.086
+            ],
+            [
+              -125264.81,
+              -66282.17,
+              157824.393
+            ],
+            [
+              -133851.24,
+              -64460.11,
+              162282.094
+            ],
+            [
+              -142971.37,
+              -56339.15,
+              167358.989
+            ],
+            [
+              -144405.94,
+              -55181.95,
+              167902.976
+            ]
+          ],
+          "kind": "detachable_platter",
+          "speed_mps": 3.9,
+          "capacity_per_hour": 720,
+          "pylons": 9,
+          "drive": "open",
+          "return_station": "floating",
+          "year": 1972,
+          "source": "https://www.remontees-mecaniques.net/bdd/reportage-tkd-pierre-blanche-poma-3502.html",
+          "supports_surveyed": true,
+          "ascent_side": "right"
+        },
+        {
+          "name": "Pras 1",
+          "osm_way": "213110409",
+          "route": [
+            [
+              7242.87,
+              -83381.42,
+              125643.663
+            ],
+            [
+              2458.38,
+              -84631.67,
+              126414.061
+            ],
+            [
+              -6965.93,
+              -87130.28,
+              127681.825
+            ],
+            [
+              -16977.86,
+              -89801.23,
+              129119.782
+            ],
+            [
+              -26674.65,
+              -92402.48,
+              131158.622
+            ],
+            [
+              -36414.44,
+              -94992.49,
+              132707.612
+            ],
+            [
+              -46148.37,
+              -97575.06,
+              134519.241
+            ],
+            [
+              -55437.8,
+              -100044.28,
+              136288.843
+            ],
+            [
+              -65617.9,
+              -102751.71,
+              138369.304
+            ],
+            [
+              -75582.79,
+              -105401.75,
+              140685.882
+            ],
+            [
+              -80713.37,
+              -106765.97,
+              141775.826
+            ]
+          ],
+          "kind": "detachable_platter",
+          "speed_mps": 3,
+          "capacity_per_hour": 720,
+          "pylons": 9,
+          "drive": "modern",
+          "return_station": "floating",
+          "year": 1982,
+          "source": "https://www.remontees-mecaniques.net/bdd/reportage-tkd-des-pras-1-2-poma-8986.html",
+          "supports_surveyed": true,
+          "ascent_side": "right"
+        },
+        {
+          "name": "Pras 2",
+          "osm_way": "213110408",
+          "route": [
+            [
+              7405.22,
+              -83857.83,
+              125644.398
+            ],
+            [
+              2655.28,
+              -85261.44,
+              126408.59
+            ],
+            [
+              -6738.64,
+              -87797.7,
+              127641.962
+            ],
+            [
+              -16782.26,
+              -90472.07,
+              129137.28
+            ],
+            [
+              -26505.05,
+              -93046.92,
+              131171.573
+            ],
+            [
+              -36222.2,
+              -95620.99,
+              132716.928
+            ],
+            [
+              -45977.67,
+              -98210.64,
+              134530.029
+            ],
+            [
+              -55323.89,
+              -100628.03,
+              136279.735
+            ],
+            [
+              -65448.98,
+              -103369.44,
+              138329.807
+            ],
+            [
+              -75437.58,
+              -105946.49,
+              140683.507
+            ],
+            [
+              -80597.78,
+              -107323.09,
+              141799.421
+            ]
+          ],
+          "kind": "detachable_platter",
+          "speed_mps": 3,
+          "capacity_per_hour": 720,
+          "pylons": 9,
+          "drive": "modern",
+          "return_station": "floating",
+          "year": 1982,
+          "source": "https://www.remontees-mecaniques.net/bdd/reportage-tkd-des-pras-1-2-poma-8986.html",
+          "supports_surveyed": true,
+          "ascent_side": "left"
+        },
+        {
+          "name": "Pré Levé",
+          "osm_way": "213110420",
+          "route": [
+            [
+              -56834.65,
+              -97967.97,
+              136490.556
+            ],
+            [
+              -66504.0,
+              -94493.24,
+              137856.24
+            ],
+            [
+              -74627.36,
+              -91968.47,
+              139323.924
+            ],
+            [
+              -82621.49,
+              -89230.16,
+              143115.82
+            ],
+            [
+              -88835.35,
+              -87109.2,
+              145306.728
+            ],
+            [
+              -96600.49,
+              -84468.43,
+              148313.339
+            ],
+            [
+              -102726.91,
+              -82598.23,
+              150462.197
+            ],
+            [
+              -108462.67,
+              -83248.72,
+              152981.4
+            ],
+            [
+              -116158.5,
+              -84230.89,
+              155070.012
+            ],
+            [
+              -122454.12,
+              -85000.24,
+              156954.735
+            ],
+            [
+              -131307.1,
+              -92661.92,
+              161463.542
+            ],
+            [
+              -138752.21,
+              -99063.09,
+              165582.872
+            ],
+            [
+              -145051.44,
+              -104563.15,
+              168763.529
+            ],
+            [
+              -148786.45,
+              -107737.29,
+              170320.727
+            ]
+          ],
+          "kind": "detachable_platter",
+          "speed_mps": 3.54,
+          "capacity_per_hour": 720,
+          "pylons": 12,
+          "drive": "covered",
+          "return_station": "release",
+          "year": 1988,
+          "source": "https://www.remontees-mecaniques.net/bdd/reportage-tkd-du-pre-leve-poma-8978.html",
+          "supports_surveyed": true,
+          "ascent_side": "left"
+        }
+      ],
+      "chairlifts": [
+        {
+          "name": "Blanchon",
+          "kind": "fixed_chair",
+          "route": [
+            [
+              -1910.32,
+              -64885.86,
+              125708.324
+            ],
+            [
+              -5972.05,
+              -64859.32,
+              125883.185
+            ],
+            [
+              -16378.67,
+              -64790.51,
+              126427.09
+            ],
+            [
+              -28935.81,
+              -64708.16,
+              131243.928
+            ],
+            [
+              -42285.84,
+              -64620.54,
+              136213.068
+            ],
+            [
+              -51818.98,
+              -64558.22,
+              138566.494
+            ],
+            [
+              -59773.38,
+              -64505.69,
+              140321.412
+            ],
+            [
+              -61747.0,
+              -64493.34,
+              140847.886
+            ]
+          ],
+          "speed_mps": 2,
+          "capacity_per_hour": 900,
+          "pylons": 6,
+          "source": "https://www.remontees-mecaniques.net/bdd/reportage-tsf2-du-blanchon-poma-3194.html",
+          "ascent_side": "right"
+        }
+      ]
     }
   },
   "dependencies": [
     {
       "id": "community.foxes",
       "version": "=0.4.0"
+    },
+    {
+      "id": "community.surface-lifts",
+      "version": "=0.1.0"
     }
   ]
 }

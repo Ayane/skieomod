@@ -10,6 +10,7 @@ from types import SimpleNamespace
 import unittest
 from unittest.mock import patch
 from urllib.parse import urlencode
+from urllib.error import HTTPError
 import zipfile
 
 from tools import custom_map as cli
@@ -83,6 +84,42 @@ class InstallationTests(unittest.TestCase):
         (Path(game['ue4ss_mods']).parent / 'UE4SS.dll').unlink()
         with self.assertRaisesRegex(ManifestError, 'incomplete'):
             desktop.install_ue4ss(game)
+
+    def test_known_leaking_ue4ss_upgrade_preserves_settings_and_other_mods(self):
+        game = self.game()
+        loader = Path(game['ue4ss_dir']); loader.mkdir(parents=True)
+        dll = loader / 'UE4SS.dll'; dll.write_bytes(b'old leaking loader')
+        (Path(game['binary_dir']) / 'dwmapi.dll').write_bytes(b'original proxy')
+        settings = loader / 'UE4SS-settings.ini'; settings.write_text('user settings')
+        other = loader / 'Mods/OtherMod/main.lua'; other.parent.mkdir(parents=True); other.write_text('user mod')
+        stream = io.BytesIO()
+        with zipfile.ZipFile(stream, 'w') as archive:
+            archive.writestr('dwmapi.dll', b'new proxy')
+            archive.writestr('ue4ss/UE4SS.dll', b'fixed loader')
+            archive.writestr('ue4ss/UE4SS-settings.ini', b'default settings')
+        data = stream.getvalue()
+        missing = HTTPError(desktop.UE4SS_URL, 404, 'not mirrored yet', None, None)
+        with patch.object(desktop, 'UE4SS_LEAKING_DLL_SHA256', hashlib.sha256(dll.read_bytes()).hexdigest()), \
+                patch.object(desktop, 'UE4SS_SHA256', hashlib.sha256(data).hexdigest()), \
+                patch.object(desktop, 'urlopen', side_effect=[missing, io.BytesIO(data)]) as download:
+            desktop.install_ue4ss(game)
+            self.assertEqual(download.call_args.args[0], desktop.UE4SS_UPSTREAM_URL)
+        self.assertEqual(dll.read_bytes(), b'fixed loader')
+        self.assertEqual((loader / 'UE4SS.dll.1152-e3ba1016.bak').read_bytes(), b'old leaking loader')
+        self.assertEqual(settings.read_text(), 'user settings')
+        self.assertEqual(other.read_text(), 'user mod')
+        self.assertEqual((Path(game['binary_dir']) / 'dwmapi.dll').read_bytes(), b'original proxy')
+
+    def test_ue4ss_bad_upgrade_archive_leaves_existing_dll_untouched(self):
+        game = self.game(); loader = Path(game['ue4ss_dir']); loader.mkdir(parents=True)
+        dll = loader / 'UE4SS.dll'; dll.write_bytes(b'old leaking loader')
+        (Path(game['binary_dir']) / 'dwmapi.dll').write_bytes(b'original proxy')
+        with patch.object(desktop, 'UE4SS_LEAKING_DLL_SHA256', hashlib.sha256(dll.read_bytes()).hexdigest()), \
+                patch.object(desktop, 'urlopen', return_value=io.BytesIO(b'wrong download')), \
+                self.assertRaisesRegex(ManifestError, 'SHA-256'):
+            desktop.install_ue4ss(game)
+        self.assertEqual(dll.read_bytes(), b'old leaking loader')
+        self.assertFalse((loader / 'UE4SS.dll.1152-e3ba1016.bak').exists())
 
     def test_loader_install_preserves_repositories_and_backs_up_changed_files(self):
         game = self.game()

@@ -48,4 +48,12 @@ assert(rendered==120 and syncs==0,'frame loop serialized save state on every ima
 frame_api:_stop();assert(cancelled[frame_handle],'frame loop survived unloading')
 local denied=require('api').new({}, {id='test.denied'})
 assert(not pcall(denied.on_frame,denied,function()end),'frame callback bypassed gameplay permission')
+
+assert(not pcall(denied.configure_surface_lifts,denied,{},{}),'surface lifts bypassed gameplay permission')
+local called=false
+frame_api._host.surface_lifts=function(owner,definitions,assets)
+ assert(owner==frame_api and definitions[1]=='definition' and assets.platter=='model')
+ called=true;return 'handle'
+end
+assert(frame_api:configure_surface_lifts({'definition'},{platter='model'})=='handle' and called)
 print('API loops: weak UE4SS references, collection between ticks, errors and map cancellation OK')

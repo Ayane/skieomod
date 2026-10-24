@@ -7,6 +7,44 @@ have their own package versions. Download the
 
 ## [Unreleased]
 
+## [1.25.0] - 2026-10-25
+
+- Apply Veymont's green, blue, red and black trail colors through the map API;
+  distinguish intermediate OSM pistes from easy runs and face the resort with
+  the native camera component when starting a new game.
+- Keep surface-lift hangers in front of their passengers after camera cuts and
+  delayed boarding discovery; retain the same guest/carrier association.
+- Reduce surface-lift frame work with cached rider discovery, exact sparse
+  route projection, incremental snow profiles, nearby poses/wheels/stocks and
+  one small, rate-limited snow contact view. Use an English mapmod display name.
+- Stop surface lifts for excess snow as well as bare sections, preserve manual speed intent, and register ascent maintenance corridors for native snowcats. Only actual blade passages remove surplus snow; complete-route measurements control reopening.
+- Keep ordinary Poma guide pulleys vertical, refine the snowboard towing grip, and render moving cables without snow accumulation or broken seams.
+
+- Add the portable Surface Lifts mapmod with original Blender models, native
+  standing passengers, terrain/snow-following transport, queues and save identities.
+- Model Veymont's eight platter lifts, including Pré Levé's covered station and
+  route bends; use the two-seat native chairlift for Blanchon in new games.
+- Guard the surface-lift cable caches against the exact reviewed game build
+  26143813 and 26178224, reflected layout changes and inconsistent native boarding markers.
+- Add native equipped towing poses, ski imprints, circulating TKD stocks,
+  spatial motor/impact sounds and full-route snow closure with manual speed intent.
+- Plant each native ski on the rendered snow using leg IK and bounded depth
+  readbacks; place the disc behind the thighs and the bent shaft below the crotch.
+- Separate sliding TKD parts with spring return from rigid TKF poles; preserve
+  sleeve, clamp and disc dimensions while the rider follows the terrain.
+- Give the return cable its own elevated supports and route over low pylons;
+  connect grooved, inclined drive wheels with tangent entry and exit sheaves.
+- Keep unloaded poles upright, discs perpendicular to their shafts, and fit
+  snowboard towing poses to the native rigid board and its two bindings.
+- Update UE4SS to 1181 to fix the retained Lua output tables that caused memory
+  growth during transform queries; back up the known affected 1152 DLL on setup.
+- Confine Linux compatibility runs to a separate cgroup capped at 12 GiB or less; refuse reused
+  Proton prefixes and record process memory before a runaway test can exhaust the host.
+
+- Mirror paired platter lifts, declare each line’s ascent side, and keep Blanchon’s uphill chairs on the right.
+- Separate rotating pulley rims from static bearings and motors; align tower rollers with a smooth cable tangent and keep station frames outside the wheel sweep.
+- Put the TKD spring casing below its slim sliding rod and retain each hanger through the guide and FIFO stock; dispatch only on boarding with minimum cable separation.
+
 - Add the editor map tutorial to the workshop's Help menu and packaged guides.
 - Include this changelog in the tools and publish a versioned copy with each release.
 - Prepare optional Discord release announcements after HTTPS publication checks,

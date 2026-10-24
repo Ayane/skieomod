@@ -149,6 +149,7 @@ end
 local host = {
     bind_key = function(api, key, callback) return require('map_input').bind(api, key, callback) end,
     entity_action = function(api, name, ...) return require('map_entities')[name](api, ...) end,
+    surface_lifts = function(api, definitions, assets) return require('surface_lifts').configure(api, definitions, assets) end,
     sync_state = function(api) Saves.sync_native(api) end,
     scenario_action = function(api, name, ...) return require('scenario_host').action(api, name, ...) end,
     place_objects = function(api, definitions) return SceneObjects.place(api, definitions) end,
@@ -817,7 +818,7 @@ local function activate_map(map, restoring, sandbox)
                 proxy.log = function(_, message) return scoped:log(message) end
                 proxy.read_asset = function(_, path) return scoped:read_asset(path) end
                 proxy.load_forest_skxy = function(_, path, options) return scoped:load_forest_skxy(path, options) end
-                for _, name in ipairs({'mapmod_options', 'mod_state', 'environment', 'spawn_animated', 'footprint', 'expire_footprints', 'bind_key', 'focus_camera'}) do
+                for _, name in ipairs({'mapmod_options', 'mod_state', 'environment', 'spawn_animated', 'footprint', 'expire_footprints', 'bind_key', 'focus_camera', 'configure_surface_lifts'}) do
                     proxy[name] = function(_, ...) return scoped[name](scoped, ...) end
                 end
                 for _, name in ipairs({"on", "off", "after", "every", "loading_progress", "hold_loading"}) do

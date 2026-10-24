@@ -10,12 +10,13 @@ import re
 import subprocess
 import sys
 from urllib.request import urlopen
+from urllib.error import HTTPError
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 from deployment.discord_releases import release_notes
 from deployment.github_autopublish import version_key
-from tools.skieo_install import UE4SS_ARCHIVE, UE4SS_URL, read_ue4ss_archive
+from tools.skieo_install import UE4SS_ARCHIVE, UE4SS_URL, UE4SS_UPSTREAM_URL, read_ue4ss_archive
 
 
 def gh(*arguments):
@@ -45,7 +46,15 @@ def select():
 def dependency():
     target = ROOT / 'build/custom-map-downloads' / UE4SS_ARCHIVE
     target.parent.mkdir(parents=True, exist_ok=True)
-    with urlopen(UE4SS_URL, timeout=120) as response:
+    try:
+        response = urlopen(UE4SS_URL, timeout=120)
+    except HTTPError as error:
+        if error.code not in (404, 410):
+            raise
+        # The first release using a new pinned build also populates its mirror.
+        # Fetch that exact upstream asset; read_ue4ss_archive checks its digest.
+        response = urlopen(UE4SS_UPSTREAM_URL, timeout=120)
+    with response:
         data = response.read(64 * 1024 * 1024 + 1)
     if len(data) > 64 * 1024 * 1024:
         raise ValueError('UE4SS download is too large')

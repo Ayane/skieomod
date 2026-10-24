@@ -1,11 +1,11 @@
 {
   "format": "skieo-compatibility-contract",
   "version": 1,
-  "reference_build": "26143813",
-  "reference_executable_sha256": "831667e59b6e64df1baecd543d98c719d5f8219ce1f3ac9648a641887dbe135f",
-  "native_helper_sha256": "9e300681a8d1f8325a988ef29cc725b25f675607aaaaf7d1f2138bbc6d17ea8b",
+  "reference_build": "26178224",
+  "reference_executable_sha256": "89e207dfc37b94be6f439e4590f4140b711a369bb1e85bb7d14212b06d98e567",
+  "native_helper_sha256": "236effa74de9c4443abca605c87a60f081b9b9795b459834e06120526b5768b2",
   "native_sources": {
-    "native/SkiEONativeTerrain/native_terrain.c": "0f24a241fbdefaf71401ac3c1185c6ae6647b2fe1c5e59014cf43ed61eacae2c",
+    "native/SkiEONativeTerrain/native_terrain.c": "258c2eaf40a7e1deb7d2e83fdabf7fcc1e4434b2bb0779bc4fb6f155e2576eb7",
     "native/SkiEONativeTerrain/navigation_layout.h": "ae2ae1c9daf46e17a6deb9a401ade531b06709cd88d92bd76952ec915b2cd1d6",
     "native/SkiEONativeTerrain/render_mapping_layout.h": "5cf8d6da07c19a575f2d6a93c54156f4f0af3e6a1a8d4f0e04e7fc654f112ff9",
     "native/SkiEOTrailRatings/trail_ratings.c": "c4d23bbaad05bf966ec018e7ed3204fa683683ea1c2de8ae1e85d5ebb31796b7",
@@ -37,8 +37,15 @@
     "native/SkiEOUpdater/build.sh": "30bbc3dbb8ff6b6d58649a9b46d102660f6fcb22fb806b36070e0acb5cd09c93",
     "native/SkiEONativeTerrain/surface_sampling.h": "e2020f8c85b71b1dccbba1efb3bb7d1d977ebb0de3faf132a49bcb91cde71684",
     "native/SkiEONativeTerrain/layout_resolution.h": "aa2d8b5c5f57090721eb12cbbf6497f9429eeb7412e7bd5a43628bf73ee023c5",
-    "native/SkiEONativeTerrain/layout_profiles.h": "355e3baac370f4025936a9e4fd5b752e35d82965906fb58dfff39cf4a66fd761",
-    "tools/native_layouts.py": "aae8de3aa01e75b4d74da233859205617ae14b8e0e5503f75ef87b3ca7d6e9f8"
+    "native/SkiEONativeTerrain/layout_profiles.h": "dbd27e1f8a03cbdb632464160ee38242e58889cd1b1aeb99c39a0b6f5e1b7c0d",
+    "tools/native_layouts.py": "aae8de3aa01e75b4d74da233859205617ae14b8e0e5503f75ef87b3ca7d6e9f8",
+    "native/SkiEOSurfaceLifts/track_policy.h": "5644c7a088facde246deb9badc5d45847e358a6ea81dc6f7a8f7d1d497e5188c",
+    "native/SkiEOSurfaceLifts/build.sh": "58705eccbb11c17a646fda361e8cefc3a2c7dfd2e727146132dedb07194cc2c1",
+    "native/SkiEOSurfaceLifts/reviewed_build.h": "690342c3c151b26b007c5fc1c88f044613bc379bde59c30c5c1bc0aee913cb18",
+    "native/SkiEOSurfaceLifts/README.md": "a47e042f81a0c24845cbb58721caffefb2b102d127652aba3fd70d26049f2719",
+    "native/SkiEOSurfaceLifts/surface_lifts.c": "491817c7c7dfdf024197be92f937be6e5fafde9c37f9fd772f5f05148bd4ea31",
+    "native/SkiEOSurfaceLifts/contact_read.h": "6f09d7cc435aa2be0ea86774f8c8a8072834edea962f54a33733f497df38449f",
+    "native/SkiEOSurfaceLifts/snow_grade.h": "69f960e66ba30734749ab17578d56e3f28ade9bc35111d9388422f48596e7352"
   },
   "guards": [
     {
@@ -352,11 +359,11 @@
     },
     {
       "id": "staff.regenerate",
-      "rva": "0x5349450",
-      "bytes": "4c8bdc41564881ec00060000",
+      "rva": "0x534d140",
+      "bytes": "4c8bdc41564881ec10060000",
       "mode": "normalized_unique",
       "normalized": {
-        "size": 717,
+        "size": 720,
         "masks": [
           [
             15,
@@ -415,29 +422,29 @@
             4
           ],
           [
-            436,
+            439,
             4
           ],
           [
-            657,
+            660,
             4
           ],
           [
-            671,
+            674,
             4
           ],
           [
-            703,
+            706,
             4
           ]
         ],
-        "fnv1a64": "38c5effc7bbed170"
+        "fnv1a64": "b80fb237a694c5e1"
       }
     },
     {
       "id": "staff.settings",
-      "rva": "0x534946e",
-      "bytes": "4883b908050000004c8bf10f84",
+      "rva": "0x534d15e",
+      "bytes": "4883b9f8040000004c8bf10f84",
       "mode": "normalized_unique",
       "normalized": {
         "size": 17,
@@ -447,7 +454,7 @@
             4
           ]
         ],
-        "fnv1a64": "2844fb874268e40f"
+        "fnv1a64": "fda90a042ce11b2c"
       }
     },
     {
@@ -1247,7 +1254,12 @@
     "/Game/Core/BP_SkiResortGameMode.uasset",
     "/Game/Data/DA_PathStyles.uasset",
     "/Game/Materials/M_Prop_albtex.uasset",
-    "/Game/Materials/M_TrailLine.uasset"
+    "/Game/Materials/M_TrailLine.uasset",
+    "/Game/Characters/Meshes/SK_Skier_Equipped.uasset",
+    "/Game/Characters/Meshes/Skier_Anim_Stand.uasset",
+    "/Game/Characters/Meshes/Skier_Rig_Snowboard.uasset",
+    "/Game/Characters/Meshes/Skier_Anim_Snowboard_Intermediate.uasset",
+    "../../../Engine/Plugins/Interchange/Assets/Content/gltf/MaterialInstances/MI_Default_Opaque.uasset"
   ],
   "maps": [
     {
@@ -1264,9 +1276,9 @@
         "trees": 0
       },
       "expected_variants": {
-        "Beginner": 2,
-        "Intermediate": 2,
-        "Expert": 4,
+        "GreenCircle": 2,
+        "BlueSquare": 2,
+        "BlackDiamond": 4,
         "TwoSided": 2,
         "None": 4
       },
@@ -1274,21 +1286,23 @@
     },
     {
       "id": "community.veymont",
-      "version": "0.7.7",
-      "archive": "mod/SkiEO-Veymont/bin/community.veymont-0.7.7.skieomap",
+      "version": "0.8.0",
+      "archive": "mod/SkiEO-Veymont/bin/community.veymont-0.8.0.skieomap",
       "expected": {
         "buildings": 13,
         "decorations": 54,
         "lifts": 9,
-        "trails": 20,
+        "trails": 28,
         "hubs": 11,
         "staff": 22,
-        "trees": 383500
+        "trees": 383500,
+        "surface_lifts": 8,
+        "chairlift_models": 1
       },
       "expected_variants": {
-        "Beginner": 8,
-        "Intermediate": 26,
-        "Expert": 6,
+        "GreenCircle": 8,
+        "BlueSquare": 12,
+        "BlackDiamond": 20,
         "TwoSided": 4,
         "None": 8,
         "LowBox": 2
@@ -1303,7 +1317,7 @@
   "known_issues": [
     "Dark hub outlines and Expert trail markers are native colors; distinguish their geometry/occlusion from a material failure with a labeled color diagnostic."
   ],
-  "ue4ss_sha256": "b6c3833120285cb49e90849dbca39d658573c4b8bac07ab2b62f78428cf3b1d3",
+  "ue4ss_sha256": "ce5e3c46a920cc00b2817ac61e438c9162830290379d0b5b9c4dfc2b29459290",
   "reference_inventory": "compatibility/reference-assets-26019240.json",
   "reference_inventory_sha256": "0851bc20dc9a1e5806b3da07062809cf2e9341472897cd6b358906f8e95f723c",
   "dependencies": [
@@ -1312,9 +1326,16 @@
       "version": "0.4.0",
       "kind": "mod",
       "archive": "mod/SkiEO-Foxes/bin/community.foxes-0.4.0.skieomod"
+    },
+    {
+      "id": "community.surface-lifts",
+      "version": "0.1.0",
+      "kind": "mod",
+      "archive": "mod/SkiEO-SurfaceLifts/bin/community.surface-lifts-0.1.0.skieomod"
     }
   ],
   "native_helpers": {
-    "mod/SkiEO-CustomMaps/Scripts/skieo_trail_ratings.dll": "ac623e3e82ac9497c244366498f6894c77cca48f95600c919257d8786e5075a9"
+    "mod/SkiEO-CustomMaps/Scripts/skieo_trail_ratings.dll": "ac623e3e82ac9497c244366498f6894c77cca48f95600c919257d8786e5075a9",
+    "mod/SkiEO-CustomMaps/Scripts/skieo_surface_lifts.dll": "3fd6374d06ded9cdba6ddf20aa04e9c5d306933c37fdb3f700a7d295ee89b9b7"
   }
 }

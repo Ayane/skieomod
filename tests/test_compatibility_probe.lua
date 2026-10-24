@@ -22,6 +22,7 @@ local function exercise(allow_maps,isolated,missing_class,prefix_proof)
     os.rename=function(a,b) written[b]=written[a];written[a]=nil;return true end
     os.time=function() return tick end
     StaticFindObject=function(path)
+        if path=='/Script/Engine.Default__KismetMathLibrary' then return {BreakVector=function()end} end
         if path:find('SaveDumpLibrary',1,true) then
             return {IsValid=function() return true end,GetSaveGamesDir=function()
                 return isolated and (prefix_proof and 'C:/test-prefix/SaveGames/' or 'test-evidence/userdata/Saved/SaveGames') or 'user-saves/SaveGames'
@@ -42,6 +43,7 @@ local function exercise(allow_maps,isolated,missing_class,prefix_proof)
     assert(status['live.heartbeat']=='pass')
     assert(status['live.isolation']==(isolated and (not prefix_proof or prefix_proof=='valid') and 'pass' or 'fail'))
     assert(status['live.reflection']==(missing_class and 'fail' or 'pass'))
+    assert(status['live.output_lifetime']=='pass')
 end
 exercise(false,true,false)
 exercise(true,false,false)
@@ -101,6 +103,7 @@ local function map_cycle(lose_building,wrong_mesh,swap_ids,deleted_shell)
     os.rename=function(a,b) written[b]=written[a];return true end
     os.time=function() return tick end
     StaticFindObject=function(path)
+        if path=='/Script/Engine.Default__KismetMathLibrary' then return {BreakVector=function()end} end
         if path:find('/Script/SkiResortSimulator.',1,true) and not path:find('SaveDumpLibrary',1,true) then return path end
         assert(path:find('SaveDumpLibrary',1,true))
         return {IsValid=function() return true end,GetSaveGamesDir=function() return 'test-evidence/userdata/Saved/SaveGames' end}

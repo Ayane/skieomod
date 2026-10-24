@@ -43,7 +43,7 @@ MODULES = ('custom_map.py', 'custom_maps.py', 'custom_packages.py', 'skieo_insta
            'skieo_project.py', 'skieo_templates.py', 'skieo_workshop.py', 'skieo_repository.py', 'skieo_heightmap.py', 'skieo_bake.py', 'skieo_authoring.py', 'skieo_game_catalog.py', 'skieo_scene.py', 'skieo_editor_scene.py', 'skieo_editor.py', 'skieo_editor_ui.py',
            'skieo_editor_widgets.py', 'skieo_editor_config.py', 'skieo_editor_3d.py', 'skieo_editor_graph.py', 'skieo_editor_resources.py')
 PACKAGE_FILES = ('LICENSE', 'THIRD_PARTY_NOTICES.md', 'pyproject.toml', 'MANIFEST.in', 'CHANGELOG.md', 'docs/discord-releases.md', 'docs/getting-started.md', 'docs/large-maps.md', 'docs/terrain-repairs.md', 'docs/vegetation.md', 'docs/editor.md', 'docs/editor-tutorial.md', 'docs/custom-map-cli.md',
-                 'docs/custom-map-repository.md', 'docs/custom-map-format.md', 'docs/steam-workshop.md', 'docs/scripts-and-scenarios.md', 'docs/mapmods.md', 'docs/mapmod-tutorial.md',
+                 'docs/custom-map-repository.md', 'docs/custom-map-format.md', 'docs/steam-workshop.md', 'docs/scripts-and-scenarios.md', 'docs/mapmods.md', 'docs/surface-lifts.md', 'docs/mapmod-tutorial.md',
                  'native/SkiEORepository/LICENSE', 'tools/build_custom_map_release.py',
                  'tests/check_skieomod_distribution.py', 'deployment/publish_loader_updates.py', 'deployment/release_custom_map.py', 'deployment/discord_releases.py',
                  'tools/repair_heightmap.py', 'maps/veymont/map.json')
@@ -70,7 +70,8 @@ for name, data in loader_files.items():
     except ValueError:
         continue
     release_files[relative] = data
-featured_sources = [ROOT / 'mod/SkiEO-Veymont', ROOT / 'mod/SkiEO-SuperSaintBernard', ROOT / 'mod/SkiEO-Foxes']
+featured_sources = [ROOT / 'mod/SkiEO-Veymont', ROOT / 'mod/SkiEO-SuperSaintBernard',
+                    ROOT / 'mod/SkiEO-Foxes', ROOT / 'mod/SkiEO-SurfaceLifts']
 featured = {} if args.tools_only else featured_files(featured_sources)
 if args.loader_archive:
     release_files, _ = read_archive(args.loader_archive)

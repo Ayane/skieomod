@@ -1,0 +1,7 @@
+Original procedural models and code: SkiEO contributors, BSD-3-Clause.
+Blender source: tools/build_surface_lift_models.py.
+Visual references: remontees-mecaniques.net reports 8978 (Pre Leve), 8986 (Pras),
+8992 (Alleyrons), 3582 (Blavet), 3502 (Pierre Blanche), 3194 (Blanchon).
+Reporters/photographers include Losta38, l'alexois, kilano18 and jerome21-06.
+Reference photographs are consulted only and are not redistributed.
+Sources, model approximations and technical characteristics: docs/surface-lifts.md.

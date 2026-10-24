@@ -11,7 +11,9 @@ release. Assets are uploaded to a draft before the release becomes public.
 Published versions and existing tags cannot be overwritten. An interrupted
 draft upload can be retried with `gh workflow run release.yml --ref main`;
 the same checks run before publication. UE4SS is fetched from the existing
-public download and checked against its pinned SHA-256.
+public download and checked against its pinned SHA-256. When a new pinned build
+has not reached that mirror, the workflow fetches its exact official GitHub
+asset and verifies the same digest before packaging it.
 
 The server polls the public GitHub Releases API every five minutes (up to 15
 seconds of jitter), without a GitHub token or an inbound webhook. It verifies

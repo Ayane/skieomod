@@ -30,9 +30,9 @@ static const uint8_t skieo_prefix_2[] = {0x40,0x57,0x48,0x83,0xec,0x20,0x83,0xb9
 static const SkiEOAddressMask skieo_masks_2[] = {{28,4},{36,4},{44,4},{52,4},{60,4},{80,4},{86,4},{105,4},{119,4},{177,4},{199,4},{255,4},{267,4},{276,4},{324,4},{389,1},{506,1}};
 static const uint8_t skieo_prefix_3[] = {0x83,0xb9,0x50,0x0b,0x00,0x00,0x00,0x0f,0x8e};
 static const SkiEOAddressMask skieo_masks_3[] = {{9,4}};
-static const uint8_t skieo_prefix_4[] = {0x4c,0x8b,0xdc,0x41,0x56,0x48,0x81,0xec,0x00,0x06,0x00,0x00};
-static const SkiEOAddressMask skieo_masks_4[] = {{15,4},{109,4},{121,4},{161,4},{169,4},{176,4},{184,4},{191,4},{285,4},{317,4},{343,4},{361,4},{379,4},{397,4},{436,4},{657,4},{671,4},{703,4}};
-static const uint8_t skieo_prefix_5[] = {0x48,0x83,0xb9,0x08,0x05,0x00,0x00,0x00,0x4c,0x8b,0xf1,0x0f,0x84};
+static const uint8_t skieo_prefix_4[] = {0x4c,0x8b,0xdc,0x41,0x56,0x48,0x81,0xec,0x10,0x06,0x00,0x00};
+static const SkiEOAddressMask skieo_masks_4[] = {{15,4},{109,4},{121,4},{161,4},{169,4},{176,4},{184,4},{191,4},{285,4},{317,4},{343,4},{361,4},{379,4},{397,4},{439,4},{660,4},{674,4},{706,4}};
+static const uint8_t skieo_prefix_5[] = {0x48,0x83,0xb9,0xf8,0x04,0x00,0x00,0x00,0x4c,0x8b,0xf1,0x0f,0x84};
 static const SkiEOAddressMask skieo_masks_5[] = {{13,4}};
 static const uint8_t skieo_prefix_6[] = {0x40,0x55,0x53,0x56,0x48,0x8d,0x6c,0x24,0xb9,0x48,0x81,0xec,0xb0,0x00,0x00,0x00};
 static const SkiEOAddressMask skieo_masks_6[] = {{50,4},{87,4},{99,4},{107,4},{120,4},{501,4},{523,4},{652,4},{669,4},{693,4},{706,4},{714,4},{722,4},{761,4},{768,4},{782,4},{842,1},{872,1}};
@@ -61,8 +61,8 @@ static const SkiEOCodeLayout skieo_layouts[] = {
     {skieo_prefix_1,23,943,skieo_masks_1,34,UINT64_C(0x0233D676564E2E77)},
     {skieo_prefix_2,16,511,skieo_masks_2,17,UINT64_C(0x63CA1F13EEC1EFEB)},
     {skieo_prefix_3,9,14,skieo_masks_3,1,UINT64_C(0xF1121EB0BC70E016)},
-    {skieo_prefix_4,12,717,skieo_masks_4,18,UINT64_C(0x38C5EFFC7BBED170)},
-    {skieo_prefix_5,13,17,skieo_masks_5,1,UINT64_C(0x2844FB874268E40F)},
+    {skieo_prefix_4,12,720,skieo_masks_4,18,UINT64_C(0xB80FB237A694C5E1)},
+    {skieo_prefix_5,13,17,skieo_masks_5,1,UINT64_C(0xFDA90A042CE11B2C)},
     {skieo_prefix_6,16,884,skieo_masks_6,18,UINT64_C(0xB1E0D7E8B0EBD3DD)},
     {skieo_prefix_7,20,50,skieo_masks_7,3,UINT64_C(0x68C65F0EBB8372AA)},
     {skieo_prefix_8,30,153,skieo_masks_8,3,UINT64_C(0xD4FCD8FAD1A843E1)},

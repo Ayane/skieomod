@@ -127,6 +127,24 @@ de 1.24.6 et l’avertissement de version dans Custom Map.
 
 ## 2. Contrôles UE4SS dans une copie isolée
 
+Sous Linux, le jeu de qualification tourne dans un groupe systemd utilisateur
+séparé de l'éditeur : plafond de 12 Gio par défaut, swap interdit et arrêt de tout le groupe
+en cas de dépassement. Le lancement exige 8 Gio de marge supplémentaires et
+refuse un préfixe Proton encore utilisé, même si Wine nomme le processus
+`GameThread`. Sans ce confinement vérifié par le noyau, le jeu n'est pas lancé.
+`memory-limit.json` décrit la limite appliquée ; `memory-usage.jsonl` conserve
+la consommation du groupe, son pic et les PID/RSS de ses processus. Le contrôle
+actif arrête le test 1 Gio avant son plafond ou sous 4 Gio disponibles pour le système.
+Le plafond du noyau reste en place pendant une revue interactive.
+`--memory-limit-gib 8` permet un essai plafonné à 8 Gio (arrêt anticipé à 7 Gio)
+avec 16 Gio disponibles au lancement. La réserve de 8 Gio reste obligatoire.
+
+Avant de charger une carte, `live.output_lifetime` exécute 1 000 appels
+à trois paramètres de sortie et vérifie que leurs tableaux sont libérés.
+Le build UE4SS 1152 conservait une référence par sortie : les lectures de
+transformations provoquaient ainsi une croissance continue, même après une
+collecte Lua. Le build 1181 corrige ce défaut ([correctif amont](https://github.com/UE4SS-RE/RE-UE4SS/pull/1452)).
+
 ```sh
 python3 tools/check_game_compatibility.py --live --output build/compatibility/mon-essai
 ```

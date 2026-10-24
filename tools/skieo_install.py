@@ -14,6 +14,7 @@ import sysconfig
 import tempfile
 import time
 from urllib.parse import parse_qs, urlparse
+from urllib.error import HTTPError
 from urllib.request import urlopen
 import zipfile
 
@@ -30,9 +31,12 @@ PRIMARY_REPOSITORY = 'https://skieomod.emillon.fr'
 APP_IDS = ('4493130', '5012760')
 LOADER_NAME = 'SkiEO-CustomMaps'
 # Retain the tested UE 5.8 build on our server: upstream's rolling tag deletes assets.
-UE4SS_ARCHIVE = 'UE4SS_v3.0.1-1152-ge3ba1016.zip'
+UE4SS_ARCHIVE = 'UE4SS_v3.0.1-1181-g83330635.zip'
 UE4SS_URL = PRIMARY_REPOSITORY + '/downloads/' + UE4SS_ARCHIVE
-UE4SS_SHA256 = 'af8ea9d8975e8eff7967423f43b8b50875e66a29a0f434cffce6e0867ea17252'
+UE4SS_UPSTREAM_URL = 'https://github.com/UE4SS-RE/RE-UE4SS/releases/download/experimental-latest/' + UE4SS_ARCHIVE
+UE4SS_SHA256 = 'b9a166a756605b21058a64cde93bcaab1a855dba3553e5c7e6ce0fa8fdfad7b9'
+# This previously distributed build leaks every UFunction out-parameter table.
+UE4SS_LEAKING_DLL_SHA256 = 'b6c3833120285cb49e90849dbca39d658573c4b8bac07ab2b62f78428cf3b1d3'
 UE4SS_MAX_BYTES = 16 * 1024 * 1024
 STEAM_START_TIMEOUT = 120
 EDITOR_LAUNCH_TIMEOUT = 120
@@ -272,15 +276,27 @@ def configure(args, repository=None):
 def install_ue4ss(config):
     binary = Path(config['binary_dir'])
     loader = Path(config['ue4ss_dir'])
-    if (loader / 'UE4SS.dll').is_file() and (binary / 'dwmapi.dll').is_file():
-        return
-    if (loader / 'UE4SS.dll').exists() or (binary / 'dwmapi.dll').exists():
+    dll = loader / 'UE4SS.dll'
+    upgrade = False
+    if dll.is_file() and (binary / 'dwmapi.dll').is_file():
+        upgrade = hashlib.sha256(dll.read_bytes()).hexdigest() == UE4SS_LEAKING_DLL_SHA256
+        if not upgrade:
+            return
+    if not upgrade and (dll.exists() or (binary / 'dwmapi.dll').exists()):
         raise ManifestError('UE4SS installation is incomplete or a dwmapi.dll proxy already exists. Complete the UE4SS installation before running skieomod setup again.')
-    print('Installing UE4SS (compatible with UE 5.8)…')
+    print('Updating UE4SS to fix retained Lua output tables…' if upgrade else 'Installing UE4SS (compatible with UE 5.8)…')
     with tempfile.TemporaryDirectory(prefix='skieomod-ue4ss-') as folder:
         archive_path = Path(folder) / 'ue4ss.zip'
         digest = hashlib.sha256()
-        with urlopen(UE4SS_URL, timeout=120) as source, archive_path.open('wb') as target:
+        try:
+            source = urlopen(UE4SS_URL, timeout=120)
+        except HTTPError as error:
+            if error.code not in (404, 410):
+                raise
+            # A development build may precede its retained mirror. The exact
+            # upstream filename and digest are pinned; never use an unpinned latest.
+            source = urlopen(UE4SS_UPSTREAM_URL, timeout=120)
+        with source, archive_path.open('wb') as target:
             count = 0
             while chunk := source.read(1024 * 1024):
                 count += len(chunk)
@@ -300,6 +316,25 @@ def install_ue4ss(config):
             # Validate every CRC before modifying the game folder.
             if archive.testzip():
                 raise ManifestError('UE4SS CRC mismatch')
+            if upgrade:
+                backup = loader / 'UE4SS.dll.1152-e3ba1016.bak'
+                old = dll.read_bytes()
+                if hashlib.sha256(old).hexdigest() != UE4SS_LEAKING_DLL_SHA256:
+                    raise ManifestError('UE4SS changed during its update; no file was replaced')
+                if backup.exists() and backup.read_bytes() != old:
+                    raise ManifestError('Refusing to replace a different UE4SS backup')
+                if not backup.exists():
+                    backup.write_bytes(old)
+                staged = dll.with_suffix('.dll.skieomod-new')
+                try:
+                    staged.write_bytes(archive.read('ue4ss/UE4SS.dll'))
+                    os.replace(staged, dll)
+                except PermissionError as error:
+                    raise ManifestError('Close Ski-E-O before updating UE4SS; the previous DLL is unchanged') from error
+                finally:
+                    staged.unlink(missing_ok=True)
+                print('UE4SS updated; restart the game if it was already open. Previous DLL: ' + str(backup))
+                return
             for item in infos:
                 destination = binary / item.filename
                 if destination.exists():

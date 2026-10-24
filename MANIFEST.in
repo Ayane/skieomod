@@ -11,7 +11,7 @@ include tools/repair_heightmap.py maps/veymont/map.json
 include docs/vegetation.md
 include docs/editor.md
 include docs/editor-tutorial.md
-include docs/scripts-and-scenarios.md docs/mapmods.md docs/mapmod-tutorial.md
+include docs/scripts-and-scenarios.md docs/mapmods.md docs/surface-lifts.md docs/mapmod-tutorial.md
 include schemas/*.json
 include mod/SkiEO-CustomMaps/README.md
 include mod/SkiEO-CustomMaps/LICENSE-MINHOOK.md
@@ -28,3 +28,7 @@ include deployment/discord_releases.py
 include mod/SkiEO-CustomMaps/Scripts/skieo_update_bootstrap.dll
 include mod/SkiEO-CustomMaps/Scripts/skieo_updater.exe
 recursive-include native/SkiEOUpdater *.c *.h *.sh *.md
+
+include mod/SkiEO-CustomMaps/Scripts/skieo_surface_lifts.dll
+recursive-include native/SkiEOSurfaceLifts *.c *.h *.sh *.md
+recursive-include native/SkiEOTrailRatings/vendor/minhook *.c *.h *.txt

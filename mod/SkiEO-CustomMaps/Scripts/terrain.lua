@@ -1256,6 +1256,16 @@ local function native_trail_materials(visualization)
     return materials
 end
 
+function Terrain.hide_excluded_trail_labels()
+    if not Terrain.trail_visual_exclusions then return end
+    for _,actor in ipairs(current_actors("TrailPathLabelActor")) do
+        if Terrain.trail_visual_exclusions[actor:GetTrailId()] then
+            actor:SetActorHiddenInGame(true)
+            actor:SetActorEnableCollision(false)
+        end
+    end
+end
+
 local function hide_native_trail_lines()
     local visualization = current_object("TrailVisualizationSubsystem")
     local retained = {}
@@ -1285,6 +1295,7 @@ local function hide_native_trail_lines()
             removed = removed + 1
         end
     end
+    Terrain.hide_excluded_trail_labels()
     return hidden, removed
 end
 
@@ -1350,6 +1361,7 @@ function Terrain.rebuild_trail_visuals(preserve_visibility)
     local section = 0
     trail_map.RegisteredTrails:ForEach(function(key, value)
         local trail_id = numeric(key)
+        if Terrain.trail_visual_exclusions and Terrain.trail_visual_exclusions[trail_id] then return end
         local info = parameter_value(value)
         local vertices, triangles, normals, uvs = trail_ribbon(
             Terrain.active, info, width, z_offset)

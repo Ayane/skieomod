@@ -88,19 +88,20 @@ class EvidenceTests(unittest.TestCase):
                 with self.assertRaises(ValueError): protocol.validate_contract(data)
 
     def complete_live(self):
-        ids = ['live.reflection', 'live.heartbeat', 'live.isolation']
+        ids = ['live.reflection', 'live.heartbeat', 'live.isolation', 'live.output_lifetime']
         ids += ['live.test.map.' + stage for stage in ['counts', 'variants', 'gc']]
         return {'run_id': 'current-run', 'complete': True, 'maps_enabled': True,
                 'checks': [{'id': key, 'status': 'pass'} for key in ids]}
 
     def test_stale_partial_duplicate_and_missing_live_results_fail(self):
-        for change in ['stale', 'partial', 'missing_gc', 'duplicate', 'exception']:
+        for change in ['stale', 'partial', 'missing_gc', 'missing_lifetime', 'duplicate', 'exception']:
             with self.subTest(change=change):
                 self.report['checks'] = []
                 data = self.complete_live()
                 if change == 'stale': data['run_id'] = 'previous-run'
                 if change == 'partial': data['complete'] = False
                 if change == 'missing_gc': data['checks'].pop()
+                if change == 'missing_lifetime': data['checks'] = [x for x in data['checks'] if x['id'] != 'live.output_lifetime']
                 if change == 'duplicate': data['checks'].append(data['checks'][0])
                 if change == 'exception': data['error'] = 'binding failed'
                 protocol.ingest_live(self.report, data, self.contract)
@@ -299,8 +300,11 @@ class IsolationTests(unittest.TestCase):
             with patch.object(protocol, 'prepare_live', return_value=({'binary_dir': str(folder)}, ue)), \
                  patch.object(protocol.desktop, 'editor_launch_plan', return_value=(['game'], {}, folder)), \
                  patch.object(protocol.desktop, 'ensure_editor_steam'), \
+                 patch.object(protocol, 'Limits') as limits, \
                  patch.object(protocol.desktop, 'stop_editor_launch') as stop, \
                  patch.object(protocol.subprocess, 'Popen', return_value=process) as launch:
+                limits.return_value.prepare.return_value=['bounded-game']
+                limits.return_value.sample.return_value=None
                 protocol.run_live({}, {'maps': []}, report, folder)
             if protocol.sys.platform.startswith('linux'):
                 self.assertEqual(launch.call_args.kwargs['env']['STEAM_COMPAT_DATA_PATH'], str(folder / 'compatdata'))
@@ -309,6 +313,21 @@ class IsolationTests(unittest.TestCase):
             self.assertEqual(stop.call_args.args, (process,))
             self.assertEqual(stop.call_args.kwargs['binary'], folder / 'skieogame.exe')
             self.assertEqual(len(stop.call_args.kwargs['token']), 32)
+
+    @unittest.skipUnless(protocol.sys.platform.startswith('linux'), 'Linux memory confinement')
+    def test_insufficient_memory_is_reported_without_starting_steam_or_game(self):
+        with tempfile.TemporaryDirectory() as directory:
+            folder=Path(directory);report={'checks':[],'run_id':'run'}
+            with patch.object(protocol,'prepare_live',return_value=({'binary_dir':str(folder)},folder)), \
+                 patch.object(protocol.desktop,'editor_launch_plan',return_value=(['game'],{},folder)), \
+                 patch.object(protocol,'Limits') as limits, \
+                 patch.object(protocol.desktop,'ensure_editor_steam') as steam, \
+                 patch.object(protocol.subprocess,'Popen') as process:
+                limits.return_value.prepare.side_effect=RuntimeError('Insufficient memory headroom')
+                protocol.run_live({}, {'maps':[]}, report, folder)
+            steam.assert_not_called();process.assert_not_called()
+            self.assertEqual(report['checks'][0]['id'],'live.memory')
+            self.assertEqual(report['checks'][0]['status'],'blocked')
 
 
 if __name__ == '__main__':

@@ -1,0 +1,86 @@
+{
+  "format": {
+    "name": "skieo-mod",
+    "version": "1.0.0"
+  },
+  "id": "community.surface-lifts",
+  "metadata": {
+    "name": "Surface lifts",
+    "version": "0.1.0",
+    "authors": [
+      "Albatar (Élie Millon)"
+    ],
+    "description": "Poma surface lifts with platter poles, stations, towers, bends and ground-level skier transport.",
+    "language": "en",
+    "license": "BSD-3-Clause (code and original models)"
+  },
+  "runtime": "map-api",
+  "dependencies": [],
+  "script": {
+    "language": "lua",
+    "api": "1.4",
+    "entry": "Scripts/main.lua",
+    "permissions": [
+      "gameplay"
+    ]
+  },
+  "content": {
+    "assets": [
+      "Assets/angle-tower.skpm",
+      "Assets/blanchon-drive.skpm",
+      "Assets/blanchon-return.skpm",
+      "Assets/fixed-drive.skpm",
+      "Assets/floating-return.skpm",
+      "Assets/lattice-return.skpm",
+      "Assets/palette.png",
+      "Assets/platter.skpm",
+      "Assets/poma-drive.skpm",
+      "Assets/pras-drive.skpm",
+      "Assets/pre-leve-drive.skpm",
+      "Assets/release-return.skpm",
+      "Assets/tower.skpm",
+      "Assets/poles-bundle.skpm",
+      "Assets/platter-upper.skpm",
+      "Assets/platter-shaft.skpm",
+      "Assets/platter-lower.skpm",
+      "Assets/return-support.skpm",
+      "Assets/return-angle.skpm",
+      "Assets/fixed-return-support.skpm",
+      "Assets/inclined-wheel.skpm",
+      "Assets/guide-wheel.skpm",
+      "Assets/motor.skpm",
+      "Assets/chair-tower.skpm",
+      "Assets/chair-head.skpm"
+    ]
+  },
+  "files": [
+    "Scripts/main.lua",
+    "Assets/angle-tower.skpm",
+    "Assets/blanchon-drive.skpm",
+    "Assets/blanchon-return.skpm",
+    "Assets/fixed-drive.skpm",
+    "Assets/floating-return.skpm",
+    "Assets/lattice-return.skpm",
+    "Assets/palette.png",
+    "Assets/platter.skpm",
+    "Assets/poma-drive.skpm",
+    "Assets/pras-drive.skpm",
+    "Assets/pre-leve-drive.skpm",
+    "Assets/release-return.skpm",
+    "Assets/tower.skpm",
+    "LICENSE",
+    "CREDITS.txt",
+    "Assets/poles-bundle.skpm",
+    "Assets/platter-upper.skpm",
+    "Assets/platter-shaft.skpm",
+    "Assets/platter-lower.skpm",
+    "Assets/return-support.skpm",
+    "Assets/return-angle.skpm",
+    "Assets/fixed-return-support.skpm",
+    "Assets/inclined-wheel.skpm",
+    "Assets/guide-wheel.skpm",
+    "Assets/motor.skpm",
+    "Assets/chair-tower.skpm",
+    "Assets/chair-head.skpm"
+  ]
+}

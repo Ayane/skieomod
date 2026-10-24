@@ -7,11 +7,13 @@ import subprocess
 import tarfile
 import tempfile
 import unittest
+from urllib.error import HTTPError
 from unittest.mock import patch
 
 from deployment import github_autopublish as auto
 from deployment import github_release as github
 from deployment import publish_loader_updates as publisher
+from tools import skieo_install
 
 
 class AutopublishTests(unittest.TestCase):
@@ -221,6 +223,26 @@ class GithubReleaseTests(unittest.TestCase):
         (self.root / 'tools/skieo_loader.py').write_text("VERSION = '1.24.1'\n")
         with self.assertRaises(ValueError):
             github.source_version()
+
+    def test_new_pinned_dependency_can_bootstrap_an_empty_mirror(self):
+        data = b'pinned UE4SS build'
+        with patch.object(github, 'urlopen', side_effect=[
+                HTTPError(github.UE4SS_URL, 404, 'not mirrored yet', {}, None), io.BytesIO(data)]) as fetch, \
+                patch.object(skieo_install, 'UE4SS_SHA256', hashlib.sha256(data).hexdigest()):
+            github.dependency()
+        self.assertEqual(fetch.call_args_list[0].args[0], github.UE4SS_URL)
+        self.assertEqual(fetch.call_args_list[1].args[0], github.UE4SS_UPSTREAM_URL)
+        self.assertEqual((self.root / 'build/custom-map-downloads' / github.UE4SS_ARCHIVE).read_bytes(), data)
+
+    def test_dependency_fallback_still_rejects_wrong_bytes_and_server_errors(self):
+        with patch.object(github, 'urlopen', side_effect=[
+                HTTPError(github.UE4SS_URL, 410, 'gone', {}, None), io.BytesIO(b'wrong build')]), \
+                self.assertRaises(skieo_install.ManifestError):
+            github.dependency()
+        with patch.object(github, 'urlopen', side_effect=HTTPError(github.UE4SS_URL, 500, 'server failure', {}, None)) as fetch, \
+                self.assertRaises(HTTPError):
+            github.dependency()
+        self.assertEqual(fetch.call_count, 1)
 
     def test_already_published_version_never_uploads_or_replaces_assets(self):
         (self.root / 'build/release-1.24.2').mkdir(parents=True)

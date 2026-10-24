@@ -204,6 +204,12 @@ function Api:footprint(x, y, yaw, texture) return self:_entity_action('footprint
 function Api:expire_footprints() return self:_entity_action('expire') end
 function Api:focus_camera(x, y, z, distance) return self:_entity_action('focus_camera', x, y, z, distance) end
 
+function Api:configure_surface_lifts(definitions, assets)
+    assert(self._gameplay_allowed, "script permission 'gameplay' is required for surface lifts")
+    assert(self._host.surface_lifts, 'This loader does not support surface lifts')
+    return self._host.surface_lifts(self, definitions, assets)
+end
+
 function Api:place_objects(definitions)
     if not self._gameplay_allowed then error("script permission 'gameplay' is required for scene objects", 2) end
     if self._scene_started then error('Scene objects may be placed only once per map session', 2) end

@@ -22,6 +22,10 @@ local NativeTerrain = {
     derived_textures = {},
 }
 
+function NativeTerrain.set_camera_rotation(pawn,rotation)
+    return require('camera_view').set(pawn,rotation)
+end
+
 local CLASS_PATH = "/Script/SkiResortSimulator.TerrainHeightCacheSubsystem"
 local LANDSCAPE_COMPONENT_CLASS = "/Script/Landscape.LandscapeComponent"
 local SOURCE_DIRECTORY = debug.getinfo(1, "S").source:match("^@(.*[/\\])[^/\\]+$")

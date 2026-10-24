@@ -357,7 +357,8 @@ local function clear_source_corridors()
         end
     end
     for _, lift in ipairs(VeymontData.lifts) do
-        clear_line(lift.bottom, lift.top, 1500.0)
+        local route = lift.route or {lift.bottom, lift.top}
+        for i = 1, #route - 1 do clear_line(route[i], route[i + 1], 1500.0) end
         for _, endpoint in ipairs({ lift.bottom, lift.top }) do
             local ok, result = pcall(function()
                 return obstacles:ClearObstaclesInRadius(
@@ -954,11 +955,32 @@ end
 
 local function spawn_station_lift(
     world, gameplay_statics, lift_class, guid_library, base_hub_id, definition)
+    if definition.real_type == 'chair_lift' then
+        local path = '/Game/Blueprints/Lifts/BP_FixedChair2.BP_FixedChair2_C'
+        lift_class = StaticFindObject(path)
+        if not lift_class or not lift_class:IsValid() then lift_class = LoadAsset(path) end
+        assert(lift_class and lift_class:IsValid(), 'Blanchon two-seat lift class unavailable')
+        NativeTerrain.retain_texture(lift_class)
+    end
     local lift = spawn_placeable_preview(
         world, gameplay_statics, lift_class, definition.bottom, 0.0)
     lift.PlaceableComponent:GenerateNewId()
     lift:SetInstanceName(FText(definition.name))
     lift:Initialize(definition.bottom, definition.top)
+    if definition.route and #definition.route > 2 then
+        local waypoints = {}
+        for i, point in ipairs(definition.route) do
+            waypoints[#waypoints + 1] = {position=point,
+                bIsTerminal=i==1 or i==#definition.route, bIsAngleStation=false}
+        end
+        lift.Waypoints = waypoints
+    end
+    if definition.real_type == 'chair_lift' then
+        -- Blanchon: fixed two-seater, 2 m/s, 900 passengers/hour.
+        lift.Capacity = 2
+        lift.OperatingSpeed = 200
+        lift.DispatchIntervalSeconds = 8
+    end
     -- Every lower terminal is a member of Gresse's base hub. The Ticket Office
     -- uses this same HubId, so native connectivity no longer treats it as an
     -- isolated building and the guest spawner can use it as an entrance/exit.
@@ -1316,7 +1338,18 @@ local function prepare_veymont_view()
             -- world-space view, not an offset inherited from Sugar Bowl.
             local location = { X = 70000.0, Y = -125000.0, Z = 210000.0 }
             local rotation = { Pitch = -43.0, Yaw = 145.0, Roll = 0.0 }
+            NativeTerrain.set_camera_rotation(player, rotation)
             player:K2_SetActorLocationAndRotation(location, rotation, false, {}, true)
+            -- The native free camera owns its view on FollowCamera. Rotating
+            -- only the pawn leaves that component looking away from the resort.
+            local camera = player.FollowCamera
+            if camera and camera:IsValid() then
+                camera:K2_SetWorldRotation(rotation, false, {}, true)
+            end
+            local controller = UEHelpers.GetPlayerController()
+            if controller and controller:IsValid() then
+                controller:SetControlRotation(rotation)
+            end
             log("camera positioned over the Gresse-en-Vercors base area")
         else
             log("player pawn is unavailable; camera kept its source-level position")
@@ -1328,12 +1361,15 @@ end
 local function override_station_lift_boolean(context)
     local lift = context:get()
     if station_definition_for_lift(lift) then
+        local surface=require('surface_lifts')
+        if surface.is_adapted(lift) then return nil end
         return true
     end
     return nil
 end
 
 local function override_station_lift_status(context)
+    if require('surface_lifts').is_adapted(context:get()) then return nil end
     if override_station_lift_boolean(context) == true then
         return FText("Operating")
     end
@@ -1386,6 +1422,10 @@ return {
             install_station_lift_overrides()
             Vegetation.unload()
         elseif event_name == "map.ready" then
+            api.game:set_trail_rating_system({colors = {
+                beginner = '#008000', intermediate = '#0080FF',
+                expert = '#FF0000', extreme = '#000000',
+            }})
             local vegetation_done = api:hold_loading()
             if not event.restored then
                 local station_done = api:hold_loading()

@@ -95,6 +95,24 @@ return function(runtime,spec_path)
         add('live.reflection',#errors==0,'native classes, property types and function parameters',{errors=errors})
         return #errors==0
     end
+    local function output_lifetime()
+        local library=StaticFindObject('/Script/Engine.Default__KismetMathLibrary')
+        local function refs()
+            local n=0
+            for key in pairs(debug.getregistry()) do if type(key)=='number' then n=n+1 end end
+            return n
+        end
+        library:BreakVector({X=1,Y=2,Z=3},{},{},{})
+        collectgarbage('collect')
+        local before,before_memory=refs(),collectgarbage('count')
+        for _=1,1000 do library:BreakVector({X=1,Y=2,Z=3},{},{},{}) end
+        collectgarbage('collect')
+        local after,after_memory=refs(),collectgarbage('count')
+        local pass=after-before<10 and after_memory-before_memory<1024
+        add('live.output_lifetime',pass,'UFunction output tables must be released after synchronous calls',
+            {calls=1000,outputs=3000,before_refs=before,after_refs=after,before_kib=before_memory,after_kib=after_memory})
+        return pass
+    end
     local function isolation()
         local library=StaticFindObject('/Script/SkiResortSimulator.Default__SaveDumpLibrary')
         assert(valid(library),'save directory inspector unavailable')
@@ -124,7 +142,14 @@ return function(runtime,spec_path)
         local world=Helpers.GetWorld()
         local result={world=world:GetFullName(),world_address=world:GetAddress(),buildings=0,decorations=0,
             lifts=#actors('LiftActor'),hubs=#actors('HubActor'),trails=0,staff=0,trees=0,variants={},saved_variants={},
-            invalid_marker_variants=0,buried_buildings=0,mesh_mismatches=0,placeables={}}
+            invalid_marker_variants=0,buried_buildings=0,mesh_mismatches=0,placeables={},surface_lifts=0,chairlift_models=0}
+        local api=runtime.active_api
+        for _,item in ipairs(api and api._surface_lifts and api._surface_lifts.items or {}) do
+            if not item.disposed and current(item.lift) then
+                local key=item.definition.kind=='fixed_chair' and 'chairlift_models' or 'surface_lifts'
+                result[key]=result[key]+1
+            end
+        end
         local function remember(a,variant)
             local id=a:GetPlaceableId()
             local key=string.format('%08x%08x%08x%08x',id.A&0xffffffff,id.B&0xffffffff,id.C&0xffffffff,id.D&0xffffffff)
@@ -230,7 +255,8 @@ return function(runtime,spec_path)
             if Q.ticks<5 then return end
             local isolated=isolation()
             local reflected=reflection()
-            Q.result.maps_enabled=spec.allow_maps and isolated and reflected
+            local bounded=output_lifetime()
+            Q.result.maps_enabled=spec.allow_maps and isolated and reflected and bounded
             if Q.result.maps_enabled then next_map() else finish() end
             return
         end

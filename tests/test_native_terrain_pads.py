@@ -74,16 +74,20 @@ int inspect_cleanup(const uint8_t *data, size_t size, uint32_t rva) {
         config = load_config()
         binary = Path(config.get('binary_dir', ROOT / 'build/no-configured-game')) / 'skieogame.exe'
         candidates = [
-            (ROOT / 'build/update-25996759/session/game/SkiResortSimulator/Binaries/Win64/skieogame.exe', 0x4fdf110),
+            (ROOT / 'build/update-25996759/session/game/SkiResortSimulator/Binaries/Win64/skieogame.exe', 0x4fdf110, None),
         ]
         reference = json.loads((ROOT / 'compatibility/game-contract.json').read_text())
-        if binary.is_file() and hashlib.sha256(binary.read_bytes()).hexdigest() == reference['reference_executable_sha256']:
-            pad_guard = next(guard for guard in reference['guards'] if guard['id'] == 'terrain.pads')
-            candidates.append((binary, int(pad_guard['rva'], 0)))
         pad_guard = next(g for g in reference['guards'] if g['id'] == 'terrain.pads')
         cleanup_guard = next(g for g in reference['guards'] if g['id'] == 'terrain.pads_cleanup')
+        if binary.is_file() and hashlib.sha256(binary.read_bytes()).hexdigest() == reference['reference_executable_sha256']:
+            image = PEImage(binary.read_bytes())
+            pads = native_layouts.resolve(image, pad_guard, reference['guards'])
+            cleanup = native_layouts.resolve(image, cleanup_guard, reference['guards'])
+            self.assertEqual(len(pads), 1)
+            self.assertEqual(len(cleanup), 1)
+            candidates.append((binary, pads[0], cleanup[0]))
         found = 0
-        for path, rva in candidates:
+        for path, rva, resolved_cleanup in candidates:
             if not path.is_file():
                 continue
             found += 1
@@ -99,8 +103,9 @@ int inspect_cleanup(const uint8_t *data, size_t size, uint32_t rva) {
                 self.assertEqual(bool(self.inspect(raw, len(code), rva)), allowed, hex(offset))
                 raw[offset] = bytes([code[offset]])
             self.assertEqual(raw.raw[:-1], code)
-            cleanup_rva = (int(cleanup_guard['rva'], 0) if rva == int(pad_guard['rva'], 0) else
-                {0x4ff3310: 0x4fe0c30, 0x4ff2d80: 0x4fe0680, 0x4fe1470: 0x4fcc520, 0x4fe0f70: 0x4fcc020, 0x4fe0ff0: 0x4fcc230, 0x4fe0c00: 0x4fcbe40, 0x4fdf110: 0x4fca360}[rva])
+            cleanup_rva = resolved_cleanup or {
+                0x4ff3310: 0x4fe0c30, 0x4ff2d80: 0x4fe0680, 0x4fe1470: 0x4fcc520,
+                0x4fe0f70: 0x4fcc020, 0x4fe0ff0: 0x4fcc230, 0x4fe0c00: 0x4fcbe40, 0x4fdf110: 0x4fca360}[rva]
             code = PEImage(path.read_bytes()).read(cleanup_rva, 0x10b)
             raw = ctypes.create_string_buffer(code)
             self.assertTrue(self.inspect_cleanup(raw, len(code), cleanup_rva))

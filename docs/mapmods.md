@@ -98,6 +98,7 @@ No unrestricted UE4SS access is needed.
 | `handle:snow(amount, shake_time)` | Snow coat 0–1; optional shake time emits falling flakes |
 | `handle:pause()` | Immediately silence the entity's contact audio during time/UI/world pause |
 | `handle:inspect(provider)` | Make the visible mesh selectable with the mouse; provider returns `title`, optional `subtitle`/`note` and at most four `{label,value}` text properties; one lightweight card per map session, refreshed while selected and removed on unload |
+| `api:configure_surface_lifts(definitions, assets)` | Adapts existing native lifts to standing, terrain-following platter lifts; requires `gameplay`, the reviewed game build and this loader. See [surface lifts](surface-lifts.md) for assets, configuration and limitations. |
 | `api:on_frame(callback)` | Map-owned callback on each engine frame, falling back to a 16 ms game-thread timer |
 | `handle:look_at(x, y, z, weight, dt)` | World-space target for aim groups; weight 0–1 and timestep 0–0.25 s; weight zero smoothly returns to neutral |
 | `api:footprint(x, y, yaw, texture)` | A visual pawprint on snow, with an optional declared PNG; returns false on dry/outside terrain |
