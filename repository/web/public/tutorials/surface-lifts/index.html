@@ -2,7 +2,7 @@
 <html lang="en"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Add surface lifts to a map · SkiEO Mod</title>
-<meta name="description" content="Place a native lift in skieomod editor and add platter poles with the Surface lifts mapmod. Download a working map project, configure routes, test saves and publish your map.">
+<meta name="description" content="Place a native lift in skieomod editor and add platter poles with the Surface lifts mapmod. Download a working map project, configure routes, test saves, replace models and publish your map.">
 <link rel="canonical" href="https://skieomod.emillon.fr/tutorials/surface-lifts/">
 <link rel="stylesheet" href="../heightmap/tutorial.css?v=1.26.0">
 <link rel="stylesheet" href="../mapmods/mapmods.css?v=1.26.0">
@@ -16,10 +16,10 @@
 <div class="hero-meta"><span>Surface lifts 0.1.0 · loader 1.25.0+</span><span>One editable practice map</span><span>English · 25 October 2026</span></div>
 <figure class="hero-figure"><img src="route.svg" width="1200" height="500" alt="A schematic showing one native lift and its configured towing route, with scene coordinates in metres and route coordinates in centimetres."><figcaption>A schematic of the practice line. Terrain and snow determine the runtime height.</figcaption></figure>
 </section>
-<div class="guide-layout"><aside class="contents"><nav aria-label="Tutorial steps"><p class="eyebrow">ON THIS PAGE</p><a href="#practice"><span>01</span> Open the practice map</a><a href="#native"><span>02</span> Place a native lift</a><a href="#dependency"><span>03</span> Add the dependency</a><a href="#route"><span>04</span> Configure the route</a><a href="#test"><span>05</span> Build and play</a><a href="#share"><span>06</span> Test saves and publish</a><a href="#questions">Troubleshooting</a></nav></aside>
+<div class="guide-layout"><aside class="contents"><nav aria-label="Tutorial steps"><p class="eyebrow">ON THIS PAGE</p><a href="#practice"><span>01</span> Open the practice map</a><a href="#native"><span>02</span> Place a native lift</a><a href="#dependency"><span>03</span> Add the dependency</a><a href="#route"><span>04</span> Configure the route</a><a href="#test"><span>05</span> Build and play</a><a href="#share"><span>06</span> Test saves and publish</a><a href="#models"><span>07</span> Use your own models</a><a href="#questions">Troubleshooting</a></nav></aside>
 <article class="steps">
 <section class="step" id="practice"><p class="step-number">STEP 01</p><h2>Open a complete example</h2>
-<p>The mapmod <code>community.surface-lifts</code> adapts an existing native lift. Your map supplies a name, a route and operating settings; the separate mod package supplies its models and behaviour. You do not need Blender or Unreal Editor.</p>
+<p>The mapmod <code>community.surface-lifts</code> adapts an existing native lift. Your map supplies a name, a route and operating settings; the separate mod package supplies its models and behaviour. The standard models need neither Blender nor Unreal Editor. The optional custom-model chapter uses Blender.</p>
 <div class="download-card"><h3>Surface lift practice</h3><p>A 1024 × 1024 m map with one named native lift and a ticket office, plus the separate Surface lifts 0.1.0 source project and its original models. Extract both folders beside each other.</p><a class="download" href="files/surface-lift-practice.zip" download>Download the source projects ↓</a> <a href="/docs/surface-lifts-tutorial.md">Read the text guide ↗</a></div>
 <p>Install matching current tools and loader using the <a href="/install/">Windows or Linux installer</a>. Playing requires a reviewed Steam Windows game build, directly or under Linux/Proton. The native macOS game cannot load this Windows DLL-based mod.</p>
 <p>In skieomod editor, use <strong>Open</strong> to choose <code>practice-mountain/custom-map.json</code>. From editor 1.26.0, <strong>Help → Surface lift tutorial</strong> opens this guide.</p>
@@ -82,6 +82,163 @@ skieomod run practice-mountain --dependency surface-lifts</code></pre><button ty
 <p>Keep the dependency pinned, increase your map version after edits, rebuild, then publish:</p>
 <div class="command"><pre><code>skieomod publish practice-mountain</code></pre><button type="button" class="copy">Copy</button></div>
 <p>Web publication uses your publishing token; see <a href="/docs/custom-map-repository.md">the publication guide</a>. Surface lifts 0.1.0 is already published. Do not republish an unchanged copy; if you modify the mapmod, give your fork its own ID and version. The existing Workshop preparation workflow also keeps map and mod separate.</p>
+</section>
+<section class="step" id="models">
+<p class="step-number">OPTIONAL · STEP 07</p><h2>Use your own models</h2>
+<p>The standard map options choose among the models shipped by the mapmod. To
+supply your own geometry, make a separate version of the mapmod and change its
+model table. A <code>drive</code> value such as <code>Assets/my-drive.skpm</code> is not supported:
+<code>drive</code> still accepts only <code>open</code>, <code>covered</code> or <code>modern</code>.</p>
+<h3>Make your own mapmod project</h3>
+<p>Copy the extracted <code>surface-lifts/</code> folder to <code>my-surface-lifts/</code>. In its
+<code>custom-mod.json</code>, change <code>id</code> to a namespaced ID you own, for example
+<code>yourname.surface-lifts</code>. Set your own <code>metadata.name</code>, <code>metadata.authors</code> and
+<code>metadata.version</code> (start at <code>0.1.0</code>). Keep the <code>map-api</code> runtime, <code>gameplay</code>
+permission, scripts and existing assets. Retain the original <code>LICENSE</code> and
+credits, and credit your added models in <code>CREDITS.txt</code>.</p>
+<p>The fork replaces <code>community.surface-lifts</code> for this map. Keep only one of them
+in the dependency graph: the loader accepts <strong>one <code>configure_surface_lifts</code>
+call per map session</strong>. The model table is shared by every configured line;
+there is currently no separate custom model table per lift.</p>
+<h3>Create and export a model with Blender</h3>
+<p>The loader reads <strong><code>.skpm</code> static meshes and one shared PNG palette</strong>. Keep your
+<code>.blend</code> files as authoring sources; FBX, OBJ and <code>.blend</code> files are not runtime
+lift models. No Unreal cooking or DLL build is needed for a model replacement.</p>
+<p>A working exporter and the original geometry definitions are in
+<a href="https://github.com/Ayane/skieomod/blob/main/tools/build_surface_lift_models.py"><code>tools/build_surface_lift_models.py</code></a>.
+Download a <a href="https://github.com/Ayane/skieomod/archive/refs/heads/main.zip">repository source checkout</a>
+into a separate work folder. The generator recreates its Blender scene from
+Python definitions; it does not read an edited <code>.blend</code> file. Add your geometry
+before the final <code># Keep an immediately usable authoring overview</code> block.
+For example, this creates a wider blue mast while keeping the standard support
+attachment positions:</p>
+<div class="command"><pre><code class="language-python">box('my footing', (0, 0, .12), (1.1, 1.1, .24), 2)
+rod('my blue mast', (0, 0, .24), (0, 0, 6.55), .24, 3, 12)
+rod('my crossarm', (0, 0, 6.8), (0, 1.65, 6.8), .09)
+rod('my brace', (0, 0, 4.8), (0, 1.6, 6.5), .06)
+ladder(.24, -.2, 6.6)
+export('my-tower')
+</code></pre><button type="button" class="copy">Copy</button></div>
+<p>With Blender available as <code>blender</code>, run this from the repository checkout:</p>
+<div class="command"><pre><code class="language-sh">blender --background --threads 2 --python tools/build_surface_lift_models.py
+</code></pre><button type="button" class="copy">Copy</button></div>
+<p>Copy the generated <code>mod/SkiEO-SurfaceLifts/Assets/my-tower.skpm</code> into
+<code>my-surface-lifts/Assets/my-tower.skpm</code>. This example uses the unchanged palette
+already in your fork. The script also writes <code>build/surface-lifts/models.blend</code>
+as a visual overview. Its collections are spread apart for inspection <strong>after
+export</strong>; those overview offsets must not enter your runtime meshes.</p>
+<p>The supplied exporter uses metres in Blender, bakes object transforms, then
+writes centimetres with <code>(x, -y, z)</code> coordinates and reflected normals. Model
+local X runs along the line, Z points up, and the loader handles rotation and
+left/right mirroring. Keep the source model's local origin and attachment
+positions: a tower is anchored at its foot, a station at its route-terminal
+reference, a wheel at its centre and a pole at its cable clamp. Do not centre
+each object independently before export.</p>
+<p>For hand-modelled meshes, reuse the script's <code>export(name)</code> routine in your
+Blender authoring script with your mesh objects in <code>parts</code>, the output folder
+in <code>OUT</code>, and the palette materials in <code>mats</code>. Each object's first material
+must belong to <code>mats</code>. This exporter assigns a palette colour per object; it
+does not export Blender shader graphs or an existing UV unwrap. Edit <code>PALETTE</code>
+and regenerate <code>palette.png</code> if you need different colours; replacing the
+shared palette changes every model using those colours.</p>
+<h3>Declare the files and select their roles</h3>
+<p>Add <code>Assets/my-tower.skpm</code> to <strong>both</strong> <code>files</code> and <code>content.assets</code> in
+<code>my-surface-lifts/custom-mod.json</code>. Append to the existing arrays; keep the
+other entries. Paths are relative to the mapmod root, use <code>/</code>, and are
+case-sensitive. Every new mesh or replacement PNG needs both declarations.</p>
+<p>In <code>my-surface-lifts/Scripts/main.lua</code>, keep the existing <code>local models = {...}</code>
+table. Insert this assignment immediately after that table, before
+<code>return function(api)</code>:</p>
+<div class="command"><pre><code class="language-lua">models.tower = 'Assets/my-tower.skpm'
+</code></pre><button type="button" class="copy">Copy</button></div>
+<p>This changes ordinary intermediate pylons. Bend pylons and the separately
+assembled wheels keep their original models. Other replacement slots are:</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Model table key</th>
+<th>Role and selection</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>tower</code>, <code>angle_tower</code></td>
+<td>Ordinary and bend support frames. The reference mast is scaled vertically from a 6 m base height.</td>
+</tr>
+<tr>
+<td><code>return_support</code>, <code>return_angle</code>, <code>fixed_return_support</code></td>
+<td>Separate high-return frames and fixed-pole return arms. Preserve their reference attachment positions.</td>
+</tr>
+<tr>
+<td><code>drive</code></td>
+<td>Open lower station for <code>detachable_platter</code> with <code>drive: &quot;open&quot;</code>.</td>
+</tr>
+<tr>
+<td><code>covered</code>, <code>modern</code></td>
+<td>Lower stations selected by <code>drive: &quot;covered&quot;</code> or <code>drive: &quot;modern&quot;</code>.</td>
+</tr>
+<tr>
+<td><code>fixed</code></td>
+<td>Lower station for <code>fixed_platter</code> with <code>drive: &quot;open&quot;</code>.</td>
+</tr>
+<tr>
+<td><code>return_station</code>, <code>release</code>, <code>lattice</code></td>
+<td>Upper stations selected by <code>return_station: &quot;floating&quot;</code>, <code>&quot;release&quot;</code> or <code>&quot;lattice&quot;</code>.</td>
+</tr>
+<tr>
+<td><code>inclined_wheel</code>, <code>guide_wheel</code>, <code>motor</code></td>
+<td>Separate rotating wheels and motor. The reference wheel radii are 2 m and 0.8 m, centred at the origin in the XY plane.</td>
+</tr>
+<tr>
+<td><code>platter</code></td>
+<td>Complete rigid TKF pole: clamp at the origin, disc about 3 m below it.</td>
+</tr>
+<tr>
+<td><code>platter_upper</code>, <code>platter_shaft</code>, <code>platter_lower</code></td>
+<td>Animated TKD clamp/suspension, sliding shaft and lower spring casing with disc. Preserve all three source origins and lengths; the shaft is a 1 cm segment scaled by the animation.</td>
+</tr>
+<tr>
+<td><code>poles_bundle</code></td>
+<td>The passenger's carried ski poles.</td>
+</tr>
+<tr>
+<td><code>chair_drive</code>, <code>chair_return</code>, <code>chair_tower</code>, <code>chair_head</code></td>
+<td>Frames used by the <code>fixed_chair</code> configuration; native chairs remain native.</td>
+</tr>
+<tr>
+<td><code>palette</code></td>
+<td>Shared PNG texture for all models.</td>
+</tr>
+</tbody>
+</table></div>
+<p>All <strong>24 mesh slots plus <code>palette</code> are required</strong>, including slots unused by
+your particular line. Keep the original files for anything you do not replace.
+The cable, wheel placement, towing poses and telescopic animation are generated
+by the loader; changing a mesh does not move their attachment points. Start
+with cosmetic changes that preserve the reference dimensions. Each SKPM mesh
+must fit the loader limits: 16 MiB, 150,000 vertices and 450,000 triangle indices
+(150,000 triangles). Keep repeated poles and wheels much smaller.</p>
+<h3>Bind the map to your fork, test and publish</h3>
+<p>In <code>practice-mountain/custom-map.json</code>, replace the dependency ID with
+<code>yourname.surface-lifts</code> and pin <code>=0.1.0</code>. Rename the extension key from
+<code>community.surface-lifts</code> to <code>yourname.surface-lifts</code>, keeping its <code>lifts</code>
+configuration unchanged. The extension key must match the fork's ID because
+<code>api:mapmod_options()</code> reads that namespace. Reopen the map in the editor after
+external edits.</p>
+<p>Run from the parent folder containing the two projects:</p>
+<div class="command"><pre><code class="language-sh">skieomod build my-surface-lifts
+skieomod build practice-mountain --dependency my-surface-lifts
+skieomod run practice-mountain --dependency my-surface-lifts
+</code></pre><button type="button" class="copy">Copy</button></div>
+<p>Inspect a straight support, a bend if used, both terminals, moving wheels and
+occupied/unoccupied poles. Check a new game and a save/reload. If a model is
+missing, check both manifest lists and exact path spelling; if it floats or
+misses the cable, compare its origin and dimensions with the original mesh.</p>
+<p>Give the practice map your own map ID before publishing it. Publish your
+mapmod first with <code>skieomod publish my-surface-lifts</code>, then publish the map with
+<code>skieomod publish practice-mountain</code>. Keep them as separate packages. For later
+model edits, increase the fork's <code>metadata.version</code>, update the map's dependency
+pin and version, rebuild and publish both projects.</p>
 </section>
 <section class="step" id="questions"><p class="step-number">TROUBLESHOOTING</p><h2>When the line does not behave as expected</h2>
 <details><summary>The original chairlift is still visible</summary><p>Check the dependency, exact name, centimetre conversion and lower terminal. Inspect UE4SS.log for <code>Surface lifts: 1 native installations adapted</code>. Check that loading finished successfully.</p></details>

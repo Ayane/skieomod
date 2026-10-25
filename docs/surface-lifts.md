@@ -3,6 +3,8 @@
 Pour ajouter une remontée à votre propre carte, commencez par le
 [tutoriel pas à pas et son projet d’exercice](https://skieomod.emillon.fr/tutorials/surface-lifts/),
 également accessible dans **Help → Surface lift tutorial** de l’éditeur.
+Le [chapitre sur les modèles personnalisés](https://skieomod.emillon.fr/tutorials/surface-lifts/#models)
+explique l’export Blender, les rôles des maillages et la publication de votre propre mapmod.
 
 Veymont 0.8.0 distingue le Blanchon, télésiège fixe deux places, des huit
 remontées à perches. Le mapmod `community.surface-lifts` est distribué dans

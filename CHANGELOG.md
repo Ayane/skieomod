@@ -7,6 +7,11 @@ have their own package versions. Download the
 
 ## [Unreleased]
 
+## [1.26.2] - 2026-10-25
+
+- Extend the Surface lift tutorial with custom model authoring: Blender export,
+  asset declarations, model slots, fork configuration and publication.
+
 ## [1.26.1] - 2026-10-25
 
 - Distribute the Linux installer directly as a standalone shell script instead
