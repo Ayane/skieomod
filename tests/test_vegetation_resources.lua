@@ -9,7 +9,8 @@ end} end
 local valid_object={IsValid=function() return true end}
 local actors, callbacks, seen = {}, {}, {}
 local inserted, copy_work, refreshes, fail_refresh = 0, 0, 0, false
-local expected_y
+local expected_y, native_manager
+local cleared_indices={}
 local draw_instancing=1
 local system={IsValid=function() return true end,
     GetConsoleVariableIntValue=function(_,name) assert(name=='r.MeshDrawCommands.DynamicInstancing');return draw_instancing end,
@@ -51,8 +52,14 @@ local gameplay={BeginDeferredActorSpawnFromClass=function()
             for k,v in pairs(self.first) do output[k]=v end
             return true
         end
-        function component:UpdateInstanceTransform(_,_,_,dirty)
-            assert(dirty);refreshes=refreshes+1;copy_work=copy_work+self.count
+        function component:UpdateInstanceTransform(index,transform,_,dirty)
+            if dirty then refreshes=refreshes+1;copy_work=copy_work+self.count
+            else
+                assert(index>=0 and index<self.count,'clearing changed an invalid native slot')
+                assert(transform.Scale3D.X==0,'cleared tree remains visible')
+                cleared_indices[#cleared_indices+1]=index
+            end
+            if index==0 then self.first=transform end
             return true
         end
         self.components[#self.components+1]=component
@@ -67,7 +74,7 @@ package.preload.UEHelpers=function() return {
     GetKismetSystemLibrary=function() return system end,GetPlayerController=function() return valid_object end,
 } end
 StaticFindObject=function() return valid_object end
-FindAllOf=function() return {} end
+FindAllOf=function(class) return class=='ObstacleDataManager'and native_manager and {native_manager}or{} end
 ExecuteInGameThread=function(fn) fn() end
 local api={}
 function api:after(delay,callback) assert(delay>0);callbacks[#callbacks+1]=callback end
@@ -142,4 +149,26 @@ Vegetation.unload()
 draw_instancing=0;seen={}
 Vegetation.load_skxy(source(1),api,{},function(message) assert(not message) end)
 drain();Vegetation.unload();assert(draw_instancing==0,'user-disabled optimization was unexpectedly enabled')
+
+-- The native save owns the cleared zones. Apply existing zones before the
+-- load completes, then observe new zones without shifting renderer indices.
+local zones={}
+local native_zones=setmetatable({GetArrayNum=function()return #zones end},{__index=zones})
+native_manager={IsValid=function()return true end,GetWorld=function()return world end,ClearedZones=native_zones}
+local function cleared_zone(x,r)
+    return {Center={X=x,Y=0},Radius=r,EndOffset={X=0,Y=0},Outline={ForEach=function()end}}
+end
+zones[1]=cleared_zone(500,1)
+seen={};cleared_indices={};local settled=false
+Vegetation.load_skxy(source(3000),api,{},function(message)assert(not message,message);settled=true end)
+assert(not settled);drain()
+assert(settled and #cleared_indices==3,'saved clearing was not applied before load completion')
+zones[2]=cleared_zone(2999,0)
+api.visibility();drain()
+assert(#cleared_indices==4 and cleared_indices[4]==2998,'live native clearing missed the stable instance slot')
+api.visibility();drain();assert(#cleared_indices==4,'unchanged zones cleared trees twice')
+Vegetation.unload();seen={};cleared_indices={}
+Vegetation.load_skxy(source(3000),api,{},function(message)assert(not message,message)end)
+drain();assert(#cleared_indices==4,'trees regrew when the saved forest was reconstructed')
+Vegetation.unload()
 print('Portable forest: SKXY only, grounding, bounded buffers, source validation and cancellation OK')

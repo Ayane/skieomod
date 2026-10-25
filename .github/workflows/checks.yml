@@ -3,6 +3,20 @@ on: [push, pull_request]
 permissions:
   contents: read
 jobs:
+  windows-https:
+    runs-on: windows-latest
+    strategy:
+      matrix:
+        python: ['3.10', '3.13']
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+      - run: python -m pip install "truststore>=0.10.4,<0.11"
+      - run: python -m unittest tests.test_skieo_http
+      - name: Verify the public update feed with native Windows TLS
+        run: python -c "import ssl; from tools.skieo_http import windows_context; from tools.skieo_loader import fetch_feed; c=windows_context(); assert c.check_hostname and c.verify_mode == ssl.CERT_REQUIRED; print(fetch_feed(timeout=30)['release'])"
   mod:
     runs-on: ubuntu-24.04
     env:

@@ -103,8 +103,10 @@ The biome is a static bake preset; it does not replace live seasonal weather.
 To reserve a clearing, add `trees.exclude`: an array of `[west, north, east, south]`
 rectangles in centred world metres. For example `[[ -60, -40, 60, 40 ]]` clears a
 120 by 80 m area around the origin. `min_elevation_meters` optionally bounds tree
-placement from below. Trees are visual spruce instances; they have no gameplay
-collision. The native tree visibility button controls them.
+placement from below. The native tree visibility button controls the spruce
+instances. Building placement and the game's clearing tools also clear these
+trees. Cleared areas persist in native saves and remain clear when the forest
+is reconstructed on loading, including saves made with earlier loader versions.
 
 Ground cover is a baked **grass/rock colour texture**, not 3D grass blades.
 `texture_size` accepts 16, 32, 64, 128, 256 or 512. Optional `grass_color` and

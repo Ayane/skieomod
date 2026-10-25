@@ -60,6 +60,12 @@ Press **Play** to check the current version and download Veymont if it is missin
 or outdated. A current downloaded copy remains playable offline. No Workshop
 subscription is required. Maps are kept out of the CLI and loader distributions.
 
+If `skieomod setup` reports an HTTPS certificate error, check your computer's
+date and time and install operating system updates. Update the tools using the
+installation command above, then retry setup. Windows downloads use the native
+Windows certificate validator. If the error persists, include the complete
+message and your Windows and Python versions in your report.
+
 ## Stay updated
 
 skieomod checks release metadata in the background at most once a day. A new

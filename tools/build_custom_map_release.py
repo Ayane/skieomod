@@ -39,7 +39,7 @@ if ue4ss_archive.exists() and ue4ss_archive.read_bytes() != ue4ss_data:
 OUTPUT.mkdir(parents=True, exist_ok=True)
 if not ue4ss_archive.exists():
     ue4ss_archive.write_bytes(ue4ss_data)
-MODULES = ('custom_map.py', 'custom_maps.py', 'custom_packages.py', 'skieo_install.py', 'skieo_uninstall.py', 'skieo_loader.py', 'skieo_updates.py',
+MODULES = ('custom_map.py', 'custom_maps.py', 'custom_packages.py', 'skieo_http.py', 'skieo_install.py', 'skieo_uninstall.py', 'skieo_loader.py', 'skieo_updates.py',
            'skieo_project.py', 'skieo_templates.py', 'skieo_workshop.py', 'skieo_repository.py', 'skieo_heightmap.py', 'skieo_bake.py', 'skieo_authoring.py', 'skieo_game_catalog.py', 'skieo_scene.py', 'skieo_editor_scene.py', 'skieo_editor.py', 'skieo_editor_ui.py',
            'skieo_editor_widgets.py', 'skieo_editor_config.py', 'skieo_editor_3d.py', 'skieo_editor_graph.py', 'skieo_editor_resources.py')
 PACKAGE_FILES = ('LICENSE', 'THIRD_PARTY_NOTICES.md', 'pyproject.toml', 'MANIFEST.in', 'CHANGELOG.md', 'docs/discord-releases.md', 'docs/getting-started.md', 'docs/large-maps.md', 'docs/terrain-repairs.md', 'docs/vegetation.md', 'docs/editor.md', 'docs/editor-tutorial.md', 'docs/custom-map-cli.md',

@@ -4,13 +4,13 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "skieo-custom-map"
-version = "1.25.0"
+version = "1.25.1"
 description = "Create, build, run and prepare Ski-E-O! maps and mods for Steam Workshop"
 authors = [{name = "Albatar (Élie Millon)"}]
 license = "BSD-3-Clause"
 license-files = ["LICENSE", "THIRD_PARTY_NOTICES.md"]
 requires-python = ">=3.10"
-dependencies = ["PySide6-Essentials>=6.8,<7", "pyqtgraph>=0.14,<0.15", "PyOpenGL>=3.1.7,<4", "numpy>=1.26,<3"]
+dependencies = ["PySide6-Essentials>=6.8,<7", "pyqtgraph>=0.14,<0.15", "PyOpenGL>=3.1.7,<4", "numpy>=1.26,<3", "truststore>=0.10.4,<0.11; sys_platform == 'win32'"]
 readme = "docs/getting-started.md"
 
 [project.urls]
@@ -22,7 +22,7 @@ Issues = "https://github.com/Ayane/skieomod/issues"
 skieomod = "custom_map:main"
 
 [tool.setuptools]
-py-modules = ["custom_map", "custom_maps", "custom_packages", "skieo_install", "skieo_uninstall", "skieo_loader", "skieo_updates", "skieo_project", "skieo_templates", "skieo_workshop", "skieo_repository", "skieo_heightmap", "skieo_bake", "skieo_authoring", "skieo_game_catalog", "skieo_scene", "skieo_editor_scene", "skieo_editor", "skieo_editor_ui", "skieo_editor_widgets", "skieo_editor_config", "skieo_editor_3d", "skieo_editor_graph", "skieo_editor_resources"]
+py-modules = ["custom_map", "custom_maps", "custom_packages", "skieo_http", "skieo_install", "skieo_uninstall", "skieo_loader", "skieo_updates", "skieo_project", "skieo_templates", "skieo_workshop", "skieo_repository", "skieo_heightmap", "skieo_bake", "skieo_authoring", "skieo_game_catalog", "skieo_scene", "skieo_editor_scene", "skieo_editor", "skieo_editor_ui", "skieo_editor_widgets", "skieo_editor_config", "skieo_editor_3d", "skieo_editor_graph", "skieo_editor_resources"]
 package-dir = {"" = "tools"}
 
 [tool.setuptools.data-files]

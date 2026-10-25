@@ -7,6 +7,14 @@ have their own package versions. Download the
 
 ## [Unreleased]
 
+## [1.25.1] - 2026-10-25
+
+- Use native Windows certificate validation for setup, updates and web
+  publication, and explain certificate failures with actionable diagnostics.
+- Clear portable forest instances when native construction and clearing tools
+  record cleared zones. Restore existing clearings from native saves and bound
+  spatial queries and render updates across frames.
+
 ## [1.25.0] - 2026-10-25
 
 - Apply Veymont's green, blue, red and black trail colors through the map API;

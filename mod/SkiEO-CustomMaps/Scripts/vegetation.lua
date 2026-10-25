@@ -1,5 +1,6 @@
 local UEHelpers = require("UEHelpers")
 local Terrain = require("terrain")
+local Clearing = require('vegetation_clearing')
 
 local Vegetation = {
     actor = nil,
@@ -71,6 +72,7 @@ function Vegetation.unload()
     local actor = Vegetation.actor
     Vegetation.actor, Vegetation.component = nil, nil
     Vegetation.components = {}
+    Vegetation.clearing, Vegetation.obstacles = nil, nil
     Vegetation.overlay, Vegetation.hidden = nil, nil
     if Vegetation.previous_draw_instancing~=nil then
         local previous=Vegetation.previous_draw_instancing
@@ -206,6 +208,70 @@ local function load_points(count, point_at, api, options, done)
 
     local source_index, created = 1, 0
     local component, component_count = nil, 0
+    local inserted, draining, completed = false, false, false
+    local cursor, dirty = 0, {}
+    local clearing = Clearing.new(point_at, function(slot,x,y)
+        local part=math.floor(slot/COMPONENT_CAPACITY)+1
+        local target=assert(Vegetation.components[part])
+        local transform=identity_transform()
+        transform.Translation={X=x,Y=y,Z=0}
+        transform.Scale3D={X=0,Y=0,Z=0}
+        assert(target:UpdateInstanceTransform(slot%COMPONENT_CAPACITY,transform,true,false,false),
+            'could not clear a portable tree')
+        dirty[target]=true
+    end)
+    Vegetation.clearing=clearing
+    local function manager()
+        local world=UEHelpers.GetWorld()
+        if not valid(world)then return nil end
+        local current=Vegetation.obstacles
+        if valid(current)and current:GetWorld():GetAddress()==world:GetAddress()then return current end
+        for _,candidate in ipairs(FindAllOf('ObstacleDataManager')or{})do
+            if valid(candidate)and candidate:GetWorld():GetAddress()==world:GetAddress()then
+                Vegetation.obstacles=candidate;return candidate
+            end
+        end
+    end
+    local function ingest()
+        local obstacles=manager()
+        if not obstacles then return false end
+        local zones=obstacles.ClearedZones
+        local count=zones:GetArrayNum()
+        if count<cursor then cursor=0 end
+        for index=cursor+1,math.min(count,cursor+64)do
+            -- UE4SS's reflected TArray indices are one-based and bounded.
+            local z=zones[index];local outline={}
+            z.Outline:ForEach(function(_,value)
+                local p=value:get();outline[#outline+1]={x=p.X,y=p.Y}
+            end)
+            clearing:enqueue({x=z.Center.X,y=z.Center.Y,dx=z.EndOffset.X,dy=z.EndOffset.Y,
+                radius=z.Radius,outline=outline})
+            cursor=index
+        end
+        return cursor<count
+    end
+    local drain
+    drain=function()
+        if Vegetation.generation~=generation then return end
+        draining=true
+        local ok,message=pcall(function()
+            local more=ingest()
+            clearing:step(1024)
+            for target in pairs(dirty)do refresh_component(target,1)end
+            dirty={}
+            if more or clearing:pending()then api:after(1,drain);return end
+            draining=false
+            if not completed then completed=true;done(nil,created,count)end
+        end)
+        if not ok then
+            Vegetation.unload()
+            if not completed then completed=true;done(tostring(message))else error(message)end
+        end
+    end
+    api:every(250,function()
+        if Vegetation.generation~=generation then return false end
+        if inserted and not draining then drain()end
+    end)
     local first_batch = true
     local function add_batch()
         if Vegetation.generation ~= generation then return end
@@ -233,6 +299,7 @@ local function load_points(count, point_at, api, options, done)
                 local x, y = point_at(record)
                 local z = Terrain.surface_height_at(x, y)
                 if z then
+                    clearing:add(record,(#Vegetation.components-1)*COMPONENT_CAPACITY+component_count+#transforms,x,y)
                     -- Two inexpensive integer sequences give stable visual
                     -- variation without depending on Lua's global RNG state.
                     local yaw = (record * 137.50776405) % 360.0
@@ -278,7 +345,8 @@ local function load_points(count, point_at, api, options, done)
         else
             api:log(string.format("portable forest render buffers refreshed (%d components)",
                 #Vegetation.components))
-            done(nil, created, count)
+            inserted=true
+            drain()
         end
     end
     -- Never perform the first native bulk insertion from the map-ready

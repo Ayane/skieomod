@@ -15,12 +15,14 @@ from urllib.error import URLError
 import zipfile
 
 if __package__ == "tools":
+    from .skieo_http import certificate_error
     from .custom_packages import ManifestError, inspect_package, pack_package, resolve, MANIFESTS
     from . import skieo_install as desktop, skieo_project as projects, skieo_workshop as workshop
     from .skieo_loader import VERSION, installed_mapmods, fetch_mapmod_dependencies
     from . import skieo_updates as updates
     from . import skieo_repository as web_repository
 else:
+    from skieo_http import certificate_error
     from custom_packages import ManifestError, inspect_package, pack_package, resolve, MANIFESTS
     import skieo_install as desktop
     import skieo_project as projects
@@ -512,7 +514,7 @@ def main(argv=None):
                 desktop.save_config(config)
             print(json.dumps(config, ensure_ascii=False, indent=2))
     except (ManifestError, OSError, ValueError, KeyError, URLError, subprocess.SubprocessError) as error:
-        print(f"error: {error}", file=sys.stderr)
+        print('error: ' + (certificate_error(error) or str(error)), file=sys.stderr)
         return 2
     return 0
 

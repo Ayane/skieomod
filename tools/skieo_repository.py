@@ -6,12 +6,14 @@ import os
 from pathlib import Path
 from urllib.error import HTTPError
 from urllib.parse import urlsplit
-from urllib.request import HTTPRedirectHandler, Request, build_opener
+from urllib.request import HTTPRedirectHandler, Request
 
 if __package__ == 'tools':
+    from .skieo_http import build_opener
     from .custom_packages import ManifestError, inspect_package
     from .skieo_install import PRIMARY_REPOSITORY
 else:
+    from skieo_http import build_opener
     from custom_packages import ManifestError, inspect_package
     from skieo_install import PRIMARY_REPOSITORY
 

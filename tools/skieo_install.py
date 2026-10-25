@@ -15,14 +15,15 @@ import tempfile
 import time
 from urllib.parse import parse_qs, urlparse
 from urllib.error import HTTPError
-from urllib.request import urlopen
 import zipfile
 
 if __package__ == 'tools':
+    from .skieo_http import urlopen
     from .custom_packages import ManifestError
     from .custom_maps import safe_relative_path
     from . import skieo_loader as loader_release
 else:
+    from skieo_http import urlopen
     from custom_packages import ManifestError
     from custom_maps import safe_relative_path
     import skieo_loader as loader_release

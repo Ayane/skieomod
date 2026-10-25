@@ -8,16 +8,18 @@ import shutil
 import tempfile
 import time
 import zipfile
-from urllib.request import Request, urlopen
+from urllib.request import Request
 
 if __package__ == 'tools':
+    from .skieo_http import urlopen
     from .custom_packages import inspect_package, pack_package, resolve
     from .custom_maps import ManifestError, inspect_archive, load_manifest, pack, safe_relative_path, semver_compare, validate_manifest, validate_zip
 else:
+    from skieo_http import urlopen
     from custom_packages import inspect_package, pack_package, resolve
     from custom_maps import ManifestError, inspect_archive, load_manifest, pack, safe_relative_path, semver_compare, validate_manifest, validate_zip
 
-VERSION = '1.25.0'
+VERSION = '1.25.1'
 NAME = 'SkiEO-CustomMaps'
 RECORD = 'loader-release.json'
 MAX_ARCHIVE_BYTES = 64 * 1024 * 1024
