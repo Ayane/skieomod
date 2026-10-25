@@ -1,0 +1,9 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=Install SkiEO Mod
+Comment=Install Python, pipx and the SkiEO Custom Map loader
+Terminal=true
+Exec=sh -c "exec bash \\"\\$(dirname \\"\\$1\\")/Install-SkiEO-Linux.sh\\"" skieomod %k
+Icon=system-software-install
+Categories=Game;

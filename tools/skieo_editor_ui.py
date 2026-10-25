@@ -253,6 +253,7 @@ class MapEditor(W.QMainWindow):
         help_menu.addAction('Heightmap tutorial',lambda: G.QDesktopServices.openUrl(C.QUrl('https://skieomod.emillon.fr/tutorials/heightmap/')))
         help_menu.addAction('Ticket Office model tutorial',lambda: G.QDesktopServices.openUrl(C.QUrl('https://skieomod.emillon.fr/tutorials/ticket-office/')))
         help_menu.addAction('Mapmod tutorial',lambda: G.QDesktopServices.openUrl(C.QUrl('https://skieomod.emillon.fr/tutorials/mapmods/')))
+        help_menu.addAction('Surface lift tutorial',lambda: G.QDesktopServices.openUrl(C.QUrl('https://skieomod.emillon.fr/tutorials/surface-lifts/')))
 
     def workspace(self):
         central=W.QWidget();layout=W.QVBoxLayout(central);layout.setContentsMargins(12,10,12,8);self.setCentralWidget(central)

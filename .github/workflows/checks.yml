@@ -3,6 +3,27 @@ on: [push, pull_request]
 permissions:
   contents: read
 jobs:
+  installers:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-24.04, windows-latest]
+    env:
+      SKIEO_INSTALLER_NO_PAUSE: '1'
+      SKIEO_INSTALLER_TOOLS_ONLY: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - run: python -m unittest tests.test_installers
+      - name: Run the standalone Windows launcher
+        if: runner.os == 'Windows'
+        shell: cmd
+        run: call repository\web\public\install\Install-SkiEO-Windows.cmd
+      - name: Run the standalone Linux launcher
+        if: runner.os == 'Linux'
+        run: bash repository/web/public/install/Install-SkiEO-Linux.sh
   windows-https:
     runs-on: windows-latest
     strategy:

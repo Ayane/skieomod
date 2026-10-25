@@ -7,6 +7,16 @@ have their own package versions. Download the
 
 ## [Unreleased]
 
+## [1.26.0] - 2026-10-25
+
+- Add the Surface lift tutorial to the editor Help menu and website, with
+  an editable practice map, separate mapmod sources, route examples and save checks.
+- Publish standalone Windows and Linux installers that reuse or install
+  Python and pipx, install the current tools and run game setup. Include a
+  Linux desktop launcher and preserve executable permissions in its ZIP.
+- Test installer isolation, error handling and source downloads, and exercise
+  the standalone launchers on Windows and Linux before automatic publication.
+
 ## [1.25.1] - 2026-10-25
 
 - Use native Windows certificate validation for setup, updates and web

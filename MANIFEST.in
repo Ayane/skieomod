@@ -12,6 +12,7 @@ include docs/vegetation.md
 include docs/editor.md
 include docs/editor-tutorial.md
 include docs/scripts-and-scenarios.md docs/mapmods.md docs/surface-lifts.md docs/mapmod-tutorial.md
+include docs/surface-lifts-tutorial.md
 include schemas/*.json
 include mod/SkiEO-CustomMaps/README.md
 include mod/SkiEO-CustomMaps/LICENSE-MINHOOK.md

@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="500" viewBox="0 0 1200 500" role="img" aria-labelledby="title desc">
+<title id="title">One native lift, one configured surface-lift route</title><desc id="desc">The lower and upper scene terminals use metres. The matching mapmod route uses centimetres and runs uphill from bottom to top. The ascent is on the left when viewed uphill.</desc>
+<rect width="1200" height="500" rx="20" fill="#e8f0ec"/>
+<path d="M0 430L290 325 510 365 850 125 1200 215V500H0Z" fill="#c6d8cc"/>
+<path d="M0 480L280 410 500 440 830 245 1200 320V500H0Z" fill="#f5f7ef"/>
+<path d="M230 388L935 132" fill="none" stroke="#172f29" stroke-width="9"/>
+<path d="M215 366L920 110" fill="none" stroke="#ca603c" stroke-width="5"/>
+<path d="M245 410L950 154" fill="none" stroke="#527966" stroke-width="3" stroke-dasharray="10 10"/>
+<g fill="#172f29"><path d="M377 340v-51h-29v-10h62v10h-26v51ZM518 289v-51h-29v-10h62v10h-26v51ZM659 238v-51h-29v-10h62v10h-26v51ZM800 187v-51h-29v-10h62v10h-26v51Z"/></g>
+<g fill="#ca603c"><circle cx="230" cy="388" r="15"/><circle cx="935" cy="132" r="15"/><path d="M598 225l-24-4 9 24Z"/></g>
+<g font-family="system-ui,sans-serif" fill="#172f29">
+<text x="45" y="57" font-size="32" font-weight="700">Place the native lift. Configure the towing line.</text>
+<text x="45" y="91" font-size="20">Same name, same lower terminal · route points run from bottom to top</text>
+<rect x="38" y="165" width="300" height="115" rx="10" fill="#fffdf6"/><text x="60" y="198" font-size="23" font-weight="700">Lower terminal</text>
+<text x="60" y="230" font-size="20">Scene: (-80, 240) m</text><text x="60" y="258" font-size="20">Route: [-8000, 24000, 0] cm</text>
+<rect x="834" y="271" width="328" height="115" rx="10" fill="#fffdf6"/><text x="855" y="304" font-size="23" font-weight="700">Upper terminal</text>
+<text x="855" y="336" font-size="20">Scene: (-80, -240) m</text><text x="855" y="364" font-size="20">Route: [-8000, -24000, 0] cm</text>
+<text x="440" y="162" font-size="21" fill="#a64427">Uphill / ascent on the left</text>
+<text x="530" y="410" font-size="20" fill="#527966">Empty return</text>
+<text x="45" y="468" font-size="19">Schematic only. Runtime heights follow terrain and snow; Z = 0 is a placeholder.</text>
+</g></svg>

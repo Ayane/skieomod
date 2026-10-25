@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Add surface lifts to a map · SkiEO Mod</title>
+<meta name="description" content="Place a native lift in skieomod editor and add platter poles with the Surface lifts mapmod. Download a working map project, configure routes, test saves and publish your map.">
+<link rel="canonical" href="https://skieomod.emillon.fr/tutorials/surface-lifts/">
+<link rel="stylesheet" href="../heightmap/tutorial.css?v=1.26.0">
+<link rel="stylesheet" href="../mapmods/mapmods.css?v=1.26.0">
+<script src="../heightmap/tutorial.js?v=1.26.0" defer></script>
+</head><body>
+<a class="skip" href="#guide">Skip to the tutorial</a>
+<header class="site-header"><a class="brand" href="/">◭ SkiEO Mod <small>FOR SKI-E-O!</small></a><nav aria-label="Main navigation"><a href="../editor/">Create a map</a><a href="../mapmods/">Mapmods</a><a href="/install/">Install the tools</a></nav></header>
+<main id="guide">
+<section class="hero"><p class="eyebrow">THE MAP MAKER’S GUIDE · SURFACE LIFTS</p><h1>Make the climb.<br><em>With platter poles.</em></h1>
+<p class="lead">Place a lift in the workshop, connect the Surface lifts mapmod and configure its line. Keep the native queues, employees, tickets and saves while skiers ride uphill on the snow.</p>
+<div class="hero-meta"><span>Surface lifts 0.1.0 · loader 1.25.0+</span><span>One editable practice map</span><span>English · 25 October 2026</span></div>
+<figure class="hero-figure"><img src="route.svg" width="1200" height="500" alt="A schematic showing one native lift and its configured towing route, with scene coordinates in metres and route coordinates in centimetres."><figcaption>A schematic of the practice line. Terrain and snow determine the runtime height.</figcaption></figure>
+</section>
+<div class="guide-layout"><aside class="contents"><nav aria-label="Tutorial steps"><p class="eyebrow">ON THIS PAGE</p><a href="#practice"><span>01</span> Open the practice map</a><a href="#native"><span>02</span> Place a native lift</a><a href="#dependency"><span>03</span> Add the dependency</a><a href="#route"><span>04</span> Configure the route</a><a href="#test"><span>05</span> Build and play</a><a href="#share"><span>06</span> Test saves and publish</a><a href="#questions">Troubleshooting</a></nav></aside>
+<article class="steps">
+<section class="step" id="practice"><p class="step-number">STEP 01</p><h2>Open a complete example</h2>
+<p>The mapmod <code>community.surface-lifts</code> adapts an existing native lift. Your map supplies a name, a route and operating settings; the separate mod package supplies its models and behaviour. You do not need Blender or Unreal Editor.</p>
+<div class="download-card"><h3>Surface lift practice</h3><p>A 1024 × 1024 m map with one named native lift and a ticket office, plus the separate Surface lifts 0.1.0 source project and its original models. Extract both folders beside each other.</p><a class="download" href="files/surface-lift-practice.zip" download>Download the source projects ↓</a> <a href="/docs/surface-lifts-tutorial.md">Read the text guide ↗</a></div>
+<p>Install matching current tools and loader using the <a href="/install/">Windows or Linux installer</a>. Playing requires a reviewed Steam Windows game build, directly or under Linux/Proton. The native macOS game cannot load this Windows DLL-based mod.</p>
+<p>In skieomod editor, use <strong>Open</strong> to choose <code>practice-mountain/custom-map.json</code>. From editor 1.26.0, <strong>Help → Surface lift tutorial</strong> opens this guide.</p>
+</section>
+<section class="step" id="native"><p class="step-number">STEP 02</p><h2>Start with one native lift</h2>
+<p>The downloaded example already contains the lift. To repeat the exercise in your own map, select <strong>Source terrain</strong>, open <strong>Objects</strong> and search for the one-seat chairlift: <strong>Chair lift (one seat)</strong> or <strong>Fixed Chair1</strong>, class <code>BP_FixedChair1</code>. Click <strong>Place on terrain</strong>, then its lower and upper terminals. Press Escape to stop placing.</p>
+<p>Select the lift, name it <strong>Practice platter</strong> and save. Its queue, staff assignments and management panel stay native. The mapmod replaces the visible chairlift equipment and adapts its towing line.</p>
+<div class="table-wrap"><table><thead><tr><th>Scene field</th><th>Practice value</th></tr></thead><tbody><tr><td>Name</td><td><code>Practice platter</code></td></tr><tr><td>Lower X / Y</td><td><code>-80 / 240</code> metres</td></tr><tr><td>Upper X / Y</td><td><code>-80 / -240</code> metres</td></tr></tbody></table></div>
+<p>The scene source is <code>Scene/objects.json</code>, declared through <code>build.scene.file</code>. The <a href="files/objects.json" download>example scene JSON</a> contains the exact objects. Keep the native lift in the scene. New lifts built later during play are not automatically converted.</p>
+</section>
+<section class="step" id="dependency"><p class="step-number">STEP 03</p><h2>Let your map request the mapmod</h2>
+<p>Use <strong>File → Show project folder</strong>, then open <code>custom-map.json</code> in a text editor. Add this entry to the top-level <code>dependencies</code> array, preserving other dependencies:</p>
+<div class="command"><pre><code>{"id": "community.surface-lifts", "version": "=0.1.0"}</code></pre><button type="button" class="copy">Copy</button></div>
+<p>The ID and version select a separate <code>.skieomod</code> package. Keep that package separate from your <code>.skieomap</code>; do not copy its assets or <code>custom-mod.json</code> into the map. Published maps download their declared dependencies before starting.</p>
+</section>
+<section class="step" id="route"><p class="step-number">STEP 04</p><h2>Give the towing line its route</h2>
+<p>Add this top-level <code>extensions</code> fragment to the map manifest, merging it with any existing extensions:</p>
+<div class="command"><pre><code>"extensions": {
+  "community.surface-lifts": {
+    "lifts": [{
+      "name": "Practice platter",
+      "kind": "detachable_platter",
+      "route": [[-8000, 24000, 0], [-8000, 0, 0], [-8000, -24000, 0]],
+      "speed_mps": 2.5,
+      "capacity_per_hour": 600,
+      "pylons": 4,
+      "drive": "open",
+      "return_station": "floating",
+      "ascent_side": "left"
+    }]
+  }
+}</code></pre><button type="button" class="copy">Copy</button></div>
+<p>You can also <a href="files/surface-lifts-options.json" download>download just the options</a>. Reopen the project after external edits so the editor cannot save an older in-memory manifest over your changes.</p>
+<p><strong>The scene uses metres; the route uses world centimetres.</strong> For an ordinary centred editor map, multiply X and Y by 100. Include the world-origin offset if your map uses a custom origin. Every point needs three numbers, but Z is resampled from terrain and snow: <code>0</code> is a valid placeholder. Order points from the lower terminal to the upper one and keep them all inside the map.</p>
+<p>The first match requires the exact lift name and a lower terminal within <strong>50 m</strong> of the first route point. Names must be unique among configured lines. The matched native GUID is then stored in the save.</p>
+<div class="table-wrap"><table><thead><tr><th>Option</th><th>Meaning and accepted values</th></tr></thead><tbody>
+<tr><td><code>kind</code></td><td><code>detachable_platter</code> (TKD, with a stock of poles) or <code>fixed_platter</code> (TKF, rigid poles).</td></tr>
+<tr><td><code>route</code></td><td>2–128 points; at most 3 km long.</td></tr>
+<tr><td><code>speed_mps</code></td><td>0.5–5 m/s.</td></tr><tr><td><code>capacity_per_hour</code></td><td>100–1200 people per hour.</td></tr>
+<tr><td><code>pylons</code></td><td>1–32 intermediate supports, excluding the terminals.</td></tr>
+<tr><td><code>drive</code></td><td><code>open</code>, <code>covered</code> or <code>modern</code>.</td></tr>
+<tr><td><code>return_station</code></td><td><code>floating</code>, <code>release</code> or <code>lattice</code>.</td></tr>
+<tr><td><code>ascent_side</code></td><td><code>left</code> or <code>right</code>, looking uphill from the lower terminal.</td></tr>
+<tr><td><code>max_snow_cm</code></td><td>Optional, 110–300 cm. Default: 150 for TKF, 250 for TKD.</td></tr>
+</tbody></table></div>
+<p>Keep the first line straight. With exactly <code>pylons + 2</code> route points, the interior points place the supports and turns above 5° receive bend supports. Otherwise the loader fits supports to the route and terrain. Inspect intentional bends in the game. One session supports at most sixteen configured installations.</p>
+</section>
+<section class="step" id="test"><p class="step-number">STEP 05</p><h2>Build the separate projects, then play</h2>
+<p>Open a terminal in the extracted practice folder:</p>
+<div class="command"><pre><code>skieomod build surface-lifts
+skieomod build practice-mountain --dependency surface-lifts
+skieomod run practice-mountain --dependency surface-lifts</code></pre><button type="button" class="copy">Copy</button></div>
+<p><code>--dependency</code> locates the mod for local testing; it does not bundle its files into the map. The optional <code>--check-scripts</code> flag needs Lua 5.4 and <code>luac</code>. After installing the local dependency, you can also use the editor's <strong>Play</strong> button.</p>
+<p>Inspect the lower station, the poles and their supports in the game. Add descending trails and complete your resort with the normal construction tools. Open the lift, assign staff and provide guest access and services. Pause and native speed/stop controls still apply.</p>
+<figure class="hero-figure"><img src="images/practice-in-game.png" width="1280" height="720" loading="lazy" alt="The downloadable practice map loaded in Ski-E-O!, showing its ticket office, lower platter station and supports extending uphill."><figcaption>The exact downloadable project running in an isolated game session: one native lift adapted to a detachable platter lift, with four intermediate supports.</figcaption></figure>
+<p>The whole ascent needs snow. Surface lifts close below 3 cm and reopen after reaching at least 5 cm throughout, subject to manual stop. Excess snow also closes them above the configured limit, with a 20 cm reopening margin. Provide a garage, snowcats and staff for maintenance. The mapmod supplies ascent maintenance corridors; a work request alone does not remove snow.</p>
+</section>
+<section class="step" id="share"><p class="step-number">STEP 06</p><h2>Check saves before sharing</h2>
+<p>Save and reload. Native identity, staff and management data are preserved while the models and poles are rebuilt. Test authored route or name changes in a <strong>new game</strong> first: existing saves keep their bound GUID and saved lift positions. Removing a lift in a save does not recreate it.</p>
+<p>Keep the dependency pinned, increase your map version after edits, rebuild, then publish:</p>
+<div class="command"><pre><code>skieomod publish practice-mountain</code></pre><button type="button" class="copy">Copy</button></div>
+<p>Web publication uses your publishing token; see <a href="/docs/custom-map-repository.md">the publication guide</a>. Surface lifts 0.1.0 is already published. Do not republish an unchanged copy; if you modify the mapmod, give your fork its own ID and version. The existing Workshop preparation workflow also keeps map and mod separate.</p>
+</section>
+<section class="step" id="questions"><p class="step-number">TROUBLESHOOTING</p><h2>When the line does not behave as expected</h2>
+<details><summary>The original chairlift is still visible</summary><p>Check the dependency, exact name, centimetre conversion and lower terminal. Inspect UE4SS.log for <code>Surface lifts: 1 native installations adapted</code>. Check that loading finished successfully.</p></details>
+<details><summary>The lift will not run</summary><p>Check snow along the entire ascent, hours, staff, manual stop and maintenance. A missing station model does not explain an ordinary native operating restriction.</p></details>
+<details><summary>The new configuration is absent in a saved game</summary><p>The saved lift position and GUID remain authoritative. Start a new game after editing the authored scene. A deleted saved lift is intentionally not recreated.</p></details>
+<details><summary>The route or supports look wrong</summary><p>Check lower-to-upper point order, world centimetres, map boundaries, ascent side, support count and terrain. Begin with a straight route before adding surveyed bends.</p></details>
+<details><summary>The game build is refused</summary><p>Update the tools and loader. The native helpers require a reviewed game build; changing DLL names or disabling guards does not provide compatibility.</p></details>
+<p>For implementation details, see the <a href="/docs/surface-lifts.md">surface-lift reference</a>. Ordinary maps use the options above: the dependency calls <code>api:configure_surface_lifts</code> once after loading, so the map should not call it a second time.</p>
+</section>
+</article></div></main>
+<footer class="site-footer"><a href="/">SkiEO Mod</a><span>Code and original models by Albatar (Élie Millon) · BSD-3-Clause</span><a href="https://github.com/Ayane/skieomod">Source on GitHub ↗</a></footer>
+</body></html>

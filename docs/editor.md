@@ -85,6 +85,9 @@ includes format-specific questions and command-line instructions.
 **Help → Mapmod tutorial** opens the
 [mapmod guide](https://skieomod.emillon.fr/tutorials/mapmods/), with downloadable
 practice projects, the animated fox example and separate versioned dependencies.
+**Help → Surface lift tutorial** opens the
+[platter lift guide](https://skieomod.emillon.fr/tutorials/surface-lifts/), with an
+editable map, the separate mapmod sources, route settings and save checks.
 
 ## Navigate and sculpt in 3D
 

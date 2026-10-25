@@ -1,0 +1,31 @@
+{
+  "lifts": [
+    {
+      "name": "Practice platter",
+      "kind": "detachable_platter",
+      "route": [
+        [
+          -8000,
+          24000,
+          0
+        ],
+        [
+          -8000,
+          0,
+          0
+        ],
+        [
+          -8000,
+          -24000,
+          0
+        ]
+      ],
+      "speed_mps": 2.5,
+      "capacity_per_hour": 600,
+      "pylons": 4,
+      "drive": "open",
+      "return_station": "floating",
+      "ascent_side": "left"
+    }
+  ]
+}

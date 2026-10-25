@@ -21,6 +21,7 @@ class App {
     {path: 'heightmap', fr: 'Importer un relief', en: 'Import terrain', detailFr: 'Transformez une heightmap R16 ou PNG 16 bits en montagne jouable.', detailEn: 'Turn an R16 or 16-bit PNG heightmap into a playable mountain.'},
     {path: 'scripts', fr: 'Écrire un scénario', en: 'Write a scenario', detailFr: 'Événements, objectifs et économie, avec des graphes ou du Lua.', detailEn: 'Events, goals and economy, with graphs or Lua.'},
     {path: 'mapmods', fr: 'Partager un mapmod', en: 'Share a mapmod', detailFr: 'Créez des comportements réutilisables sur plusieurs cartes.', detailEn: 'Create behaviours that work across multiple maps.'},
+    {path: 'surface-lifts', fr: 'Ajouter des téléskis à perches', en: 'Add platter surface lifts', detailFr: 'Placez une remontée, configurez sa ligne et utilisez le mapmod Surface lifts.', detailEn: 'Place a native lift, configure its route and use the Surface lifts mapmod.'},
     {path: 'ticket-office', fr: 'Importer un modèle 3D', en: 'Import a 3D model', detailFr: 'Remplacez le Ticket Office et placez vos propres objets.', detailEn: 'Replace the Ticket Office and place your own objects.'},
   ];
   constructor() {

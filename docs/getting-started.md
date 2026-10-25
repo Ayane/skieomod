@@ -32,6 +32,15 @@ before making your own map.
 
 ## Install and play
 
+For Windows or Linux, use the [downloadable installers](https://skieomod.emillon.fr/install/).
+Windows: double-click the `.cmd`. Linux: extract the ZIP and open
+`Install-SkiEO.desktop`; your desktop may ask you to allow launching it.
+They check Python and pipx, install missing components and run setup. Close
+the game first and launch it through Steam once before installing the mod.
+The current DLL-based game loader does not support the native macOS game.
+
+For manual installation, use the commands below.
+
 You need **Python 3.10 or later**, **pipx** on your PATH, and the Windows edition
 of Ski-E-O! or its demo installed through Steam. Linux with Proton is supported.
 Launch the game once, then close it before installation.

@@ -1,0 +1,29 @@
+{
+  "version": 1,
+  "objects": [
+    {
+      "id": "practice-platter",
+      "name": "Practice platter",
+      "kind": "lift",
+      "class": "/Game/Blueprints/Lifts/BP_FixedChair1.BP_FixedChair1_C",
+      "position": [
+        -80,
+        240
+      ],
+      "end_position": [
+        -80,
+        -240
+      ]
+    },
+    {
+      "id": "ticket-office",
+      "name": "Practice ticket office",
+      "kind": "building",
+      "class": "/Game/Blueprints/Buildings/BP_TicketOffice.BP_TicketOffice_C",
+      "position": [
+        -45,
+        260
+      ]
+    }
+  ]
+}

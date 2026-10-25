@@ -1,0 +1,70 @@
+#!/usr/bin/env bash
+set -Eeuo pipefail
+
+skieo_temporary=''
+finish() {
+    skieo_status=$?
+    trap - EXIT
+    if [[ -n "$skieo_temporary" ]]; then rm -rf -- "$skieo_temporary"; fi
+    if [[ $skieo_status -ne 0 ]]; then
+        printf '\nInstallation stopped. Read the error above, then run this installer again.\n'
+    fi
+    if [[ -t 0 && -z "${SKIEO_INSTALLER_NO_PAUSE:-}" ]]; then
+        read -r -p 'Press Enter to close this window. ' _skieo_answer || true
+    fi
+    exit "$skieo_status"
+}
+trap finish EXIT
+
+if [[ "$(uname -s)" != Linux ]]; then
+    printf 'This installer is for Linux. The native macOS game cannot load the Windows mod.\n' >&2
+    exit 1
+fi
+if [[ "$(id -u)" == 0 ]]; then
+    printf 'Run this installer as your normal user, without sudo.\n' >&2
+    exit 1
+fi
+printf 'SkiEO Mod installer - close Ski-E-O! before continuing.\n'
+
+find_python() {
+    local candidate
+    for candidate in python3 python3.13 python3.12 python3.11 python3.10 python; do
+        if command -v "$candidate" >/dev/null 2>&1 &&
+            "$candidate" -c 'import sys; raise SystemExit(0 if sys.version_info >= (3,10) and sys.maxsize > 2**32 else 1)' >/dev/null 2>&1; then
+            command -v "$candidate"
+            return 0
+        fi
+    done
+    return 1
+}
+install_python() {
+    if ! command -v sudo >/dev/null 2>&1; then
+        printf 'Python 3.10+ with venv is needed. Ask your administrator to install it, then retry.\n' >&2
+        return 1
+    fi
+    printf 'Installing Python support with your distribution package manager...\n'
+    if command -v apt-get >/dev/null 2>&1; then
+        sudo apt-get update
+        sudo apt-get install -y python3 python3-venv
+    elif command -v dnf >/dev/null 2>&1; then
+        sudo dnf install -y python3 python3-pip
+    elif command -v pacman >/dev/null 2>&1; then
+        sudo pacman -S --needed --noconfirm python python-pip
+    elif command -v zypper >/dev/null 2>&1; then
+        sudo zypper --non-interactive install python3 python3-pip
+    else
+        printf 'Install Python 3.10+ and its venv/ensurepip package with your distribution tools, then retry.\n' >&2
+        return 1
+    fi
+}
+
+python_bin=$(find_python) || { install_python; python_bin=$(find_python); }
+if ! command -v pipx >/dev/null 2>&1 && ! "$python_bin" -c 'import venv, ensurepip' >/dev/null 2>&1; then
+    install_python
+    "$python_bin" -c 'import venv, ensurepip'
+fi
+skieo_temporary=$(mktemp -d "${TMPDIR:-/tmp}/skieomod-install.XXXXXX")
+cat > "$skieo_temporary/bootstrap.py" <<'SKIEO_BOOTSTRAP_PY'
+@@BOOTSTRAP@@
+SKIEO_BOOTSTRAP_PY
+"$python_bin" "$skieo_temporary/bootstrap.py"

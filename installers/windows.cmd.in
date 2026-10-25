@@ -1,0 +1,85 @@
+@echo off
+setlocal
+set "SKIEO_INSTALLER_PATH=%~f0"
+powershell.exe -NoLogo -NoProfile -Command "$text=[IO.File]::ReadAllText($env:SKIEO_INSTALLER_PATH); $body=($text -split '(?m)^# POWERSHELL SCRIPT\r?$',2)[1]; & ([scriptblock]::Create($body))"
+set "SKIEO_INSTALL_RESULT=%ERRORLEVEL%"
+echo.
+if not defined SKIEO_INSTALLER_NO_PAUSE pause
+exit /b %SKIEO_INSTALL_RESULT%
+# POWERSHELL SCRIPT
+$ErrorActionPreference = 'Stop'
+$ProgressPreference = 'SilentlyContinue'
+$temporary = $null
+try {
+    Write-Host 'SkiEO Mod installer - close Ski-E-O! before continuing.'
+    if (-not [Environment]::Is64BitOperatingSystem -or "$env:PROCESSOR_ARCHITECTURE $env:PROCESSOR_ARCHITEW6432" -match 'ARM') {
+        throw 'The game mod needs x64 Windows. Windows on ARM and 32-bit Windows are not supported.'
+    }
+    function Find-SkiEOPython {
+        $candidates = @()
+        foreach ($name in @('python3', 'python')) {
+            $command = Get-Command $name -ErrorAction SilentlyContinue
+            if ($command -and $command.Source -notmatch '\\WindowsApps\\') { $candidates += $command.Source }
+        }
+        $candidates += "$env:LOCALAPPDATA\Programs\Python\Python313\python.exe"
+        foreach ($candidate in $candidates) {
+            if (-not (Test-Path -LiteralPath $candidate -PathType Leaf)) { continue }
+            try {
+                & $candidate -c 'import sys; raise SystemExit(0 if sys.version_info >= (3,10) and sys.maxsize > 2**32 else 1)' 2>$null
+                if ($LASTEXITCODE -eq 0) { return $candidate }
+            } catch { }
+        }
+        $candidates = @()
+        $launcher = Get-Command py -ErrorAction SilentlyContinue
+        if ($launcher) {
+            # Listing registered runtimes cannot trigger an automatic download.
+            try { $listed = (& $launcher.Source -0p 2>$null) -join "`n" } catch { $listed = '' }
+            foreach ($match in [regex]::Matches($listed, '(?im)([a-z]:\\[^\r\n]*python\.exe)\s*$')) {
+                $candidates += $match.Groups[1].Value
+            }
+        }
+        foreach ($candidate in $candidates) {
+            if (-not (Test-Path -LiteralPath $candidate -PathType Leaf)) { continue }
+            try {
+                & $candidate -c 'import sys; raise SystemExit(0 if sys.version_info >= (3,10) and sys.maxsize > 2**32 else 1)' 2>$null
+                if ($LASTEXITCODE -eq 0) { return $candidate }
+            } catch { }
+        }
+        return $null
+    }
+    $temporary = Join-Path ([IO.Path]::GetTempPath()) ('skieomod-install-' + [Guid]::NewGuid().ToString('N'))
+    New-Item -ItemType Directory -Path $temporary | Out-Null
+    $python = Find-SkiEOPython
+    if (-not $python) {
+        Write-Host 'Installing Python 3.13 for the current user...'
+        $installer = Join-Path $temporary 'python.exe'
+        Invoke-WebRequest -UseBasicParsing -Uri 'https://www.python.org/ftp/python/3.13.17/python-3.13.17-amd64.exe' -OutFile $installer
+        if ((Get-FileHash -LiteralPath $installer -Algorithm SHA256).Hash.ToLowerInvariant() -ne '5da012101ba2e17113a9a1cd901e9ce1441086f2b7ecb5de06ec94163899a190') {
+            throw 'Python installer checksum mismatch. Nothing was executed.'
+        }
+        if ((Get-AuthenticodeSignature -LiteralPath $installer).Status -ne 'Valid') {
+            throw 'The Python installer signature could not be verified.'
+        }
+        $target = "$env:LOCALAPPDATA\Programs\Python\Python313"
+        $process = Start-Process -FilePath $installer -ArgumentList @('/quiet', 'InstallAllUsers=0', 'PrependPath=0', 'Include_launcher=0', 'Include_test=0', 'Shortcuts=0', "TargetDir=`"$target`"") -Wait -PassThru
+        if ($process.ExitCode -notin @(0,3010)) { throw "Python installation failed ($($process.ExitCode))." }
+        $python = Find-SkiEOPython
+        if (-not $python) { throw 'Python was installed but could not be started. Restart Windows and retry.' }
+    }
+    $bootstrap = Join-Path $temporary 'bootstrap.py'
+    $source = @'
+@@BOOTSTRAP@@
+'@
+    [IO.File]::WriteAllText($bootstrap, $source, (New-Object Text.UTF8Encoding($false)))
+    # pipx progress uses stderr; the Python process exit code determines success.
+    $ErrorActionPreference = 'Continue'
+    & $python $bootstrap
+    $result = $LASTEXITCODE
+    $ErrorActionPreference = 'Stop'
+} catch {
+    Write-Host ("Installation stopped: " + $_.Exception.Message) -ForegroundColor Red
+    $result = 1
+} finally {
+    if ($temporary -and (Test-Path -LiteralPath $temporary)) { Remove-Item -LiteralPath $temporary -Recurse -Force }
+}
+exit $result
