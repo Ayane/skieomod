@@ -51,18 +51,21 @@ function Bridge.restore(lift,original)
     local c=lift.CableComp
     for i,name in ipairs(names) do c[name]=original[i] end
 end
-local visuals_loader
+local visuals_loader,visuals_reviewed
 function Bridge.visuals(items,posed)
     local version=require('game_version').poll()
     assert(version.supported and reviewed[version.build],'Unreviewed surface lift visual bridge')
-    for path,fields in pairs({GuestState={GuestId=0,QueueLiftId=0xa30,Discipline=0x1d},GuestHotState={ActivityState=0x68,WorldPosition=0,Velocity=0x18}}) do
+    if not visuals_reviewed then
+    for path,fields in pairs({GuestSimulationSubsystem={Guests=0x58,GuestsHot=0x68},GuestState={GuestId=0,QueueLiftId=0xa30,Discipline=0x1d},GuestHotState={ActivityState=0x68,ColorIndex=0x50,WorldPosition=0,Velocity=0x18}}) do
         local found={}
         local cls=assert(StaticFindObject('/Script/SkiResortSimulator.'..path))
         cls:ForEachProperty(function(p)
             local name=p:GetFName():ToString()
-            if fields[name] then assert(p:GetOffset_Internal()==fields[name],'Changed native guest field: '..name);found[name]=true end
+            if fields[name] then assert(p:GetOffset_Internal()==fields[name],'Changed native guest field: '..name);local expected=({Guests='ArrayProperty',GuestsHot='ArrayProperty',GuestId='StructProperty',QueueLiftId='StructProperty',Discipline='EnumProperty',ActivityState='EnumProperty',ColorIndex='IntProperty',WorldPosition='StructProperty',Velocity='StructProperty'})[name];assert(p:GetClass():GetFName():ToString()==expected,'Changed native guest field type: '..name);found[name]=true end
         end)
         for name in pairs(fields) do assert(found[name],'Missing native guest field: '..name) end
+    end
+    visuals_reviewed=true
     end
     local directory=debug.getinfo(1,'S').source:match('^@(.*[/\\])[^/\\]+$')
     if not visuals_loader then visuals_loader=assert(package.loadlib(directory..'skieo_surface_lifts.dll','skieo_surface_lifts')) end
@@ -83,5 +86,35 @@ function Bridge.visuals(items,posed)
     f=assert(io.open(directory..'surface-lifts.status','rb'));local status=f:read('*a');f:close()
     assert(status:sub(1,3)=='ok:',status)
     return status
+end
+local riders_loader
+local riders_directory=debug.getinfo(1,'S').source:match('^@(.*[/\\])[^/\\]+$')
+function Bridge.riders(state,guests)
+    assert(visuals_reviewed,'Guest snapshot requires the reviewed visual bridge')
+    riders_loader=riders_loader or assert(package.loadlib(riders_directory..'skieo_surface_lifts.dll','skieo_surface_riders'))
+    state.rider_nonce=((state.rider_nonce or 0)+1)&0xffffffff
+    local f=assert(io.open(riders_directory..'surface-riders.job','wb'))
+    f:write(string.pack('<c4I4I8I8I4I4','SKRD',1,guests:GetAddress(),guests:GetClass():GetAddress(),state.rider_nonce,0));f:close()
+    os.remove(riders_directory..'surface-riders.bin');riders_loader()
+    f=assert(io.open(riders_directory..'surface-riders.bin','rb'));local bytes=f:read('*a');f:close()
+    assert(#bytes>=16,'Incomplete native rider snapshot')
+    local magic,version,nonce,count=string.unpack('<c4I4I4I4',bytes)
+    assert(magic=='SKRD'and version==1 and nonce==state.rider_nonce and count<=20000 and #bytes==16+count*72,'Invalid native rider snapshot')
+    local groups=state.native_rider_groups or{};state.native_rider_groups=groups
+    for _,rows in pairs(groups)do for i=#rows,1,-1 do rows[i]=nil end end
+    local cache=state.native_rider_cache or{};state.native_rider_cache=cache
+    for i=1,count do
+        local index,discipline,color,_,a,b,c,d,la,lb,lc,ld,x,y,z=string.unpack('<I4I4i4I4i4i4i4i4i4i4i4i4ddd',bytes,17+(i-1)*72)
+        local key=string.format('%08x-%08x-%08x-%08x',a,b,c,d)
+        local id=string.format('%08x-%08x-%08x-%08x',la,lb,lc,ld)
+        local row=cache[key]
+        if not row then row={key=key,guest={A=a,B=b,C=c,D=d}};cache[key]=row end
+        row.index,row.discipline,row.color,row.X,row.Y,row.Z=index,discipline,color,x,y,z
+        row.stamp=nonce
+        groups[id]=groups[id]or{};groups[id][#groups[id]+1]=row
+    end
+    for key,row in pairs(cache)do if row.stamp~=nonce then cache[key]=nil end end
+    for id,rows in pairs(groups)do if #rows==0 then groups[id]=nil end end
+    return groups
 end
 return Bridge

@@ -11,6 +11,8 @@ package.preload.UEHelpers=function()return {
 package.preload.native_terrain=function()return {
     retain_texture=function(resource)resource.rooted=true end,
 }end
+package.preload.climate=function()return{apply=function()end}end
+package.preload.snowmaking=function()return{definitions=function()return{}end,install=function()end}end
 package.preload.vegetation=function()return {unload=function()end}end
 StaticFindObject=function(path)
     if path:find('Default__KismetGuidLibrary',1,true) then return {IsValid=valid} end

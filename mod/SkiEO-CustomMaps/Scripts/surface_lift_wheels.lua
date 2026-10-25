@@ -56,13 +56,18 @@ function W.add(item,state,base,radius,sign,model,bank)
  item.wheels=item.wheels or{};item.wheels[#item.wheels+1]={component=c,base=base,radius=radius,sign=sign or 1,travel=0}
  return c
 end
-function W.update(item,phase,length,seconds,speed,paused,camera)
+function W.update(item,phase,length,seconds,speed,paused,camera,budget)
  item.cable_step=W.travel(item.wheel_previous,phase,length,seconds,speed,paused)
  item.cable_travel=(item.cable_travel or 0)+item.cable_step
  item.wheel_previous={phase=phase,seconds=seconds}
- for _,w in ipairs(item.wheels or{})do
+ local wheels=item.wheels or{};local cursor=item.wheel_cursor or 0
+ for offset=1,#wheels do
+  local index=(cursor+offset-1)%#wheels+1;local w=wheels[index]
   local p=w.base.Translation
   if w.travel~=item.cable_travel and (not camera or (p.X-camera.x)^2+(p.Y-camera.y)^2+(p.Z-camera.z)^2<18000^2)then
+   if budget and budget.remaining<=0 then break end
+   if budget then budget.remaining=budget.remaining-1 end
+   item.wheel_cursor=index
    w.component:K2_SetWorldTransform(W.rotated(w.base,item.cable_travel,w.radius,w.sign),false,{},true)
    w.travel=item.cable_travel
   end

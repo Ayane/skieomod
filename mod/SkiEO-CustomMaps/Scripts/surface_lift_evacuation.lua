@@ -1,6 +1,7 @@
 local UE=require('UEHelpers')
 local G=require('surface_lift_geometry')
 local Routes=require('surface_lift_evacuation_routes')
+local Service=require('surface_lift_service')
 local Evac={}
 local directory=debug.getinfo(1,'S').source:match('^@(.*[/\\])[^/\\]+$')
 local exports={}
@@ -15,15 +16,17 @@ local function persist(state)
     for key,record in pairs(state.evacuation_records)do
         local words={};for word in key:gmatch('%x+')do words[#words+1]=string.format('%08x',tonumber(word,16)&0xffffffff)end
         assert(#words==4,'Invalid evacuation identity')
-        local id=tostring(record.trail);groups[id]=groups[id]or{};groups[id][#groups[id]+1]=table.concat(words)
+        local id=tostring(record.trail)..'|'..record.lift;groups[id]=groups[id]or{};groups[id][#groups[id]+1]=table.concat(words)
     end
     local packed={};for id,guests in pairs(groups)do table.sort(guests);packed[id]=table.concat(guests)end
     local saved=state.api:mod_state();saved.evacuation_guests=packed;saved.evacuations=nil
 end
 local function restore_guests(state,item)
     local saved=state.api:mod_state().evacuation_guests or{}
-    for _,choice in ipairs(item.evacuation_routes)do
-        local packed=saved[tostring(choice.trail)]or''
+    local trails={};for _,choice in ipairs(item.evacuation_routes)do trails[#trails+1]=choice.trail end
+    for _,id in ipairs(item.old_groom_trails or{})do trails[#trails+1]=id end
+    for _,trail in ipairs(trails)do
+        local packed=saved[tostring(trail)..'|'..item.id]or saved[tostring(trail)]or''
         assert(type(packed)=='string'and #packed%32==0 and not packed:find('[^%x]'),'Invalid saved evacuation guests')
         for i=1,#packed,32 do
             local words={};for n=0,3 do
@@ -31,7 +34,7 @@ local function restore_guests(state,item)
                 words[n+1]=word>=0x80000000 and word-0x100000000 or word
             end
             local key=guid({A=words[1],B=words[2],C=words[3],D=words[4]})
-            state.evacuation_records[key]={lift=item.id,trail=choice.trail}
+            state.evacuation_records[key]={lift=item.id,trail=trail}
         end
     end
 end
@@ -57,14 +60,16 @@ local function packet(state,entries,item)
         trails:GetAddress(),trails:GetClass():GetAddress(),lift and lift:GetAddress()or 0,lift and lift:GetClass():GetAddress()or 0)..table.concat(entries)
 end
 local function waiting(state,force)
-    local entries={}
+    local entries,merged={},{}
     for _,item in ipairs(state.evacuation_disposing and{}or state.items)do if not item.disposed then
-        local held=(item.evacuation_waiting or 0)>0
-        if item.groom_trail then entries[#entries+1]={item.groom_trail,held and 1 or 0}end
+        local held=Service.held(item)>0
+        if item.groom_trail then merged[item.groom_trail]=math.max(merged[item.groom_trail]or 0,held and 1 or 0)end
+        for _,id in ipairs(item.old_groom_trails or{})do merged[id]=math.max(merged[id]or 0,held and 1 or 0)end
         for _,choice in ipairs(item.evacuation_routes or{})do if choice.index>0 and choice.trail then
-            entries[#entries+1]={choice.trail,(held or(choice.evacuation_waiting or 0)>0)and 1 or 0}
+            merged[choice.trail]=math.max(merged[choice.trail]or 0,(held or(choice.evacuation_waiting or 0)>0)and 1 or 0)
         end end
     end end
+    for id,held in pairs(merged)do entries[#entries+1]={id,held}end
     table.sort(entries,function(a,b)return a[1]<b[1]end)
     local keys={};for _,entry in ipairs(entries)do keys[#keys+1]=entry[1]..':'..entry[2]end
     local key=table.concat(keys,',')
@@ -133,7 +138,8 @@ function Evac.attach(state,item)
         end
         reviewed=true
     end
-    item.evacuation_routes=Routes.build(item.route,item.definition,require('terrain').surface_height_at)
+    local service_route,service_definition=Service.geometry(item)
+    item.evacuation_routes=Routes.build(item.route,item.definition,require('terrain').surface_height_at,service_route,service_definition)
     for _,choice in ipairs(item.evacuation_routes)do
         choice.trail=registered(state,item,choice);choice.groom_trail=choice.trail;choice.groom_requests=0
     end
@@ -176,7 +182,7 @@ function Evac.update(state,passengers,env)
     if env.paused or not state.evacuation_records then return end
     for _,item in ipairs(state.items)do
         if not item.disposed and item.evacuation_routes and #(passengers[item.id]or{})>0
-            and(item.snow_blocked or item.requested_speed==0 or item.lift:GetEffectiveOperatingSpeed()<=.01)then
+            and(item.snow_blocked or item.requested_speed==0 and not item.draining or item.lift:GetEffectiveOperatingSpeed()<=.01 or not item.lift:IsLiftRunning()or item.lift:IsEventDisabled()or item.lift:IsManualRepairActive())then
             Evac.release(state,item,passengers[item.id]);passengers[item.id]={}
             item.lift.OperatingSpeed=0
         end
@@ -190,14 +196,17 @@ function Evac.update(state,passengers,env)
             local cold=guests.Guests[index];local key=guid(cold.GuestId);local record=records[key]
             if record then
                 found[key]=true;local h=guests.GuestsHot[index];local p=h.WorldPosition;local near=false
+                local checked={}
                 for _,item in ipairs(state.items)do if not item.disposed and item.groom_trail then
-                    local width,offset=Routes.dimensions(item.definition)
-                    local distance=G.nearest(item.route,p.X,p.Y);local line=G.sample(item.route,distance)
+                    local route,definition=Service.geometry(item)
+                    local width,offset=Routes.dimensions(definition)
+                    local distance=G.nearest(route,p.X,p.Y);local line=G.sample(route,distance)
                     local x,y=line.x-line.nx*offset,line.y-line.ny*offset
                     -- Include a snowcat's footprint and both terminal exits.
                     if(p.X-x)^2+(p.Y-y)^2<(width*.5+400)^2 then
-                        held[item.id]=(held[item.id]or 0)+1;near=true
+                        if not checked[item.groom_trail]then held[item.groom_trail]=(held[item.groom_trail]or 0)+1 end;near=true
                     end
+                    checked[item.groom_trail]=true
                     for _,choice in ipairs(item.evacuation_routes or{})do if choice.index>0
                         and Routes.near(choice.points,p.X,p.Y,width*.5+400)then
                         roads[choice.trail]=(roads[choice.trail]or 0)+1;near=true
@@ -212,7 +221,7 @@ function Evac.update(state,passengers,env)
         end end
     end
     for _,item in ipairs(state.items)do if not item.disposed and item.evacuation_routes then
-        local was=item.evacuation_waiting or 0;item.evacuation_waiting=held[item.id]or 0
+        local was=item.evacuation_waiting or 0;item.evacuation_waiting=held[item.groom_trail]or held[item.id]or 0
         for _,choice in ipairs(item.evacuation_routes)do choice.evacuation_waiting=roads[choice.trail]or 0 end
         if item.evacuation_waiting>0 then item.lift.OperatingSpeed=0
         elseif was>0 then

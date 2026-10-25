@@ -35,11 +35,11 @@ print('Surface lift native cache: exact build, layout, marker semantics, bounds 
 -- Exercise the actual Lua/native protocol without loading a Windows DLL.
 local real_open,real_loadlib=io.open,package.loadlib
 local memory,calls={},0
-local offsets={GuestState={GuestId=0,QueueLiftId=0xa30,Discipline=0x1d},GuestHotState={ActivityState=0x68,WorldPosition=0,Velocity=0x18}}
+local offsets={GuestSimulationSubsystem={Guests=0x58,GuestsHot=0x68},GuestState={GuestId=0,QueueLiftId=0xa30,Discipline=0x1d},GuestHotState={ActivityState=0x68,ColorIndex=0x50,WorldPosition=0,Velocity=0x18}}
 StaticFindObject=function(path)
  local fields=assert(offsets[path:match('%.([^%.]+)$')])
  return {ForEachProperty=function(_,callback)
-  for name,offset in pairs(fields)do callback({GetFName=function()return{ToString=function()return name end}end,GetOffset_Internal=function()return offset end})end
+  for name,offset in pairs(fields)do callback({GetFName=function()return{ToString=function()return name end}end,GetOffset_Internal=function()return offset end,GetClass=function()return{GetFName=function()return{ToString=function()return ({Guests='ArrayProperty',GuestsHot='ArrayProperty',GuestId='StructProperty',QueueLiftId='StructProperty',Discipline='EnumProperty',ActivityState='EnumProperty',ColorIndex='IntProperty',WorldPosition='StructProperty',Velocity='StructProperty'})[name]end}end}end})end
  end}
 end
 io.open=function(path,mode)

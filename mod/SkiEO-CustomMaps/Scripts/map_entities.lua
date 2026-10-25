@@ -39,6 +39,31 @@ local function context(api)
     assert(not session._entities.stopped,'Entity session has ended')
     return session._entities
 end
+function Entities.prefetch_snow(api,points)
+    local state=context(api)
+    if not valid(state.snow)then state.snow=subsystem('SnowStateCache')end
+    if not valid(state.snow)then return end
+    local pending,keys,seen={},{},{}
+    local cell=state.snow_spacing or 100
+    for _,p in ipairs(points)do
+        local key=math.floor(p.x/cell)..':'..math.floor(p.y/cell)
+        if state.snow_cache[key]==nil and not seen[key]then
+            pending[#pending+1]=p;keys[#keys+1]=key;seen[key]=true
+        end
+    end
+    for start=1,#pending,64 do
+        local batch={};for i=start,math.min(#pending,start+63)do batch[#batch+1]=pending[i]end
+        local rows=Snow.sample_many(state.snow,batch)
+        for j=1,#batch do
+            local row=rows[j];state.snow_cache[keys[start+j-1]]=row or false
+            if row then
+                state.snow_spacing=row.spacing
+                local p=pending[start+j-1]
+                state.snow_cache[math.floor(p.x/row.spacing)..':'..math.floor(p.y/row.spacing)]=row
+            end
+        end
+    end
+end
 function Entities.environment(api,x,y,support_only)
     local state=context(api)
     if not valid(state.time) then state.time=subsystem('TimeSubsystem') end

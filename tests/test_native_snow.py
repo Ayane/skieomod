@@ -86,7 +86,13 @@ int exercise(const char *input,const char *output,int modern,int broken) {
     struct {char magic[4];uint32_t version;uint64_t owner,cls;double x,y;} job={"SKSN",1,(uintptr_t)cache,cls,13301,19901};
     if(broken==8)job.cls++;
     if(broken==9)job.x=-1;
-    FILE*f=fopen(input,"wb");if(!f)return -1;fwrite(&job,1,sizeof(job),f);fclose(f);
+    FILE*f=fopen(input,"wb");if(!f)return -1;if(broken>=10){
+        struct {char magic[4];uint32_t version;uint64_t owner,cls;uint32_t count,reserved;} batch={"SKSN",2,(uintptr_t)cache,cls,3,0};
+        double points[]={13301,19901,-1,19901,NAN,0};
+        if(broken==11)batch.count=65;
+        if(broken==13)batch.magic[0]='X';
+        fwrite(&batch,1,sizeof(batch),f);fwrite(points,1,broken==12?8:sizeof(points),f);
+    }else fwrite(&job,1,sizeof(job),f);fclose(f);
     unsigned char before_cache[sizeof(cache)],before_entries[sizeof(entries)];
     float before_samples[sizeof(samples)/sizeof(samples[0])];
     memcpy(before_cache,cache,sizeof(cache));memcpy(before_entries,entries,sizeof(entries));
@@ -120,6 +126,17 @@ int exercise(const char *input,const char *output,int modern,int broken) {
         for modern in (0, 1, 2):
             with self.subTest(modern=modern):
                 self.assertEqual(self.sample(modern), (1.0, 73.5, 20.0, 100.0))
+
+    def test_batched_points_keep_order_and_reject_malformed_packets(self):
+        source = Path(self.temp.name) / 'snow.job'
+        output = Path(self.temp.name) / 'snow.bin'
+        for modern in (0, 1, 2):
+            self.assertEqual(self.library.exercise(bytes(str(source), 'utf8'), bytes(str(output), 'utf8'), modern, 10), 0)
+            rows = list(struct.iter_unpack('<4f', output.read_bytes()))
+            self.assertEqual(rows, [(1.0, 73.5, 20.0, 100.0), (0.0,) * 4, (0.0,) * 4])
+            for broken in (11, 12, 13):
+                self.assertEqual(self.library.exercise(bytes(str(source), 'utf8'), bytes(str(output), 'utf8'), modern, broken), 0)
+                self.assertFalse(any(output.read_bytes()))
 
     def test_bad_guards_unready_or_short_data_and_outside_points_are_rejected(self):
         for modern in (1, 2):

@@ -14,6 +14,7 @@ function G.validate(d)
     assert(finite(d.speed_mps) and d.speed_mps>=.5 and d.speed_mps<=5,'Lift speed must be .5..5 m/s')
     assert(finite(d.capacity_per_hour) and d.capacity_per_hour>=100 and d.capacity_per_hour<=1200,'Invalid lift capacity')
     assert(d.kind=='detachable_platter' or d.kind=='fixed_platter' or d.kind=='fixed_chair','Unknown surface lift type')
+    assert(d.service_group==nil or(type(d.service_group)=='string'and #d.service_group>0 and #d.service_group<=64 and d.kind~='fixed_chair'),'Invalid shared service group')
     assert(d.ascent_side==nil or d.ascent_side=='left' or d.ascent_side=='right','Unknown ascent side')
     assert(d.max_snow_cm==nil or(finite(d.max_snow_cm)and d.max_snow_cm>=110 and d.max_snow_cm<=300),'Maximum snow depth must be 110..300 cm')
     assert(d.service_width_m==nil or(finite(d.service_width_m)and d.service_width_m>=4 and d.service_width_m<=10),'Service width must be 4..10 metres')
@@ -405,12 +406,13 @@ function G.path_mesh(points,radius)
     return m
 end
 -- Static cable geometry: four-sided dark rope, batched into one component.
-function G.cable_mesh(route,supports,loads,definition)
+function G.cable_mesh(route,supports,loads,definition,checkpoint,range)
     local m={vertices={},normals={},uv={},triangles={}}
     local function segment(a,b,radius,color)
         radius=radius or 1.4;color=color or 7.5/8
         local dx,dy=b.x-a.x,b.y-a.y;local h=math.max(1,math.sqrt(dx*dx+dy*dy));local nx,ny=-dy/h,dx/h
         local base=#m.vertices
+        if checkpoint and base%64==0 then checkpoint()end
         for _,p in ipairs({a,b}) do
             for i=0,3 do local u,v=math.cos(i*math.pi/2),math.sin(i*math.pi/2)
                 m.vertices[#m.vertices+1]={X=p.x+nx*u*radius,Y=p.y+ny*u*radius,Z=p.z+v*radius}
@@ -422,6 +424,7 @@ function G.cable_mesh(route,supports,loads,definition)
         end
     end
     for _,lane in ipairs({-160,160}) do
+      if not range or(range.static and lane>0)or(not range.static and lane<0)then
         local distances={}
         for i=1,math.ceil(route.length/400)do distances[#distances+1]=math.min(route.length,i*400)end
         for _,s in ipairs(supports)do
@@ -435,12 +438,16 @@ function G.cable_mesh(route,supports,loads,definition)
             for _,d in ipairs({load.lo,load.distance,load.hi})do distances[#distances+1]=d end
         end end end
         table.sort(distances)
-        local previous=G.flex_cable(route,supports,0,lane,loads);local last=0
-        for _,d in ipairs(distances)do if d>last+.01 then
+        local low,high=range and range.low or 0,range and range.high or route.length
+        distances[#distances+1]=high;table.sort(distances)
+        local previous=G.flex_cable(route,supports,low,lane,loads);local last=low
+        for _,d in ipairs(distances)do if d>last+.01 and d<=high+.001 then
             local p=G.flex_cable(route,supports,d,lane,loads);segment(previous,p);previous=p;last=d
         end
         end
     end
+      end
+    if not range or range.static then
     for j,center in ipairs({supports[1],supports[#supports]}) do
         local previous
         -- Only the used half of the inclined bullwheel carries cable.
@@ -457,6 +464,7 @@ function G.cable_mesh(route,supports,loads,definition)
                 if previous then segment(previous,q,3.5,.5/8)end;previous=q
             end
         end
+    end
     end
     return m
 end

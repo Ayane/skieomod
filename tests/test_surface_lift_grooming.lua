@@ -83,3 +83,19 @@ assert(x==30000 and y==0 and radius==250,'Last bounded blade footprint was dropp
 reply=false;assert(not pcall(grade,state,{{x=0,y=0}}),'A stale native success validated a failed call')
 io.open,os.remove,package.loadlib=original_open,original_remove,original_load
 print('Native snowcat maintenance: connected ascent, movement, snow and pause guards, complete bounded blade packets and stale-result rejection OK')
+-- A saved skier may still reference the duplicate trail during migration.
+-- Never delete its route or send its held snowcat home before clearance.
+local retired={['7']={owner='old',x=1,y=2,name='owned'}}
+local old_trail={TrailId=7,bManuallyDisabled=true,DisplayName={ToString=function()return'owned'end},Curve={StartPoint={X=1,Y=2}}}
+local occupied=true;local canceled,removed=0,0
+local native_guests={IsValid=function()return true end,GuestsHot={ForEach=function(_,fn)if occupied then fn(1,{get=function()return{CurrentTrailId=7}end})end end}}
+local native_groom={IsValid=function()return true end,GetFullName=function()return'GroomingSubsystem'end,GetWorld=function()return world end,
+ HasActiveGroomingEvent=function()return true end,OnTrailUnregistered=function(_,id)assert(id==7);canceled=canceled+1 end}
+FindAllOf=function(name)return name=='GroomingSubsystem'and{native_groom}or{}end
+local migration={api={mod_state=function()return{grooming_retired=retired}end},guests=native_guests,groom_hidden={},evacuation_records={saved={trail=7}},
+ groom_trails={RegisteredTrails={ForEach=function(_,fn)fn(1,{get=function()return old_trail end})end},
+ SetTrailGroomed=function()end,UnregisterTrail=function(_,id)assert(id==7);removed=removed+1 end}}
+Groom.finalize(migration);assert(removed==0 and canceled==0 and retired['7'])
+occupied=false;Groom.finalize(migration);assert(removed==0,'A saved route disappeared before native guests finished restoring')
+migration.evacuation_records={};Groom.finalize(migration);assert(removed==1 and canceled==1 and not retired['7'])
+print('Shared corridor save migration: saved route and snowcat remain held until clearance OK')

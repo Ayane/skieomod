@@ -3313,8 +3313,14 @@ __declspec(dllexport) int skieo_sample_snow(void *lua_state)
     if (!sibling_path(path,MAX_PATH,L"native_entity_snow.job") ||
         !sibling_path(output,MAX_PATH,L"native_entity_snow.bin")) return 0;
     FILE *f=_wfopen(path,L"rb"); if(!f)return 0;
-    struct {char magic[4];uint32_t version;uint64_t owner,cls;double x,y;} job={0};
-    size_t n=fread(&job,1,sizeof(job),f);int extra=fgetc(f);fclose(f);
+    struct {char magic[4];uint32_t version;uint64_t owner,cls;} job={0};
+    uint8_t payload[32+64*16]={0};
+    size_t n=fread(payload,1,sizeof(payload),f);int extra=fgetc(f);fclose(f);
+    if(n>=sizeof(job))memcpy(&job,payload,sizeof(job));
+    uint32_t samples_count=1,reserved=0;
+    if(job.version==2 && n>=32){memcpy(&samples_count,payload+24,4);memcpy(&reserved,payload+28,4);}
+    int packet_ok=(job.version==1 && n==40) || (job.version==2 && samples_count>=1 && samples_count<=64 && !reserved && n==32+samples_count*16);
+    if(!packet_ok)samples_count=1;
     uint8_t *cache=(uint8_t *)(uintptr_t)job.owner;
     uint8_t *exe=(uint8_t *)GetModuleHandleW(L"skieogame.exe");
     static const uint8_t validity[]={0x0f,0xb6,0x81,0xa5,0x01,0,0,0x41,0x88,0};
@@ -3356,25 +3362,29 @@ __declspec(dllexport) int skieo_sample_snow(void *lua_state)
         }
     }
     uint64_t cls=0;
-    float result[4]={0,0,0,0};
-    if(n!=sizeof(job)||extra!=EOF||memcmp(job.magic,"SKSN",4)||job.version!=1
-        ||!exe||!job.owner||!job.cls||!isfinite(job.x)||!isfinite(job.y)
+    float result[64][4]={{0}};
+    if(!packet_ok||extra!=EOF||memcmp(job.magic,"SKSN",4)
+        ||!exe||!job.owner||!job.cls
         ||!readable_range(cache,0x2a0)||!stride) goto done;
     memcpy(&cls,cache+0x10,8);if(cls!=job.cls||!cache[0x1a5])goto done;
     double bounds[4];memcpy(bounds,cache+0xe8,32);
     int32_t tiles;memcpy(&tiles,cache+0x10c,4);
     if(tiles<1||tiles>128||!isfinite(bounds[0])||!isfinite(bounds[1])
         ||!isfinite(bounds[2])||!isfinite(bounds[3])||bounds[2]<=bounds[0]||bounds[3]<=bounds[1])goto done;
-    double gx=(job.x-bounds[0])/(bounds[2]-bounds[0])*tiles*64;
-    double gy=(job.y-bounds[1])/(bounds[3]-bounds[1])*tiles*64;
-    if(gx<0||gy<0||gx>=tiles*64||gy>=tiles*64)goto done;
-    int32_t ix=(int32_t)floor(gx),iy=(int32_t)floor(gy),tx=ix/64,ty=iy/64;
     uint8_t *entries=NULL;int32_t count,capacity,bits;
     memcpy(&entries,cache+0x48,8);memcpy(&count,cache+0x50,4);memcpy(&capacity,cache+0x54,4);memcpy(&bits,cache+0x70,4);
     uint32_t *allocated=NULL;memcpy(&allocated,cache+0x68,8);
     if(!allocated)allocated=(uint32_t *)(cache+0x58);
     if(count<0||count>2048||capacity<count||capacity>4096||bits<count||bits>4096
         ||!readable_range(entries,(size_t)count*stride)||!readable_range(allocated,((size_t)bits+31)/32*4))goto done;
+    for(uint32_t sample_index=0;sample_index<samples_count;++sample_index){
+    double x,y;size_t offset=(job.version==1?24:32)+(size_t)sample_index*16;
+    memcpy(&x,payload+offset,8);memcpy(&y,payload+offset+8,8);
+    if(!isfinite(x)||!isfinite(y))continue;
+    double gx=(x-bounds[0])/(bounds[2]-bounds[0])*tiles*64;
+    double gy=(y-bounds[1])/(bounds[3]-bounds[1])*tiles*64;
+    if(gx<0||gy<0||gx>=tiles*64||gy>=tiles*64)continue;
+    int32_t ix=(int32_t)floor(gx),iy=(int32_t)floor(gy),tx=ix/64,ty=iy/64;
     for(int32_t i=0;i<count;++i){
         if(!(allocated[i/32]&(1U<<(i%32))))continue;
         uint8_t *entry=entries+(size_t)i*stride;int32_t key[2],length;float *samples=NULL;
@@ -3383,11 +3393,12 @@ __declspec(dllexport) int skieo_sample_snow(void *lua_state)
         if(length!=4096||!entry[ready]||!readable_range(samples,4096*32))break;
         float *pixel=(float *)((uint8_t *)samples+((iy%64)*64+ix%64)*32);
         if(isfinite(pixel[0])&&isfinite(pixel[1])&&pixel[0]>=0&&pixel[1]>=0&&pixel[0]+pixel[1]<10000){
-            result[0]=1;result[1]=pixel[0];result[2]=pixel[1];
-            result[3]=(float)((bounds[2]-bounds[0])/(tiles*64));
+            result[sample_index][0]=1;result[sample_index][1]=pixel[0];result[sample_index][2]=pixel[1];
+            result[sample_index][3]=(float)((bounds[2]-bounds[0])/(tiles*64));
         }
         break;
     }
+    }
  done:
-    f=_wfopen(output,L"wb");if(f){fwrite(result,1,sizeof(result),f);fclose(f);}return 0;
+    f=_wfopen(output,L"wb");if(f){fwrite(result,16,samples_count,f);fclose(f);}return 0;
 }

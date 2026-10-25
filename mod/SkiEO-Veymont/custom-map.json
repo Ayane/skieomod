@@ -7,7 +7,7 @@
   "id": "community.veymont",
   "metadata": {
     "name": "Veymont",
-    "version": "0.8.1",
+    "version": "0.9.0",
     "authors": [
       "Albatar (Élie Millon)"
     ],
@@ -23,11 +23,11 @@
       "Nature",
       "Sandbox"
     ],
-    "license": "IGN Open Licence v2.0 data and OpenStreetMap ODbL 1.0",
+    "license": "IGN and Météo-France Open Licence 2.0 data; OpenStreetMap ODbL 1.0",
     "localizations": {
       "fr": {
         "description": "Créez votre échappée alpine au cœur du Vercors. De Gresse-en-Vercors au Grand Veymont et au Mont Aiguille, explorez les forêts enneigées et les grandes prairies, développez une station de 20 pistes et neuf remontées, et guettez les renards discrets qui se faufilent entre les arbres.",
-        "license": "Données IGN Licence Ouverte v2.0 et OpenStreetMap ODbL 1.0"
+        "license": "Données IGN et Météo-France Licence Ouverte 2.0 ; OpenStreetMap ODbL 1.0"
       }
     }
   },
@@ -427,7 +427,10 @@
       "Scripts/veymont_data.lua",
       "Scripts/veymont_staff.lua",
       "Vegetation/forest.skxy",
-      "Scripts/furnishings.lua"
+      "Scripts/furnishings.lua",
+      "Scripts/climate.lua",
+      "Data/climate.json",
+      "Scripts/snowmaking.lua"
     ]
   },
   "script": {
@@ -661,7 +664,8 @@
           "supports_surveyed": false,
           "ascent_side": "right",
           "service_width_m": 5,
-          "service_offset_m": 3.5
+          "service_offset_m": 3.5,
+          "service_group": "Bessards"
         },
         {
           "name": "Bessards 2",
@@ -689,7 +693,8 @@
           "supports_surveyed": false,
           "ascent_side": "left",
           "service_width_m": 5,
-          "service_offset_m": 3.5
+          "service_offset_m": 3.5,
+          "service_group": "Bessards"
         },
         {
           "name": "Blavet",
@@ -932,7 +937,8 @@
           "supports_surveyed": true,
           "ascent_side": "right",
           "service_width_m": 5,
-          "service_offset_m": 3.5
+          "service_offset_m": 3.5,
+          "service_group": "Pras"
         },
         {
           "name": "Pras 2",
@@ -1005,7 +1011,8 @@
           "supports_surveyed": true,
           "ascent_side": "left",
           "service_width_m": 5,
-          "service_offset_m": 3.5
+          "service_offset_m": 3.5,
+          "service_group": "Pras"
         },
         {
           "name": "Pré Levé",

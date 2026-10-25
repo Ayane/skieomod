@@ -20,6 +20,9 @@ local Groom=require('surface_lift_grooming')
 local Refresh=require('surface_lift_refresh')
 local Riders=require('surface_lift_riders')
 local Evac=require('surface_lift_evacuation')
+local Service=require('surface_lift_service')
+local Drain=require('surface_lift_drain')
+local CableJobs=require('surface_lift_cable_jobs')
 local Lifts={}
 local adapted={}
 local rendered={}
@@ -32,7 +35,8 @@ end
 function Lifts.is_adapted(lift) return lift and adapted[lift:GetAddress()]~=nil end
 function Lifts.closed_reason(lift)
     local i=lift and adapted[lift:GetAddress()]
-    return i and ((i.evacuation_waiting or 0)>0 and 'Évacuation de la voie de service en cours'
+    return i and (i.draining and 'Winding down · returning hangers'
+        or (i.evacuation_waiting or 0)>0 and 'Évacuation de la voie de service en cours'
         or i.snow_blocked and (i.snow_reason=='excess'and 'Excès de neige sur la ligne de montée — damage nécessaire' or 'Manque de neige sur la ligne de montée')
         or i.requested_speed==0 and 'Arrêt manuel') or nil
 end
@@ -56,9 +60,10 @@ local function snow_status(state,item,blocked,reason)
     if item.snow_blocked==blocked and item.snow_reason==reason then return end
     item.snow_blocked=blocked
     item.snow_reason=reason
+    if blocked then Drain.cancel(item)end
     -- Native Off winds down while carrying existing riders. A bare towing
     -- line requires an immediate mechanical stop, including those riders.
-    item.lift.OperatingSpeed=(blocked or item.requested_speed==0 or(item.evacuation_waiting or 0)>0) and 0 or item.definition.speed_mps*100
+    item.lift.OperatingSpeed=(blocked or (item.requested_speed==0 and not item.draining) or(item.evacuation_waiting or 0)>0) and 0 or item.definition.speed_mps*100
     if blocked then set_speed(item,0)
     elseif item.requested_speed>0 then set_speed(item,item.requested_speed) end
     state.api:mod_state().speed_requests[item.id]=item.requested_speed
@@ -91,7 +96,12 @@ local function hooks()
             persist_cycles(item.state);item.state.api:_sync_state();break
         end end
     end)
-    for _,name in ipairs({'IsLiftRunning','IsLiftAvailableForSkiing','IsLiftAvailableForTransportation','IsLiftAvailableForHomeboundTransport','IsOpenForBusiness'}) do
+    hook('surface_lifts.snow.IsLiftRunning','/Script/SkiResortSimulator.LiftActor:IsLiftRunning','post',function(context)
+        local item=adapted[context:get():GetAddress()]
+        if item and item.draining and not item.snow_blocked then return true end
+        if Lifts.closed_reason(context:get())then return false end
+    end)
+    for _,name in ipairs({'IsLiftAvailableForSkiing','IsLiftAvailableForTransportation','IsLiftAvailableForHomeboundTransport','IsOpenForBusiness'}) do
         hook('surface_lifts.snow.'..name,'/Script/SkiResortSimulator.LiftActor:'..name,'post',function(context)
             if Lifts.closed_reason(context:get()) then return false end
         end)
@@ -105,8 +115,9 @@ local function hooks()
         local item=adapted[context:get():GetAddress()]
         if item and not item.setting_speed then
             item.requested_speed=setting:get()
+            if item.requested_speed==0 then Drain.request(item)else Drain.cancel(item)end
             item.state.api:mod_state().speed_requests[item.id]=item.requested_speed
-            item.lift.OperatingSpeed=(item.snow_blocked or item.requested_speed==0 or(item.evacuation_waiting or 0)>0) and 0 or item.definition.speed_mps*100
+            item.lift.OperatingSpeed=(item.snow_blocked or item.requested_speed==0 and not item.draining or(item.evacuation_waiting or 0)>0) and 0 or item.definition.speed_mps*100
             if item.snow_blocked and item.requested_speed~=0 then set_speed(item,0) end
         end
     end)
@@ -176,6 +187,11 @@ local function transport(state,item,rebuild)
     local a=item.lift
     local job=item.snow_pending or Refresh.create(item)
     item.snow_pending=job
+    local queries={}
+    for i=job.index,math.min(#job.queries,job.index+(rebuild and #job.queries or 8)-1)do
+        local p=job.queries[i].p;queries[#queries+1]={x=p.X,y=p.Y}
+    end
+    Entities.prefetch_snow(state.api,queries)
     if not Refresh.step(job,function(x,y)return surface(state.api,x,y)end,rebuild and #job.queries or 8)then return end
     for _,group in ipairs(job.groups)do
         local s=a[group.name];local old=item.transport_groups and item.transport_groups[group.name]
@@ -195,7 +211,18 @@ local function transport(state,item,rebuild)
     Native.set(a,Cycle.boarding(item.definition),a.CableSpline:GetDistanceAlongSplineAtSplinePoint(#item.route.points-1))
     local key=a.CableSpline:FindInputKeyClosestToWorldLocation(job.marker)
     item.return_entry=a.CableSpline:GetDistanceAlongSplineAtSplineInputKey(key)
-    if rebuild then a:RebuildChairMeshes(item.phase or 0) end
+    if rebuild then
+        -- Native Off may produce an empty carrier ISM during save loading.
+        -- Build the virtual slots at nominal speed before restoring Off;
+        -- no simulation tick or new boarding runs inside this synchronous step.
+        local setting=a:GetSpeedSetting();local operating=a.OperatingSpeed
+        a.OperatingSpeed=item.definition.speed_mps*100
+        if setting==0 then set_speed(item,2)end
+        local ok,message=pcall(function()a:RebuildChairMeshes(item.phase or 0)end)
+        if setting==0 then set_speed(item,0)end
+        a.OperatingSpeed=operating
+        assert(ok,message)
+    end
 end
 local function visual(state,item)
     local a=Mesh.actor();item.visual=a
@@ -270,7 +297,18 @@ local function visual(state,item)
     supports.wheels=Wheels.supports(route,supports,G,item.definition.kind)
     for _,w in ipairs(supports.wheels)do Wheels.add(item,state,w.base,w.radius,w.sign,nil,Models.support(item,w.support-1))end
     Mesh.component(a,Station.mounts(route,supports,G),item.bank.material,{0,0,0})
-    item.cable_component=Mesh.component(a,G.cable_mesh(route,supports,nil,item.definition),item.bank.material,{0,0,0})
+    local fixed=item.definition.kind=='fixed_platter'
+    item.cable_component=Mesh.component(a,G.cable_mesh(route,supports,nil,item.definition,nil,fixed and{static=true}or nil),item.bank.material,{0,0,0})
+    if fixed then
+        item.cable_sections={}
+        for index=1,#supports-1 do
+            local range={low=supports[index].distance,high=supports[index+1].distance}
+            local m=G.cable_mesh(route,supports,nil,item.definition,nil,range)
+            item.cable_component:CreateMeshSection(index,m.vertices,m.triangles,m.normals,m.uv,{},{},false)
+            item.cable_component:SetMaterial(index,item.bank.material)
+            item.cable_sections[#item.cable_sections+1]={section=index,range=range,cable_key=''}
+        end
+    end
 end
 local function restore(item,removed)
     if item.disposed then return end;item.disposed=true
@@ -302,6 +340,8 @@ local function attach(state,a,d)
     for _,key in ipairs({'CableSpline','StartLoopSpline','EndLoopSpline'}) do item.splines[key]=snapshot_spline(a[key]) end
     item.markers,item.phase=Native.prepare(a)
     item.route=G.route(d,Terrain.surface_height_at)
+    item.service=state.services[d]
+    if item.service then item.service.members[#item.service.members+1]=item end
     item.supports=G.supports(item.route,d.pylons,d.kind,d)
     if d.kind=='fixed_chair' then
         Chair.prepare(item,set_spline,Native)
@@ -311,7 +351,6 @@ local function attach(state,a,d)
     a.bAllowDownloading=false;a.MinClearance=0;a.HardClearance=0
     a.MinOperatingSnowDepthCm=3
     item.requested_speed=state.api:mod_state().speed_requests[item.id] or a:GetSpeedSetting()
-    if item.requested_speed==0 then a.OperatingSpeed=0 end
     adapted[a:GetAddress()]=item
     a.ChairMesh=socket_mesh(a);a.ChairISM:SetStaticMesh(a.ChairMesh)
     transport(state,item,true)
@@ -328,12 +367,21 @@ local function attach(state,a,d)
     item.audio=Audio.create(item)
     Groom.attach(state,item)
     Evac.attach(state,item)
+    Drain.restore(item)
+    if item.requested_speed==0 and not item.draining then a.OperatingSpeed=0 end
     state.bindings[d.name]=item.id
     return item
 end
 local pool=Models.perch
 local function place_perch(instance,kind,t,length)
     local fixed=kind=='fixed_platter'
+    local previous=instance.last_transform
+    if instance.visible and instance.kind==kind and previous and instance.last_length==length then
+        local a,b=previous.Translation,t.Translation;local q,r=previous.Rotation,t.Rotation
+        if math.abs(a.X-b.X)<.01 and math.abs(a.Y-b.Y)<.01 and math.abs(a.Z-b.Z)<.01
+            and math.abs(q.X-r.X)+math.abs(q.Y-r.Y)+math.abs(q.Z-r.Z)+math.abs(q.W-r.W)<1e-6 then return end
+    end
+    instance.last_transform=t;instance.last_length=length
     if not instance.visible or instance.kind~=kind then
         instance.component:SetVisibility(fixed,false)
         for _,name in ipairs({'upper','shaft','lower'})do instance[name]:SetVisibility(not fixed,false)end
@@ -394,6 +442,12 @@ local function update(state)
         state.snow_cursor=(state.snow_cursor or 0)%#state.items+1
         local item=state.items[state.snow_cursor]
         if not item.disposed and current(item.lift) and item.definition.kind~='fixed_chair' then
+            local queries={}
+            local first=item.snow_scan and item.snow_scan.index or 1
+            for i=first,math.min(#item.route.points,first+15)do
+                local p=item.route.points[i];queries[#queries+1]={x=p.x-p.nx*160,y=p.y-p.ny*160}
+            end
+            Entities.prefetch_snow(state.api,queries)
             local status,minimum,_,reason,maximum=Snow.scan(item,function(x,y) return Entities.environment(state.api,x,y,true) end,16)
             item.minimum_snow=minimum
             item.maximum_snow=maximum
@@ -426,6 +480,8 @@ local function update(state)
         end
     end
     if refresh_item then transport(state,refresh_item,false)end
+    Drain.update(state,false)
+    local wheel_budget={remaining=8}
     -- All wheel angles use the native travelled phase, including slow speed,
     -- accelerated time, manual stops and pause. Snow spline rebuilds are filtered.
     for _,item in ipairs(state.items)do if not item.disposed and current(item.lift)then
@@ -435,7 +491,7 @@ local function update(state)
             local key=spline:FindInputKeyClosestToWorldLocation(t.Translation)
             item.native_phase=spline:GetDistanceAlongSplineAtSplineInputKey(key)
             item.native_length=spline:GetSplineLength()
-            Wheels.update(item,item.native_phase,item.native_length,env.seconds,item.lift:GetEffectiveOperatingSpeed()*math.max(1,env.rate or 1),env.paused,camera)
+            Wheels.update(item,item.native_phase,item.native_length,env.seconds,item.lift:GetEffectiveOperatingSpeed()*math.max(1,env.rate or 1),env.paused,camera,wheel_budget)
         end
     end end
     Evac.update(state,passengers,env)
@@ -444,6 +500,7 @@ local function update(state)
     for _,item in ipairs(state.items)do if item.definition.kind~='fixed_chair' and not item.disposed and item.native_phase then
         Riders.bind(item,passengers[item.id]or{})
     end end
+    Drain.update(state,true)
     local visible={}
     local stocks={}
     if camera then
@@ -553,15 +610,7 @@ local function update(state)
         local anchor=G.flex_cable(v.item.route,v.item.supports,v.d,v.lane,v.item.loads)
         place_perch(v.instance,'fixed_platter',G.empty_perch(anchor,v.yaw),300)
     end
-    for _,item in ipairs(state.items)do if not item.disposed and item.loads then
-        local key={};for _,p in ipairs(item.loads)do key[#key+1]=math.floor(p.distance)..':'..math.floor(p.sag)end
-        key=table.concat(key,';')
-        if key~=item.cable_key and (not item.cable_updated or env.seconds-item.cable_updated>.1)then
-            local m=G.cable_mesh(item.route,item.supports,item.loads)
-            item.cable_component:CreateMeshSection(0,m.vertices,m.triangles,m.normals,m.uv,{},{},false)
-            item.cable_key=key;item.cable_updated=env.seconds
-        end
-    end end
+    CableJobs.step(state,env.seconds)
     table.sort(stocks,function(a,b)return a.distance<b.distance end)
     for i=1,math.min(64,#stocks)do local p=stocks[i].p
         n=n+1;local instance=pool(state,n,stocks[i].item.bank)
@@ -595,9 +644,11 @@ function Lifts.configure(api,definitions,assets)
     assert(state.registry,'Native lift registry unavailable')
     api:mod_state().speed_requests=api:mod_state().speed_requests or {}
     api:mod_state().detachable_cycles=api:mod_state().detachable_cycles or {}
+    state.services=Service.prepare(definitions,Terrain.surface_height_at)
     hooks()
     local function cleanup()
         if state.stopped then return end;state.stopped=true
+        Drain.publish(state,true)
         Evac.dispose(state)
         for _,item in ipairs(state.items) do restore(item) end
         for _,p in ipairs(state.pool) do destroy(p.actor) end
@@ -636,6 +687,7 @@ function Lifts.configure(api,definitions,assets)
                 end
             end
         end
+        Groom.finalize(state)
         Native.visuals(state.items)
         if state.groom_hidden then Terrain.rebuild_trail_visuals(true)end
         api:mod_state().bindings=state.bindings
@@ -679,6 +731,7 @@ function Lifts.configure(api,definitions,assets)
                 out[#out].grooming_stamps=item.groom_stamps
                 out[#out].evacuation_waiting=item.evacuation_waiting or 0
                 out[#out].evacuated=item.evacuated or 0
+                out[#out].draining=item.draining or false
                 out[#out].requested_speed=item.requested_speed
                 out[#out].ascent_side=item.definition.ascent_side or 'right'
                 out[#out].moving_wheels=#(item.wheels or{})

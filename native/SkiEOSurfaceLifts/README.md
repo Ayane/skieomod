@@ -82,3 +82,31 @@ For registered service/escape trails they also zero the native lateral lane
 offset, whose use is anchored by the complete reviewed position helper. Native
 snowcats follow the narrow corridor centre rather than driving through pylons.
 An empty job clears this registry on disposal; other jobs forward unchanged.
+
+Normal detachable wind-down (loader 1.29.0) also drains empty retained hangers.
+`drain.h` hooks the complete reviewed `GetRunState` (RVA `0x4fbf680`, 0x24a
+bytes) and `GetEffectiveOperatingSpeed` (`0x4fc3f40`, 0xd6 bytes). Both full
+FNV-1a hashes must match before installing either hook. `SKDR` v1 contains a
+fixed 16-entry registry of validated lift/class pointers and slow speeds.
+Only native WindingDown/Stopped states can be extended. Event-disabled states,
+zero OperatingSpeed and nonregistered installations retain native results.
+Boarding counts and guest arrays are never fabricated. Lua clears the registry
+on cleanup and releases the drain when the last hanger reaches stock, including
+its lower guide rail. Manual repair and event stops cancel the drain.
+
+Loaded uphill cable spans now build as pure-Lua coroutines in short batches,
+with a shared 1.5 ms frame budget and at most one atomic span publication per
+frame. Static return ropes and station arcs remain separate. Each job
+uses a fixed load snapshot. Snow transport profiles prefetch CPU cache samples
+in `SKSN` v2 batches (up to 64 points), retaining all reviewed layout, sparse
+allocation, readiness, pointer and bounds guards; the v1 reader remains supported.
+
+`riders.h` returns a coherent, read-only snapshot of the current surface-lift
+passengers (`SKRD` v1). It requires the installed visual bridge and reviewed
+evacuation layout, validates owner/class, matching hot/cold counts, capacities
+and complete readable ranges, and selects only native RidingLift guests on
+registered surface lifts. Each 72-byte row retains native GUIDs, array index,
+discipline, full palette index and current position. Reflected field types and
+offsets are checked once before use. Lua validates the reply nonce and size,
+reuses passenger records, and never retains remote array references across
+native compaction. The operation changes no guest or boarding state.

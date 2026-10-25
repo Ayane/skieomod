@@ -3,9 +3,9 @@
   "version": 1,
   "reference_build": "26178224",
   "reference_executable_sha256": "89e207dfc37b94be6f439e4590f4140b711a369bb1e85bb7d14212b06d98e567",
-  "native_helper_sha256": "236effa74de9c4443abca605c87a60f081b9b9795b459834e06120526b5768b2",
+  "native_helper_sha256": "7ca596157c5dcd989f696514a917ee5170f5eb33685133c4e1cf819eed6c621b",
   "native_sources": {
-    "native/SkiEONativeTerrain/native_terrain.c": "258c2eaf40a7e1deb7d2e83fdabf7fcc1e4434b2bb0779bc4fb6f155e2576eb7",
+    "native/SkiEONativeTerrain/native_terrain.c": "fe47ecfc4a0cce438d4a7c8da9f381e9e96efb096f103f981cb6ac4241eec070",
     "native/SkiEONativeTerrain/navigation_layout.h": "ae2ae1c9daf46e17a6deb9a401ade531b06709cd88d92bd76952ec915b2cd1d6",
     "native/SkiEONativeTerrain/render_mapping_layout.h": "5cf8d6da07c19a575f2d6a93c54156f4f0af3e6a1a8d4f0e04e7fc654f112ff9",
     "native/SkiEOTrailRatings/trail_ratings.c": "c4d23bbaad05bf966ec018e7ed3204fa683683ea1c2de8ae1e85d5ebb31796b7",
@@ -42,11 +42,13 @@
     "native/SkiEOSurfaceLifts/track_policy.h": "5644c7a088facde246deb9badc5d45847e358a6ea81dc6f7a8f7d1d497e5188c",
     "native/SkiEOSurfaceLifts/build.sh": "58705eccbb11c17a646fda361e8cefc3a2c7dfd2e727146132dedb07194cc2c1",
     "native/SkiEOSurfaceLifts/reviewed_build.h": "690342c3c151b26b007c5fc1c88f044613bc379bde59c30c5c1bc0aee913cb18",
-    "native/SkiEOSurfaceLifts/README.md": "d71d53183738734c6312fbdd886158df7ccedf230e34caa5bbadf66326b63604",
-    "native/SkiEOSurfaceLifts/surface_lifts.c": "d61055cfaabcc0cc87bc09d0d4be0ca234c801fa5768c141b2f42062b63c0854",
+    "native/SkiEOSurfaceLifts/README.md": "2751c2087dbeb89eaacae473d0382b87cc01c70c0ceb371bb9a8bd82f2218d10",
+    "native/SkiEOSurfaceLifts/surface_lifts.c": "81970c08c6d3654598e93a89ea4273db38b0ea1d4b715df85a35b3e44a64833d",
     "native/SkiEOSurfaceLifts/contact_read.h": "6f09d7cc435aa2be0ea86774f8c8a8072834edea962f54a33733f497df38449f",
     "native/SkiEOSurfaceLifts/snow_grade.h": "69f960e66ba30734749ab17578d56e3f28ade9bc35111d9388422f48596e7352",
-    "native/SkiEOSurfaceLifts/evacuation.h": "175f72189078824776511b47a65e400fafc4c74949eaf581afe266e4f54a767c"
+    "native/SkiEOSurfaceLifts/evacuation.h": "175f72189078824776511b47a65e400fafc4c74949eaf581afe266e4f54a767c",
+    "native/SkiEOSurfaceLifts/drain.h": "42d070dd6fc596c4039f32c6152ee0cbf8c2d8ddf22a7104452b9a0aaf2ae37c",
+    "native/SkiEOSurfaceLifts/riders.h": "494c6a0f953efbb0203a9ec79213005272e7a5f172f95548a5d7791cc29a94ab"
   },
   "guards": [
     {
@@ -1006,6 +1008,20 @@
       "rva": "0x52f2c50",
       "mode": "rva",
       "bytes": "488bc4488958104889781855488d68a14881ece00000004c8b49080f57db440f"
+    },
+    {
+      "id": "surface_lifts.wind_down.state",
+      "rva": "0x4fbf680",
+      "bytes": "40534883ec2080b9d905000000488bd97408b0034883c4205bc380b9da050000",
+      "mode": "rva",
+      "note": "Full-function FNV-1a guards in native/SkiEOSurfaceLifts/drain.h; native winding-down only, no fabricated riders."
+    },
+    {
+      "id": "surface_lifts.wind_down.speed",
+      "rva": "0x4fc3f40",
+      "bytes": "40534883ec2080b97404000000488bd948897c2430751a488b81380400004885",
+      "mode": "rva",
+      "note": "Full-function FNV-1a guards in native/SkiEOSurfaceLifts/drain.h; native winding-down only, no fabricated riders."
     }
   ],
   "classes": {
@@ -1353,18 +1369,19 @@
     },
     {
       "id": "community.veymont",
-      "version": "0.8.1",
-      "archive": "mod/SkiEO-Veymont/bin/community.veymont-0.8.1.skieomap",
+      "version": "0.9.0",
+      "archive": "mod/SkiEO-Veymont/bin/community.veymont-0.9.0.skieomap",
       "expected": {
         "buildings": 13,
         "decorations": 54,
         "lifts": 9,
-        "trails": 31,
+        "trails": 29,
         "hubs": 11,
         "staff": 22,
         "trees": 383500,
         "surface_lifts": 8,
-        "chairlift_models": 1
+        "chairlift_models": 1,
+        "snowblowers": 21
       },
       "expected_variants": {
         "GreenCircle": 8,
@@ -1403,6 +1420,6 @@
   ],
   "native_helpers": {
     "mod/SkiEO-CustomMaps/Scripts/skieo_trail_ratings.dll": "ac623e3e82ac9497c244366498f6894c77cca48f95600c919257d8786e5075a9",
-    "mod/SkiEO-CustomMaps/Scripts/skieo_surface_lifts.dll": "71a48b8c7ce610a3e5aa20f09ffc6e34d8ec10374cada1484fd85b0279cebdd7"
+    "mod/SkiEO-CustomMaps/Scripts/skieo_surface_lifts.dll": "7fbdd86c681163b46e81d7917d3eb88b49c5ec9f2bcf9d0379966cb1ad05ec1d"
   }
 }

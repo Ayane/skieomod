@@ -1,4 +1,4 @@
-# SkiEO Veymont 0.8.0
+# SkiEO Veymont 0.9.0
 
 Par **Albatar (Élie Millon)**, également auteur de Custom Map et de `skieomod`.
 Veymont, les renards et les téléskis sont distribués dans trois archives séparées.
@@ -28,6 +28,33 @@ skieomod build mod/SkiEO-Foxes --check-scripts
 skieomod build mod/SkiEO-SurfaceLifts --check-scripts
 skieomod build mod/SkiEO-Veymont --dependency mod/SkiEO-Foxes --dependency mod/SkiEO-SurfaceLifts --check-scripts
 ```
+
+## Climat et enneigement de culture
+
+La carte utilise un profil saisonnier propre à Gresse, sans neige ni température
+forcées en permanence. Les prévisions et les événements restent gérés par le jeu.
+[Data/climate.json](Data/climate.json) contient les statistiques 1991–2020 et leur
+provenance : neige fraîche observée à Gresse (1 220 m), températures minimales et
+maximales de Saint-Baudille (1 040 m), avec une correction explicite de −1,17 °C
+pour les 180 m de dénivelé. La couverture des observations et les empreintes des
+fichiers d'entrée sont conservées ; les jours manquants ne sont pas assimilés à
+une absence de neige. Les données Météo-France sont sous Licence Ouverte 2.0 :
+[données quotidiennes départementales](https://www.data.gouv.fr/datasets/donnees-climatologiques-de-base-quotidiennes).
+Les fréquences et l'intensité des précipitations sont adaptées au modèle météo du jeu.
+
+Un réseau de 21 canons natifs dessert les Bruyères (14) et les Faisans (7).
+Leur implantation est une couverture conçue pour la carte, pas un inventaire
+historique de la station. Ils disposent des commandes normales du jeu : activer
+une session avec leur bouton d'alimentation lorsque la température le permet.
+Les réglages initiaux sont −2 °C et 60 cm, avec le mode natif de contrôle activé.
+Leur placement, leurs réglages et les suppressions du joueur survivent aux
+sauvegardes. Une migration unique ajoute le réseau aux anciennes parties.
+
+Les deux Pras partagent une voie de service, tout comme les deux Bessards.
+Les dameuses attendent que les skieurs évacués des deux remontées aient libéré
+la voie. Les perches débrayables continuent à revenir à la gare aval pendant
+une fermeture normale, jusqu'au rangement complet, même sans skieur en ligne.
+Ces comportements nécessitent le chargeur 1.29.0.
 
 ## Remontées mécaniques
 

@@ -1,0 +1,103 @@
+{
+  "period": [
+    1991,
+    2020
+  ],
+  "reference_elevation_m": 1220,
+  "latitude": 44.899833,
+  "annual_fresh_snow_cm": 325.18,
+  "temperature_method": "(mean TN + mean TX) / 2 at ST-BAUDILLE (1040 m), minus 1.17 C",
+  "snow_method": "GRESSE (1220 m), monthly mean of observed HNEIGEF days, scaled to calendar month",
+  "source": "https://www.data.gouv.fr/datasets/donnees-climatologiques-de-base-quotidiennes",
+  "license": "Meteo-France, Licence Ouverte 2.0",
+  "inputs": {
+    "Q_38_previous-1950-2024_RR-T-Vent.csv.gz": "38e4247bde9df80b379c9d0c1df601340ccfa711c05d6e2d683e644a2f0c58f5",
+    "Q_38_previous-1950-2024_autres-parametres.csv.gz": "399f65a4008f5a0b77b29c7f9e5c7e6391769dbb873a6b536c90c09d8098df4e"
+  },
+  "months": [
+    {
+      "month": 1,
+      "temperature_c": -0.29,
+      "fresh_snow_cm": 77.2,
+      "snow_observed_days": 865,
+      "period_days": 930
+    },
+    {
+      "month": 2,
+      "temperature_c": 0.27,
+      "fresh_snow_cm": 63.57,
+      "snow_observed_days": 820,
+      "period_days": 848
+    },
+    {
+      "month": 3,
+      "temperature_c": 3.75,
+      "fresh_snow_cm": 38.88,
+      "snow_observed_days": 897,
+      "period_days": 930
+    },
+    {
+      "month": 4,
+      "temperature_c": 6.57,
+      "fresh_snow_cm": 27.8,
+      "snow_observed_days": 900,
+      "period_days": 900
+    },
+    {
+      "month": 5,
+      "temperature_c": 10.61,
+      "fresh_snow_cm": 2.87,
+      "snow_observed_days": 930,
+      "period_days": 930
+    },
+    {
+      "month": 6,
+      "temperature_c": 14.51,
+      "fresh_snow_cm": 0.0,
+      "snow_observed_days": 450,
+      "period_days": 900
+    },
+    {
+      "month": 7,
+      "temperature_c": 16.99,
+      "fresh_snow_cm": 0.0,
+      "snow_observed_days": 496,
+      "period_days": 930
+    },
+    {
+      "month": 8,
+      "temperature_c": 16.92,
+      "fresh_snow_cm": 0.0,
+      "snow_observed_days": 496,
+      "period_days": 930
+    },
+    {
+      "month": 9,
+      "temperature_c": 12.86,
+      "fresh_snow_cm": 0.81,
+      "snow_observed_days": 480,
+      "period_days": 900
+    },
+    {
+      "month": 10,
+      "temperature_c": 9.05,
+      "fresh_snow_cm": 6.23,
+      "snow_observed_days": 930,
+      "period_days": 930
+    },
+    {
+      "month": 11,
+      "temperature_c": 3.64,
+      "fresh_snow_cm": 44.14,
+      "snow_observed_days": 870,
+      "period_days": 900
+    },
+    {
+      "month": 12,
+      "temperature_c": 0.36,
+      "fresh_snow_cm": 63.68,
+      "snow_observed_days": 867,
+      "period_days": 930
+    }
+  ]
+}

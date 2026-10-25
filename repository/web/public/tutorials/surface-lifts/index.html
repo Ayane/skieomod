@@ -64,6 +64,7 @@
 <tr><td><code>return_station</code></td><td><code>floating</code>, <code>release</code> or <code>lattice</code>.</td></tr>
 <tr><td><code>ascent_side</code></td><td><code>left</code> or <code>right</code>, looking uphill from the lower terminal.</td></tr>
 <tr><td><code>max_snow_cm</code></td><td>Optional, 110–300 cm. Default: 150 for TKF, 250 for TKD.</td></tr>
+<tr><td><code>service_group</code></td><td>Loader 1.29.0+: same group name on exactly two parallel lifts shares one service trail and grooming job.</td></tr>
 <tr><td><code>service_width_m</code></td><td>Service width, 4–10 metres; default 5.</td></tr>
 <tr><td><code>service_offset_m</code></td><td>Offset towards the ascent side, 3–10 metres; default 3.5. Leave at least 1 m around the pylons.</td></tr>
 <tr><td><code>evacuation_routes</code></td><td>Optional downhill emergency paths, in world centimetres.</td></tr>
@@ -71,7 +72,9 @@
 <p>Keep the first line straight. With exactly <code>pylons + 2</code> route points, the interior points place the supports and turns above 5° receive bend supports. Otherwise the loader fits supports to the route and terrain. Inspect intentional bends in the game. One session supports at most sixteen configured installations.</p>
 </section>
 <section class="step" id="evacuation"><h2>Service corridors and stopped lifts</h2>
-<p>With <strong>loader 1.28.0 or newer</strong>, stopping a surface lift releases its passengers. They ski down its closed service corridor using the game's normal simulation. Snowcats wait before entering or continuing that corridor until the skiers have cleared it. New grooming requests also wait. Restarting waits for clearance; a manual stop remains off afterwards. Ordinary chairlifts retain their native behaviour.</p>
+<p>With <strong>loader 1.29.0 or newer</strong>, detachable lifts wind down by carrying existing passengers to the top, then running slowly until every hanger reaches the lower stock rail. New boarding is closed. Empty returns and save/reload are supported.</p>
+<p>Hard snow, event or maintenance stops release passengers onto native service descents. Snowcats and new grooming jobs wait until skiers clear the corridor. Ordinary chairlifts retain their native behaviour.</p>
+<p>For a double lift, add e.g. <code>"service_group": "Pras"</code> to <strong>both</strong> definitions. Exactly two lifts share one corridor midway between their axes, 2–5 m wide with at least 1 m clearance from each pylon row. They must run in the same direction, stay within 15 m and differ in length by less than 10%. Grooming and evacuation occupancy are shared; owned duplicates in existing saves retire when unoccupied. Service trails remain closed to ordinary downhill traffic.</p>
 <p>Add optional emergency exits to the lift definition without copying the mapmod:</p>
 <div class="command"><pre><code>"service_width_m": 5,
 "service_offset_m": 3.5,

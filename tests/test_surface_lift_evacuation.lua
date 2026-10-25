@@ -21,7 +21,7 @@ end
 local definition={name='test',route={{0,0,0},{0,20000,4000}},kind='fixed_platter',pylons=2,speed_mps=2,capacity_per_hour=600}
 local route=G.route(definition,function(_,y)return y*.2 end)
 local choices=R.build(route,definition,function(_,y)return y*.2 end);choices[1].trail=100
-local lift=object(50);lift.OperatingSpeed=200;lift.GetLiftId=function()return id(10)end;lift.GetEffectiveOperatingSpeed=function()return 0 end
+local lift=object(50);lift.OperatingSpeed=200;lift.GetLiftId=function()return id(10)end;lift.IsEventDisabled=function()return false end;lift.IsManualRepairActive=function()return false end;lift.IsLiftRunning=function(self)return not self.hard_stop end;lift.GetEffectiveOperatingSpeed=function()return 0 end
 local item={id='lift',lift=lift,definition=definition,route=route,groom_trail=100,requested_speed=0,evacuation_routes=choices}
 local saved={}
 local state={items={item},guests=guests,groom_trails=object(40),evacuation_records={},api={log=function()end,mod_state=function()return saved end}}
@@ -57,7 +57,7 @@ local guest=guests.Guests[1].GuestId
 E.release(state,item,{{index=0,guest=guest,key=key(guest),X=350,Y=10000,Z=2000}})
 assert(released==1 and item.evacuation_waiting==1 and #waits==1 and waits[1][1]==100)
 assert(state.evacuation_records[key(guest)]and guests.GuestsHot[1].ActivityState==4)
-assert(saved.evacuation_guests['100']=='ffffffff000000020000000300000004','Saved GUID was not compact and sign-safe')
+assert(saved.evacuation_guests['100|lift']=='ffffffff000000020000000300000004','Saved GUID was not compact and sign-safe')
 local env={paused=false,seconds=10}
 E.update(state,{},env);assert(item.evacuation_waiting==1 and lift.OperatingSpeed==0)
 -- Injury or another native activity must not release a snowcat while the
@@ -93,6 +93,13 @@ state.evacuation_records[key(guest)]={lift='lift',trail=100};state.evacuation_re
 guests.Guests[1]=nil;guests.Guests[2]=nil;guests.GuestsHot[1]=nil;guests.GuestsHot[2]=nil
 env.seconds=15.5;E.update(state,{},env);assert(item.evacuation_waiting==1)
 env.seconds=21;E.update(state,{},env);assert(item.evacuation_waiting==0 and not next(state.evacuation_records))
+-- Native event/maintenance stops can retain a positive configured speed.
+-- Mechanical running state, rather than that setting, must trigger release.
+guests.Guests[1]={GuestId=guest};guests.GuestsHot[1]={ActivityState=3,CurrentTrailId=0,WorldPosition={X=350,Y=10000,Z=2000}}
+item.requested_speed=1;item.draining=false;item.evacuation_routes={choices[1]}
+lift.hard_stop=true;lift.GetEffectiveOperatingSpeed=function()return 200 end
+local before=released;env.seconds=22;E.update(state,{lift={{guest=guest,index=0,key=key(guest),X=350,Y=10000,Z=2000}}},env)
+assert(released==before+1 and guests.GuestsHot[1].ActivityState==4,'Hard stop with positive speed failed to evacuate')
 E.dispose(state);assert(#waits[#waits]==0,'Disposed corridor policy remained active')
 io.open,os.remove,package.loadlib=open,remove,loadlib
 print('Surface evacuation: native release ordering, signed GUIDs, occupied/injured/pause gates, compaction, manual stop and save restoration grace OK')

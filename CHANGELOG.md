@@ -7,6 +7,27 @@ have their own package versions. Download the
 
 ## [Unreleased]
 
+## [1.29.0] - 2026-10-25
+
+- Share one native service trail, grooming job and evacuation gate between
+  parallel double lifts using `service_group`; merge owned duplicates safely
+  in existing saves. Veymont applies this to Pras and Bessards.
+- Keep detachable lifts winding down at slow speed until every retained hanger
+  reaches the lower stock rail, even after the last passenger exits. Preserve
+  this state in saves; snow, event and maintenance stops still evacuate skiers.
+- Give Veymont 0.9.0 its own seasonal native climate from open Météo-France
+  observations at Gresse (1,220 m) and nearby St-Baudille (1991–2020). Remove
+  permanent forced snowfall and reduce storm frequency and snowfall intensity.
+- Add 21 native snow guns along Bruyères and Faisans with 60 cm / −2 °C
+  control settings, including a
+  one-time migration for existing saves. Player changes and removals persist.
+- Spread loaded cable geometry over frames, batch native CPU snow samples,
+  snapshot passengers without per-skier Unreal wrappers, bound wheel transform
+  updates and cache compatibility reflection. Keep native simulation and current
+  passenger positions intact.
+- Document shared service corridors and normal detachable wind-down in the
+  editor's surface-lift tutorial and its downloadable examples.
+
 ## [1.28.0] - 2026-10-25
 
 - Narrow Veymont's surface-lift service corridors to 5 metres and move them

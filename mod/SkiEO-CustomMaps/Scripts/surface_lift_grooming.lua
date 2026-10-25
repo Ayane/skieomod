@@ -4,6 +4,7 @@
 local UE=require('UEHelpers')
 local G=require('surface_lift_geometry')
 local Routes=require('surface_lift_evacuation_routes')
+local Service=require('surface_lift_service')
 local Mesh=require('portable_mesh')
 local Groom={}
 local registered=false
@@ -54,11 +55,13 @@ function Groom.attach(state,item)
     state.groom_trails=trails
     local stored=state.api:mod_state();stored.grooming_trails=stored.grooming_trails or{}
     local id=stored.grooming_trails[item.id]
-    local name='Entretien de la montée · '..item.definition.name
+    local name='Entretien de la montée · '..(item.service and item.service.name or item.definition.name)
     local legacy='Entretien TK · '..item.id
-    local curves=Groom.curves(item.route,item.definition)
-    local width=Groom.dimensions(item.definition)
+    local route,definition=Service.geometry(item)
+    local curves=Groom.curves(route,definition)
+    local width=Groom.dimensions(definition)
     local found,update_geometry
+    local old_owned,old_geometry
     -- IDs come from the native save. A persisted ID alone is not ownership:
     -- a deleted trail's number may have been reused by a player's new piste.
     trails.RegisteredTrails:ForEach(function(_,v)
@@ -68,17 +71,21 @@ function Groom.attach(state,item)
         -- The old corridor was centred on the towing lane, 1.6 m from the
         -- pylons. Accept that owned geometry when upgrading an existing save.
         local previous=point(item.route.points[#item.route.points],160)
+        local old_service=point(item.route.points[#item.route.points],350)
         local same_start=(start.X-expected.X)^2+(start.Y-expected.Y)^2<100^2
             or(start.X-previous.X)^2+(start.Y-previous.Y)^2<100^2
+            or(start.X-old_service.X)^2+(start.Y-old_service.Y)^2<100^2
         local same_width=math.abs(v.Curve.CorridorWidth-width)<1 or math.abs(v.Curve.CorridorWidth-2000)<1 or math.abs(v.Curve.CorridorWidth-1000)<1 or math.abs(v.Curve.CorridorWidth-500)<1
         if (id and v.TrailId==id and same_start and same_width and v.bManuallyDisabled)
             or(not id and(text==name or text==legacy))then
+            old_owned=v.TrailId;old_geometry={owner=item.id,x=start.X,y=start.Y,name=text}
             found=v.TrailId
             update_geometry=math.abs(v.Curve.CorridorWidth-width)>=1
                 or(start.X-expected.X)^2+(start.Y-expected.Y)^2>=1
             if text==legacy then trails:SetTrailDisplayName(found,FText(name))end
         end
     end)
+    if item.service and item.service.trail then found=item.service.trail;update_geometry=false end
     if not found then
         found=trails:RegisterTrailFromCurve(curves[1]);assert(found and found>0,'Maintenance corridor rejected')
         local extra={};for i=2,#curves do extra[#extra+1]=curves[i]end
@@ -88,16 +95,49 @@ function Groom.attach(state,item)
         local extra={};for i=2,#curves do extra[#extra+1]=curves[i]end
         assert(trails:ReplaceTrailGeometry(found,curves[1],extra),'Maintenance corridor upgrade rejected')
     end
-    trails:SetTrailGroomed(found,true);trails:SetTrailDisabled(found,true)
+    trails:SetTrailDisplayName(found,FText(name));trails:SetTrailGroomed(found,true);trails:SetTrailDisabled(found,true)
     item.groom_trail=found;stored.grooming_trails[item.id]=found
+    if item.service then item.service.trail=found end
+    stored.grooming_retired=stored.grooming_retired or{}
+    if old_owned and old_owned~=found then stored.grooming_retired[tostring(old_owned)]=old_geometry end
+    item.old_groom_trails={}
+    for retired,record in pairs(stored.grooming_retired)do if record.owner==item.id then item.old_groom_trails[#item.old_groom_trails+1]=tonumber(retired)end end
     item.groom_requests=0;item.groom_stamps=0
     -- Maintenance routes belong to snowcat navigation, not the downhill
     -- piste overlay. Keep their native jobs while excluding their ribbons.
     state.groom_hidden=state.groom_hidden or{};state.groom_hidden[found]=true
     local terrain=require('terrain');terrain.trail_visual_exclusions=state.groom_hidden
-    terrain.rebuild_trail_visuals(true)
+end
+function Groom.finalize(state)
+    local stored=state.api:mod_state();local retired=stored.grooming_retired or{}
+    local groom=current('GroomingSubsystem');local guests=state.guests
+    local occupied={}
+    if valid(guests)then guests.GuestsHot:ForEach(function(_,v)
+        local ok,h=pcall(function()return v:get()end);h=ok and h or v;occupied[h.CurrentTrailId]=true
+    end)end
+    for _,record in pairs(state.evacuation_records or{})do occupied[record.trail]=true end
+    for id,record in pairs(retired)do
+        local number=tonumber(id);local owned=false
+        state.groom_trails.RegisteredTrails:ForEach(function(_,v)
+            local ok,t=pcall(function()return v:get()end);t=ok and t or v
+            if t.TrailId==number and t.bManuallyDisabled and t.DisplayName:ToString()==record.name and(t.Curve.StartPoint.X-record.x)^2+(t.Curve.StartPoint.Y-record.y)^2<100^2 then owned=true end
+        end)
+        if owned then
+            state.groom_hidden[number]=true
+            -- Keep both the old route and its physically held job until the
+            -- last saved skier clears it. Then retire the duplicate together.
+            if not occupied[number]then
+                if valid(groom)and groom:HasActiveGroomingEvent(number)then groom:OnTrailUnregistered(number)end
+                state.groom_trails:SetTrailGroomed(number,false)
+                state.groom_trails:UnregisterTrail(number);state.groom_hidden[number]=nil;retired[id]=nil
+            end
+        else retired[id]=nil end
+    end
 end
 function Groom.remove(state,item)
+    if item.service then
+        for _,member in ipairs(item.service.members)do if member~=item and not member.disposed then item.groom_trail=nil;return end end
+    end
     if item.groom_trail and valid(state.groom_trails)and valid(state.groom_trails:GetWorld())
         and state.groom_trails:GetWorld():GetAddress()==UE.GetWorld():GetAddress()then
         state.groom_trails:UnregisterTrail(item.groom_trail)
@@ -131,7 +171,7 @@ function Groom.grade(state,stamps)
     flush()
 end
 function Groom.request(state,item)
-    if item.disposed or not item.groom_trail or(item.evacuation_waiting or 0)>0 then return false end
+    if item.disposed or not item.groom_trail or Service.held(item)>0 then return false end
     local groom=current('GroomingSubsystem');if not valid(groom)or groom:HasActiveGroomingEvent(item.groom_trail)then return false end
     local controller=widget(state);controller.SkiEOGroomTrailId=item.groom_trail;controller:OnGroomNowClicked()
     local requested=groom:HasActiveGroomingEvent(item.groom_trail)
@@ -142,10 +182,15 @@ function Groom.update(state,env)
     if env.paused then return end
     local groom=current('GroomingSubsystem');if not valid(groom)then return end
     local time=current('TimeSubsystem');local night=valid(time)and time:IsNightShift()
-    for _,item in ipairs(state.items)do if not item.disposed and item.groom_trail and(item.evacuation_waiting or 0)==0 then
-        local interval=item.snow_reason=='excess'and .25 or 2
-        if (night or item.snow_reason=='excess')and(not item.groom_next or env.hours>=item.groom_next)then
-            item.groom_next=env.hours+interval
+    local requested={}
+    for _,item in ipairs(state.items)do if not item.disposed and item.groom_trail and not requested[item.groom_trail]and Service.held(item)==0 then
+        requested[item.groom_trail]=true
+        local excess=false
+        for _,member in ipairs(item.service and item.service.members or{item})do if not member.disposed and member.snow_reason=='excess'then excess=true end end
+        local owner=item.service or item
+        local interval=excess and .25 or 2
+        if (night or excess)and(not owner.groom_next or env.hours>=owner.groom_next)then
+            owner.groom_next=env.hours+interval
             Groom.request(state,item)
         end
     end end
@@ -180,12 +225,15 @@ function Groom.update(state,env)
                     or env.hours-(old.hours or env.hours)
                 local maximum=math.max(3000,math.max(0,elapsed)*3600*1000)
                 if old.task==task and elapsed>=0 and elapsed<1 and distance>=10 and distance<maximum then
-                    for _,item in ipairs(state.items)do if not item.disposed and item.groom_trail and(item.evacuation_waiting or 0)==0
+                    local graded={}
+                    for _,item in ipairs(state.items)do if not item.disposed and item.groom_trail and not graded[item.groom_trail]and Service.held(item)==0
                         and groom:HasActiveGroomingEvent(item.groom_trail)then
+                        graded[item.groom_trail]=true
+                        local route,definition=Service.geometry(item)
                         for k=1,math.ceil(distance/100)do
                             local t=k/math.ceil(distance/100);local x,y=old.x+(p.X-old.x)*t,old.y+(p.Y-old.y)*t
-                            local d=G.nearest(item.route,x,y);local line=G.sample(item.route,d)
-                            local width,offset=Groom.dimensions(item.definition)
+                            local d=G.nearest(route,x,y);local line=G.sample(route,d)
+                            local width,offset=Groom.dimensions(definition)
                             local lx,ly=line.x-line.nx*offset,line.y-line.ny*offset
                             local lateral=(x-lx)*line.nx+(y-ly)*line.ny
                             local radius=math.min(250,width*.5-math.abs(lateral))
@@ -202,6 +250,10 @@ function Groom.update(state,env)
         end
     end
     Groom.grade(state,stamps)
+    if not state.retired_check or env.seconds and env.seconds>=state.retired_check then
+        state.retired_check=(env.seconds or 0)+2
+        if next(state.api.mod_state and state.api:mod_state().grooming_retired or{})then Groom.finalize(state)end
+    end
 end
 function Groom.dispose(state)
     local terrain=require('terrain')

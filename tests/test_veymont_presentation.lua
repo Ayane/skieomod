@@ -12,6 +12,8 @@ package.preload.UEHelpers=function()return{
 }end
 package.preload.native_terrain=function()return{retain_texture=function()end,
  set_camera_rotation=function(_,rotation)cached=rotation end}end
+package.preload.climate=function()return{apply=function()end}end
+package.preload.snowmaking=function()return{definitions=function()return{}end,install=function()end}end
 package.preload.vegetation=function()return{unload=function()end}end
 ExecuteInGameThread=function(fn)queued[#queued+1]=fn end
 local colors,calls

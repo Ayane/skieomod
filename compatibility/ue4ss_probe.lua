@@ -140,7 +140,7 @@ return function(runtime,spec_path)
     end
     local function snapshot()
         local world=Helpers.GetWorld()
-        local result={world=world:GetFullName(),world_address=world:GetAddress(),buildings=0,decorations=0,
+        local result={world=world:GetFullName(),world_address=world:GetAddress(),buildings=0,decorations=0,snowblowers=#actors('SnowblowerActor'),
             lifts=#actors('LiftActor'),hubs=#actors('HubActor'),trails=0,staff=0,trees=0,variants={},saved_variants={},
             invalid_marker_variants=0,buried_buildings=0,mesh_mismatches=0,placeables={},surface_lifts=0,chairlift_models=0}
         local api=runtime.active_api
@@ -194,6 +194,7 @@ return function(runtime,spec_path)
             end
         end
         for _,a in ipairs(actors('LiftActor')) do remember(a) end
+        for _,a in ipairs(actors('SnowblowerActor')) do remember(a) end
         local staff=assert(subsystem('StaffSubsystem'),'staff subsystem missing')
         result.staff=#staff:GetRoster()
         local trails=assert(subsystem('TrailMapSubsystem'),'trail map subsystem missing')

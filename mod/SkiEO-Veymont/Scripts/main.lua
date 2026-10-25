@@ -2,6 +2,9 @@ local UEHelpers = require("UEHelpers")
 local VeymontData = require("veymont_data")
 local VeymontStaff = require("veymont_staff")
 local Furnishings = require("furnishings")
+local Climate = require("climate")
+local Snowmaking = require("snowmaking")
+local SNOWMAKING_DEFINITIONS = Snowmaking.definitions(VeymontData)
 local NativeTerrain = require("native_terrain")
 local Vegetation = require("vegetation")
 
@@ -682,12 +685,7 @@ local function activate_veymont_winter()
                 "source snow initialized: grid=%d", snow:GetGridResolution()))
         end
 
-        local weather = find_in_current_world("WeatherSubsystem")
-            or FindFirstOf("WeatherSubsystem")
-        if weather and weather:IsValid() then
-            weather:ForceTemperature(-5.0)
-            weather:ForceWeather(2)
-        end
+
     end)
     log("Veymont winter activation: " ..
         tostring(ok) .. " " .. tostring(message))
@@ -1432,11 +1430,13 @@ return {
                 prepare_veymont_view()
                 build_veymont_station(function(message)
                     if message then station_done(message);return end
-                    local ok,failure=pcall(function() api:place_objects(Furnishings(VeymontData)) end)
+                    local ok,failure=pcall(function() Climate.apply(api,false);api:place_objects(Furnishings(VeymontData));Snowmaking.install(api,VeymontData,SNOWMAKING_DEFINITIONS) end)
                     station_done(not ok and tostring(failure) or nil)
                 end, true)
             else
                 log("saved resort preserved; rebuilding portable forest only")
+                Climate.apply(api,true)
+                Snowmaking.install(api,VeymontData,SNOWMAKING_DEFINITIONS)
             end
             api:every(500, function()
                 rename_hub_labels()

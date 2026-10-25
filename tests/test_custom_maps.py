@@ -27,7 +27,7 @@ class CustomMapFormatTests(unittest.TestCase):
     def test_veymont_is_valid_and_complete(self) -> None:
         manifest, paths = custom_maps.load_manifest(self.manifest_path, check_files=True)
         self.assertEqual(manifest["id"], "community.veymont")
-        self.assertEqual(len(paths), 18)
+        self.assertEqual(len(paths), 21)
         self.assertIn(Path('Scripts/furnishings.lua'), paths)
         self.assertIn(Path("Preview/veymont.png"), paths)
         self.assertIn(Path("Preview/veymont-loading.png"), paths)

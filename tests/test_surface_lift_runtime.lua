@@ -29,8 +29,8 @@ close(job.marker.Z,job.marker.X*.1+job.marker.Y*.2+53)
 assert(not pcall(Refresh.step,Refresh.create(item),function()return nil end,8))
 print('Long snow profiles, terminal loops and marker readback stay within eight samples per frame OK')
 
--- A busy resort should scan all guests four times per second, while current
--- passenger positions continue to update at the full frame rate.
+-- A busy resort discovers at most 256 guests per frame. Known passenger
+-- positions remain current while a long discovery sweep is in progress.
 local function id(n)return{A=n,B=0,C=0,D=0}end
 local function key(n)return string.format('%08x-%08x-%08x-%08x',n,0,0,0)end
 local hot,cold={},{};local scans,reads=0,0;local size=10000;local cold_size
@@ -54,31 +54,33 @@ local state={items={{id=key(1),definition={kind='detachable_platter'}},{id=key(2
 local started=os.clock()
 for frame=0,119 do
  hot[1].WorldPosition.X=frame*11
+ local before=reads
  local rows=Riders.read(state,guests,frame/120)[key(1)]
- assert(#rows==3)
+ assert(reads-before<=280,'Guest discovery exceeded its frame budget')
+ assert(#rows==(frame<39 and 2 or 3))
  local found=false
  for _,r in ipairs(rows)do if r.key==key(100)then close(r.X,frame*11);found=true end end
- assert(found,'Passenger position froze between discovery scans')
+ assert(found,'Passenger position froze between discovery slices')
 end
 local elapsed=os.clock()-started
-assert(scans==4,'Guest discovery ran at render frequency')
-assert(reads<1000,'Unrelated guests were read between discovery scans')
--- Reordering and shrinking must never pose another guest under an old GUID.
+assert(scans==0,'Unbounded ForEach walked the complete native array')
+-- Compaction invalidates the old GUID immediately; the next bounded sweep
+-- discovers its new index without borrowing a different guest's position.
 hot[1],hot[2]=hot[2],hot[1];cold[1],cold[2]=cold[2],cold[1]
+state.rider_cursor=500
 local rows=Riders.read(state,guests,1.001)[key(1)]
--- This timestamp triggers discovery, so the moved rider is found immediately.
-assert(#rows==3)
-hot[2],hot[3]=hot[3],hot[2];cold[2],cold[3]=cold[3],cold[2]
-rows=Riders.read(state,guests,1.01)[key(1)];assert(#rows==2 and not state.rider_scan)
-rows=Riders.read(state,guests,1.02)[key(1)];assert(#rows==3)
+for _,r in ipairs(rows)do assert(r.key~=key(100))end
+state.rider_cursor=1
+rows=Riders.read(state,guests,1.01)[key(1)];assert(#rows==3)
 size=2
-rows=Riders.read(state,guests,1.03)[key(1)];assert(not rows)
-size=10000;Riders.read(state,guests,1.04)
-hot[3].ActivityState=4
-rows=Riders.read(state,guests,1.05)[key(1)];assert(#rows==2)
-cold_size=2;state.rider_scan=nil
-assert(not Riders.read(state,guests,1.06)[key(1)],'Unequal hot/cold arrays caused an unsafe read')
-print(string.format('10,000 guests at 120 frames: four discovery scans, %d indexed reads in %.3f s; live positions, reorder and removal OK',reads,elapsed))
+rows=Riders.read(state,guests,1.02)[key(1)];assert(#rows==1)
+size=10000;state.rider_cursor=1
+Riders.read(state,guests,1.03)
+hot[2].ActivityState=4
+rows=Riders.read(state,guests,1.04)[key(1)];assert(#rows==1)
+cold_size=2;state.rider_cursor=1
+assert(not Riders.read(state,guests,1.05)[key(1)],'Unequal hot/cold arrays caused an unsafe read')
+print(string.format('10,000 guests: bounded discovery, live positions, compaction and removal in %.3f s OK',elapsed))
 
 -- The carrier can be more than 80 cm from the current simulation position
 -- when its ISM updates on another tick. Association follows guest identity.

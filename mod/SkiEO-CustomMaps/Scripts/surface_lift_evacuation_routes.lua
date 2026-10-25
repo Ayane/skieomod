@@ -44,9 +44,9 @@ function Routes.curves(points,width)
     end
     assert(#curves>0,'Empty service route');return curves
 end
-function Routes.build(route,d,ground)
+function Routes.build(route,d,ground,service_route,service_definition)
     Routes.validate(d)
-    local G=require('surface_lift_geometry');local service=Routes.service(route,d)
+    local G=require('surface_lift_geometry');local service=Routes.service(service_route or route,service_definition or d)
     local choices={{index=0,entry=0,length=0,points=service}}
     local _,offset=Routes.dimensions(d)
     for index,path in ipairs(d.evacuation_routes or{})do
