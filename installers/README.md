@@ -9,9 +9,10 @@ checking its SHA-256. It installs pipx if missing, installs the current tools
 from the official index and runs `skieomod setup`. Windows may ask you to
 confirm that you want to run a downloaded script.
 
-Linux: extract the ZIP and double-click `Install-SkiEO.desktop`. Your desktop
-may first require “Allow Launching” or “Run in Terminal”. You can also run the
-included shell script. Python/venv packages, if missing, use apt, dnf, pacman
+Linux: download `Install-SkiEO-Linux.sh`. In its properties, allow executing
+the file as a program, then open it with “Run in Terminal”. If your file manager
+opens it as text, open a terminal in its download folder and run
+`bash Install-SkiEO-Linux.sh`. Python/venv packages, if missing, use apt, dnf, pacman
 or zypper and may ask for your sudo password. pipx and the mod run as your
 normal user, outside system Python. Steam must have created the Proton prefix
 by launching the game once. Sandboxed desktops can require choosing the game
@@ -27,5 +28,5 @@ Linux/Proton. The native macOS game is not supported by this DLL-based loader.
 
 Sources: https://github.com/Ayane/skieomod/tree/main/installers
 Python package: https://www.python.org/downloads/release/python-31317/
-Regenerate the standalone launchers and Linux ZIP with
+Regenerate the standalone launchers with
 `python3 tools/build_installers.py`.

@@ -4,4 +4,3 @@
 /installers/* text eol=lf
 /repository/web/public/install/*.sh text eol=lf
 /repository/web/public/install/*.cmd text eol=crlf
-*.desktop text eol=lf

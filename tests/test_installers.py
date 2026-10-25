@@ -1,4 +1,4 @@
-"""Installer isolation, error handling, packaging and desktop launch behaviour."""
+"""Installer isolation, error handling and standalone launchers."""
 import contextlib
 import io
 import os
@@ -7,10 +7,8 @@ import shutil
 import subprocess
 import sys
 import tempfile
-import time
 import unittest
 from unittest.mock import patch
-import zipfile
 
 from installers import bootstrap
 from tools import build_installers
@@ -77,37 +75,15 @@ class InstallerTests(unittest.TestCase):
             with patch.object(bootstrap.subprocess,'run',return_value=subprocess.CompletedProcess([],code,version)):
                 self.assertEqual(bootstrap.usable_pipx(['pipx']),expected)
 
-    def test_launchers_are_self_contained_reproducible_and_preserve_unix_modes(self):
+    def test_launchers_are_self_contained_and_reproducible(self):
         output=build_installers.build(self.root/'download')
         expected=ROOT/'repository/web/public/install'
-        for name in ['Install-SkiEO-Windows.cmd','Install-SkiEO-Linux.sh','Install-SkiEO-Linux.zip']:
+        for name in ['Install-SkiEO-Windows.cmd','Install-SkiEO-Linux.sh']:
             self.assertEqual((output/name).read_bytes(),(expected/name).read_bytes(),name)
-        with zipfile.ZipFile(output/'Install-SkiEO-Linux.zip')as archive:
-            for name in ['Install-SkiEO-Linux.sh','Install-SkiEO.desktop']:
-                info=archive.getinfo(name)
-                self.assertEqual(info.create_system,3)
-                self.assertEqual((info.external_attr>>16)&0o111,0o111)
         script=(output/'Install-SkiEO-Linux.sh').read_bytes()
         self.assertNotIn(b'\r\n',script)
         if sys.platform!='win32'and shutil.which('bash'):
             subprocess.run(['bash','-n',str(output/'Install-SkiEO-Linux.sh')],check=True)
-
-    @unittest.skipUnless(sys.platform.startswith('linux'),'Linux desktop launch')
-    def test_desktop_launcher_handles_spaces_quotes_and_shell_characters(self):
-        try:
-            from gi.repository import Gio
-        except ImportError:self.skipTest('GIO is unavailable')
-        folder=self.root/'spaces "quotes" $dollar';folder.mkdir()
-        (folder/'Install-SkiEO-Linux.sh').write_text('#!/bin/bash\nprintf ok > "$(dirname "$0")/result"\n')
-        desktop=folder/'Install-SkiEO.desktop'
-        desktop.write_text((ROOT/'installers/Install-SkiEO.desktop').read_text().replace('Terminal=true','Terminal=false'))
-        app=Gio.DesktopAppInfo.new_from_filename(str(desktop))
-        self.assertIsNotNone(app)
-        self.assertTrue(app.launch([],None))
-        for _ in range(100):
-            if(folder/'result').exists():break
-            time.sleep(.01)
-        self.assertEqual((folder/'result').read_text(),'ok')
 
 
 if __name__=='__main__':unittest.main()

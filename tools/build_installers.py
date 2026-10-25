@@ -1,12 +1,8 @@
 #!/usr/bin/env python3
 """Embed the shared Python installer in standalone platform launchers."""
 from pathlib import Path
-import sys
-import zipfile
 
 ROOT = Path(__file__).resolve().parents[1]
-sys.path.insert(0, str(ROOT))
-from tools.custom_maps import write_zip_member
 
 
 def build(output=None):
@@ -21,16 +17,6 @@ def build(output=None):
     shell = output / 'Install-SkiEO-Linux.sh'
     shell.write_bytes(linux.encode())
     shell.chmod(0o755)
-    with zipfile.ZipFile(output / 'Install-SkiEO-Linux.zip', 'w') as archive:
-        for name, data, mode in [
-            ('Install-SkiEO-Linux.sh', linux.encode(), 0o100755),
-            ('Install-SkiEO.desktop', (source / 'Install-SkiEO.desktop').read_bytes(), 0o100755),
-            ('README.txt', (source / 'README.md').read_bytes(), 0o100644),
-        ]:
-            write_zip_member(archive, name, data)
-            info=archive.getinfo(name)
-            info.create_system=3
-            info.external_attr=mode << 16
     return output
 
 

@@ -33,8 +33,10 @@ before making your own map.
 ## Install and play
 
 For Windows or Linux, use the [downloadable installers](https://skieomod.emillon.fr/install/).
-Windows: double-click the `.cmd`. Linux: extract the ZIP and open
-`Install-SkiEO.desktop`; your desktop may ask you to allow launching it.
+Windows: double-click the `.cmd`. Linux: download the `.sh`, allow executing
+it as a program in its properties, then choose **Run in Terminal**. If it opens
+as text, open a terminal in the download folder and run
+`bash Install-SkiEO-Linux.sh`.
 They check Python and pipx, install missing components and run setup. Close
 the game first and launch it through Steam once before installing the mod.
 The current DLL-based game loader does not support the native macOS game.

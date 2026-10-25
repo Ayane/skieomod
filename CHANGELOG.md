@@ -7,6 +7,11 @@ have their own package versions. Download the
 
 ## [Unreleased]
 
+## [1.26.1] - 2026-10-25
+
+- Distribute the Linux installer directly as a standalone shell script instead
+  of a ZIP with a desktop launcher. Update download links and launch instructions.
+
 ## [1.26.0] - 2026-10-25
 
 - Add the Surface lift tutorial to the editor Help menu and website, with
