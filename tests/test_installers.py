@@ -89,7 +89,8 @@ class InstallerTests(unittest.TestCase):
                 self.assertEqual((info.external_attr>>16)&0o111,0o111)
         script=(output/'Install-SkiEO-Linux.sh').read_bytes()
         self.assertNotIn(b'\r\n',script)
-        if shutil.which('bash'):subprocess.run(['bash','-n',str(output/'Install-SkiEO-Linux.sh')],check=True)
+        if sys.platform!='win32'and shutil.which('bash'):
+            subprocess.run(['bash','-n',str(output/'Install-SkiEO-Linux.sh')],check=True)
 
     @unittest.skipUnless(sys.platform.startswith('linux'),'Linux desktop launch')
     def test_desktop_launcher_handles_spaces_quotes_and_shell_characters(self):
