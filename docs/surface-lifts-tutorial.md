@@ -105,12 +105,44 @@ native lift GUID, so the attachment survives a normal save/reload.
 | `return_station` | `floating`, `release` or `lattice`. |
 | `ascent_side` | `left` or `right`, looking from the lower terminal towards the top. |
 | `max_snow_cm` | Optional maximum snow depth, 110–300 cm. Defaults: 150 for TKF, 250 for TKD. |
+| `service_width_m` | Service corridor width, 4–10 metres; default 5. |
+| `service_offset_m` | Distance from the lift axis towards the ascent side, 3–10 metres; default 3.5. Leave at least 1 metre between the corridor edge and the pylons. |
+| `evacuation_routes` | Optional downhill emergency paths, each an array of world `[x,y,z]` points in centimetres. |
 
 Keep the first exercise straight. If the route has exactly `pylons + 2`
 points, its interior points specify the supports; turns above 5° receive bend
 supports. Otherwise supports are fitted to the route and terrain. Use surveyed
 points for intended bends and inspect the result in the game. At most sixteen
 configured installations are supported in one map session.
+
+### Service corridors and stopped lifts
+
+With **loader 1.28.0 or newer**, stopping a surface lift releases its passengers.
+They ski down the closed service corridor using the game's normal simulation.
+Snowcats wait before entering or continuing that corridor until the skiers have
+cleared it. New grooming jobs also wait. Restarting the lift waits for clearance;
+an explicit manual stop remains off afterwards. Ordinary chairlifts retain their
+native behaviour. Service trails stay closed to ordinary downhill traffic.
+
+You can add emergency exits to a lift definition without copying the mapmod:
+
+```json
+"service_width_m": 5,
+"service_offset_m": 3.5,
+"evacuation_routes": [
+  [[-8350, 0, 0], [-10000, 2000, 0], [-12000, 5000, 0]]
+]
+```
+
+These example coordinates apply to the practice line: adapt them to your terrain
+and connect the last point to a safe downhill piste. Each path starts within
+10 metres of the service corridor, then descends to its exit. Heights are sampled
+from the map; a local rise greater than 5 metres is rejected. Keep 2–128 points per
+path, at most 16 paths and 1,024 points per lift. A skier considers entries below
+their current position and chooses the shortest remaining distance to a safe
+exit, including the service approach. Without a shorter eligible exit, they
+continue to the lower terminal. Test both sides of every entry and save/reload
+during an evacuation. Use a new game to test changes to authored routes.
 
 ## 5. Build and play
 

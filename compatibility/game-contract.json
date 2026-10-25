@@ -42,10 +42,11 @@
     "native/SkiEOSurfaceLifts/track_policy.h": "5644c7a088facde246deb9badc5d45847e358a6ea81dc6f7a8f7d1d497e5188c",
     "native/SkiEOSurfaceLifts/build.sh": "58705eccbb11c17a646fda361e8cefc3a2c7dfd2e727146132dedb07194cc2c1",
     "native/SkiEOSurfaceLifts/reviewed_build.h": "690342c3c151b26b007c5fc1c88f044613bc379bde59c30c5c1bc0aee913cb18",
-    "native/SkiEOSurfaceLifts/README.md": "a47e042f81a0c24845cbb58721caffefb2b102d127652aba3fd70d26049f2719",
-    "native/SkiEOSurfaceLifts/surface_lifts.c": "491817c7c7dfdf024197be92f937be6e5fafde9c37f9fd772f5f05148bd4ea31",
+    "native/SkiEOSurfaceLifts/README.md": "d71d53183738734c6312fbdd886158df7ccedf230e34caa5bbadf66326b63604",
+    "native/SkiEOSurfaceLifts/surface_lifts.c": "d61055cfaabcc0cc87bc09d0d4be0ca234c801fa5768c141b2f42062b63c0854",
     "native/SkiEOSurfaceLifts/contact_read.h": "6f09d7cc435aa2be0ea86774f8c8a8072834edea962f54a33733f497df38449f",
-    "native/SkiEOSurfaceLifts/snow_grade.h": "69f960e66ba30734749ab17578d56e3f28ade9bc35111d9388422f48596e7352"
+    "native/SkiEOSurfaceLifts/snow_grade.h": "69f960e66ba30734749ab17578d56e3f28ade9bc35111d9388422f48596e7352",
+    "native/SkiEOSurfaceLifts/evacuation.h": "175f72189078824776511b47a65e400fafc4c74949eaf581afe266e4f54a767c"
   },
   "guards": [
     {
@@ -939,6 +940,72 @@
       "rva": "0x50369ca",
       "bytes": "41894578488b85b0000000f20f1000f2410f1185800000008b400841898588000000",
       "mode": "unique"
+    },
+    {
+      "id": "surface_evacuation.activity",
+      "rva": "0x5183e80",
+      "mode": "rva",
+      "bytes": "48895c24184889742420574883ec40410fb6f0488bfa488bd9c6427700443a42"
+    },
+    {
+      "id": "surface_evacuation.route_clear",
+      "rva": "0x519cd40",
+      "mode": "rva",
+      "bytes": "48895c24084889742410574883ec3083790c00488d710c488bd9488b098b5308"
+    },
+    {
+      "id": "surface_evacuation.route_step",
+      "rva": "0x55a1540",
+      "mode": "rva",
+      "bytes": "40534883ec208b4108488bd98b49103bc17f4c48897c24303b430c75164c8d4b"
+    },
+    {
+      "id": "surface_evacuation.array_resize",
+      "rva": "0x1288d10",
+      "mode": "rva",
+      "bytes": "48895c240848896c24104889742418574883ec304963d8498be98bf98bf24585"
+    },
+    {
+      "id": "surface_evacuation.ski_lane",
+      "rva": "0x51e4450",
+      "mode": "rva",
+      "bytes": "48895c2410574883ec60488bd9c681700500000033c9498bf948894c2420418b"
+    },
+    {
+      "id": "surface_evacuation.groom_deploy",
+      "rva": "0x530de50",
+      "mode": "rva",
+      "bytes": "48895c240848896c24104889742418574883ec60488daa300100000f29742450"
+    },
+    {
+      "id": "surface_evacuation.groom_grade",
+      "rva": "0x530e120",
+      "mode": "rva",
+      "bytes": "f30f11542418555357488dac2450ffffff4881ecb00100000f29b42490010000"
+    },
+    {
+      "id": "surface_evacuation.groom_turn",
+      "rva": "0x530e910",
+      "mode": "rva",
+      "bytes": "488bc4f30f11501855535657415441564157488d6c24b04881ec500100000f29"
+    },
+    {
+      "id": "surface_evacuation.lift_release",
+      "rva": "0x55a3ab0",
+      "mode": "rva",
+      "bytes": "4c8bdc4588431849894b085741554883ec488b42044d8be90b02488bfa0b4208"
+    },
+    {
+      "id": "surface_evacuation.unboard",
+      "rva": "0x4fcae70",
+      "mode": "rva",
+      "bytes": "48895c24104889742418574883ec20488b9938040000488bf90fb6f24885db74"
+    },
+    {
+      "id": "surface_evacuation.groom_position",
+      "rva": "0x52f2c50",
+      "mode": "rva",
+      "bytes": "488bc4488958104889781855488d68a14881ece00000004c8b49080f57db440f"
     }
   ],
   "classes": {
@@ -1286,13 +1353,13 @@
     },
     {
       "id": "community.veymont",
-      "version": "0.8.0",
-      "archive": "mod/SkiEO-Veymont/bin/community.veymont-0.8.0.skieomap",
+      "version": "0.8.1",
+      "archive": "mod/SkiEO-Veymont/bin/community.veymont-0.8.1.skieomap",
       "expected": {
         "buildings": 13,
         "decorations": 54,
         "lifts": 9,
-        "trails": 28,
+        "trails": 31,
         "hubs": 11,
         "staff": 22,
         "trees": 383500,
@@ -1336,6 +1403,6 @@
   ],
   "native_helpers": {
     "mod/SkiEO-CustomMaps/Scripts/skieo_trail_ratings.dll": "ac623e3e82ac9497c244366498f6894c77cca48f95600c919257d8786e5075a9",
-    "mod/SkiEO-CustomMaps/Scripts/skieo_surface_lifts.dll": "3fd6374d06ded9cdba6ddf20aa04e9c5d306933c37fdb3f700a7d295ee89b9b7"
+    "mod/SkiEO-CustomMaps/Scripts/skieo_surface_lifts.dll": "71a48b8c7ce610a3e5aa20f09ffc6e34d8ec10374cada1484fd85b0279cebdd7"
   }
 }

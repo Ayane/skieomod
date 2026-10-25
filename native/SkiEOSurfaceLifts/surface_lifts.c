@@ -130,3 +130,4 @@ __declspec(dllexport) int skieo_surface_lifts(void *lua)
 }
 #include "contact_read.h"
 #include "snow_grade.h"
+#include "evacuation.h"

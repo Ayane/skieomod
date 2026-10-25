@@ -3,6 +3,7 @@
 -- surplus snow; submitting a job never changes the snow or reopens a lift.
 local UE=require('UEHelpers')
 local G=require('surface_lift_geometry')
+local Routes=require('surface_lift_evacuation_routes')
 local Mesh=require('portable_mesh')
 local Groom={}
 local registered=false
@@ -16,22 +17,10 @@ local function current(class)
             and o:GetWorld():GetAddress()==UE.GetWorld():GetAddress()then return o end
     end
 end
-local function point(p)return{X=p.x-p.nx*160,Y=p.y-p.ny*160,Z=p.z}end
-function Groom.curves(route)
-    local curves={}
-    -- Retain every surveyed bend, with short ground-following chords. Native
-    -- snowcats project these curves onto the native terrain/snow surface.
-    local previous=point(route.points[#route.points])
-    for i=#route.points-1,1,-1 do
-        local p=route.points[i]
-        if i==1 or p.node~=route.points[i+1].node or i%15==1 then
-            local next_point=point(p)
-            curves[#curves+1]={StartPoint=previous,Endpoint=next_point,CorridorWidth=2000,
-                ControlPoint={X=(previous.X+next_point.X)*.5,Y=(previous.Y+next_point.Y)*.5,Z=(previous.Z+next_point.Z)*.5}}
-            previous=next_point
-        end
-    end
-    return curves
+Groom.dimensions=Routes.dimensions
+local function point(p,offset)return{X=p.x-p.nx*offset,Y=p.y-p.ny*offset,Z=p.z}end
+function Groom.curves(route,definition)
+    return Routes.curves(Routes.service(route,definition),Groom.dimensions(definition))
 end
 local function widget(state)
     if valid(state.groom_widget)then return state.groom_widget end
@@ -67,7 +56,8 @@ function Groom.attach(state,item)
     local id=stored.grooming_trails[item.id]
     local name='Entretien de la montée · '..item.definition.name
     local legacy='Entretien TK · '..item.id
-    local curves=Groom.curves(item.route)
+    local curves=Groom.curves(item.route,item.definition)
+    local width=Groom.dimensions(item.definition)
     local found,update_geometry
     -- IDs come from the native save. A persisted ID alone is not ownership:
     -- a deleted trail's number may have been reused by a player's new piste.
@@ -75,12 +65,17 @@ function Groom.attach(state,item)
         local ok,n=pcall(function()return v:get()end);v=ok and n or v
         local text=v.DisplayName:ToString()
         local start=v.Curve.StartPoint;local expected=curves[1].StartPoint
+        -- The old corridor was centred on the towing lane, 1.6 m from the
+        -- pylons. Accept that owned geometry when upgrading an existing save.
+        local previous=point(item.route.points[#item.route.points],160)
         local same_start=(start.X-expected.X)^2+(start.Y-expected.Y)^2<100^2
-        local same_width=math.abs(v.Curve.CorridorWidth-2000)<1 or math.abs(v.Curve.CorridorWidth-1000)<1 or math.abs(v.Curve.CorridorWidth-500)<1
+            or(start.X-previous.X)^2+(start.Y-previous.Y)^2<100^2
+        local same_width=math.abs(v.Curve.CorridorWidth-width)<1 or math.abs(v.Curve.CorridorWidth-2000)<1 or math.abs(v.Curve.CorridorWidth-1000)<1 or math.abs(v.Curve.CorridorWidth-500)<1
         if (id and v.TrailId==id and same_start and same_width and v.bManuallyDisabled)
             or(not id and(text==name or text==legacy))then
             found=v.TrailId
-            update_geometry=math.abs(v.Curve.CorridorWidth-2000)>=1
+            update_geometry=math.abs(v.Curve.CorridorWidth-width)>=1
+                or(start.X-expected.X)^2+(start.Y-expected.Y)^2>=1
             if text==legacy then trails:SetTrailDisplayName(found,FText(name))end
         end
     end)
@@ -128,32 +123,40 @@ function Groom.grade(state,stamps)
         points={}
     end
     for _,p in ipairs(stamps)do
-        -- Sweep the blade with overlapping clearing footprints and soft
-        -- transition edges. A single circle at the
-        -- vehicle centre leaves ridges between the two native grooming lanes.
-        -- Overlapping samples cover the blade without discarding long moves.
-        for offset=-200,200,100 do
-            points[#points+1]=string.pack('<ddff',p.x+(p.nx or 0)*offset,p.y+(p.ny or 0)*offset,300,500)
-            if #points==256 then flush()end
-        end
+        -- The previous five 3 m circles cleared a 10 m strip. Bound the blade
+        -- to the actual corridor, including its clearance around pylons.
+        points[#points+1]=string.pack('<ddff',p.x,p.y,p.radius or 250,500)
+        if #points==256 then flush()end
     end
     flush()
+end
+function Groom.request(state,item)
+    if item.disposed or not item.groom_trail or(item.evacuation_waiting or 0)>0 then return false end
+    local groom=current('GroomingSubsystem');if not valid(groom)or groom:HasActiveGroomingEvent(item.groom_trail)then return false end
+    local controller=widget(state);controller.SkiEOGroomTrailId=item.groom_trail;controller:OnGroomNowClicked()
+    local requested=groom:HasActiveGroomingEvent(item.groom_trail)
+    if requested then item.groom_requests=item.groom_requests+1 end
+    return requested
 end
 function Groom.update(state,env)
     if env.paused then return end
     local groom=current('GroomingSubsystem');if not valid(groom)then return end
     local time=current('TimeSubsystem');local night=valid(time)and time:IsNightShift()
-    for _,item in ipairs(state.items)do if not item.disposed and item.groom_trail then
+    for _,item in ipairs(state.items)do if not item.disposed and item.groom_trail and(item.evacuation_waiting or 0)==0 then
         local interval=item.snow_reason=='excess'and .25 or 2
         if (night or item.snow_reason=='excess')and(not item.groom_next or env.hours>=item.groom_next)then
             item.groom_next=env.hours+interval
-            if not groom:HasActiveGroomingEvent(item.groom_trail)then
-                local controller=widget(state);controller.SkiEOGroomTrailId=item.groom_trail
-                controller:OnGroomNowClicked()
-                if groom:HasActiveGroomingEvent(item.groom_trail)then item.groom_requests=item.groom_requests+1 end
-            end
+            Groom.request(state,item)
         end
     end end
+    if night then
+        for _,item in ipairs(state.items)do if not item.disposed and(item.evacuation_waiting or 0)==0 then
+            for _,choice in ipairs(item.evacuation_routes or{})do if choice.index>0
+                and(choice.evacuation_waiting or 0)==0 and(not choice.groom_next or env.hours>=choice.groom_next)then
+                choice.groom_next=env.hours+2;Groom.request(state,choice)
+            end end
+        end end
+    end
     state.groom_vehicles=state.groom_vehicles or{}
     local stamps={}
     local staff=current('StaffSubsystem')
@@ -177,16 +180,19 @@ function Groom.update(state,env)
                     or env.hours-(old.hours or env.hours)
                 local maximum=math.max(3000,math.max(0,elapsed)*3600*1000)
                 if old.task==task and elapsed>=0 and elapsed<1 and distance>=10 and distance<maximum then
-                    for _,item in ipairs(state.items)do if not item.disposed and item.groom_trail
+                    for _,item in ipairs(state.items)do if not item.disposed and item.groom_trail and(item.evacuation_waiting or 0)==0
                         and groom:HasActiveGroomingEvent(item.groom_trail)then
                         for k=1,math.ceil(distance/100)do
                             local t=k/math.ceil(distance/100);local x,y=old.x+(p.X-old.x)*t,old.y+(p.Y-old.y)*t
                             local d=G.nearest(item.route,x,y);local line=G.sample(item.route,d)
-                            local lx,ly=line.x-line.nx*160,line.y-line.ny*160
-                            if(x-lx)^2+(y-ly)^2<650^2 then
+                            local width,offset=Groom.dimensions(item.definition)
+                            local lx,ly=line.x-line.nx*offset,line.y-line.ny*offset
+                            local lateral=(x-lx)*line.nx+(y-ly)*line.ny
+                            local radius=math.min(250,width*.5-math.abs(lateral))
+                            if radius>=100 and(x-lx)^2+(y-ly)^2<(width*.5+300)^2 then
                                 local e=require('map_entities').environment(state.api,x,y,true)
                                 if e.snow_ready and e.snow_cm>80 then
-                                    stamps[#stamps+1]={x=x,y=y,nx=-(p.Y-old.y)/distance,ny=(p.X-old.x)/distance};item.groom_stamps=item.groom_stamps+1
+                                    stamps[#stamps+1]={x=x,y=y,radius=radius};item.groom_stamps=item.groom_stamps+1
                                 end
                             end
                         end

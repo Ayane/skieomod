@@ -16,7 +16,7 @@
 <div class="hero-meta"><span>Surface lifts 0.1.0 · loader 1.25.0+</span><span>One editable practice map</span><span>English · 25 October 2026</span></div>
 <figure class="hero-figure"><img src="route.svg" width="1200" height="500" alt="A schematic showing one native lift and its configured towing route, with scene coordinates in metres and route coordinates in centimetres."><figcaption>A schematic of the practice line. Terrain and snow determine the runtime height.</figcaption></figure>
 </section>
-<div class="guide-layout"><aside class="contents"><nav aria-label="Tutorial steps"><p class="eyebrow">ON THIS PAGE</p><a href="#practice"><span>01</span> Open the practice map</a><a href="#native"><span>02</span> Place a native lift</a><a href="#dependency"><span>03</span> Add the dependency</a><a href="#route"><span>04</span> Configure the route</a><a href="#test"><span>05</span> Build and play</a><a href="#share"><span>06</span> Test saves and publish</a><a href="#models"><span>07</span> Use your own models</a><a href="#questions">Troubleshooting</a></nav></aside>
+<div class="guide-layout"><aside class="contents"><nav aria-label="Tutorial steps"><p class="eyebrow">ON THIS PAGE</p><a href="#practice"><span>01</span> Open the practice map</a><a href="#native"><span>02</span> Place a native lift</a><a href="#dependency"><span>03</span> Add the dependency</a><a href="#route"><span>04</span> Configure the route</a><a href="#evacuation">Service and evacuation</a><a href="#test"><span>05</span> Build and play</a><a href="#share"><span>06</span> Test saves and publish</a><a href="#models"><span>07</span> Use your own models</a><a href="#questions">Troubleshooting</a></nav></aside>
 <article class="steps">
 <section class="step" id="practice"><p class="step-number">STEP 01</p><h2>Open a complete example</h2>
 <p>The mapmod <code>community.surface-lifts</code> adapts an existing native lift. Your map supplies a name, a route and operating settings; the separate mod package supplies its models and behaviour. The standard models need neither Blender nor Unreal Editor. The optional custom-model chapter uses Blender.</p>
@@ -64,8 +64,22 @@
 <tr><td><code>return_station</code></td><td><code>floating</code>, <code>release</code> or <code>lattice</code>.</td></tr>
 <tr><td><code>ascent_side</code></td><td><code>left</code> or <code>right</code>, looking uphill from the lower terminal.</td></tr>
 <tr><td><code>max_snow_cm</code></td><td>Optional, 110–300 cm. Default: 150 for TKF, 250 for TKD.</td></tr>
+<tr><td><code>service_width_m</code></td><td>Service width, 4–10 metres; default 5.</td></tr>
+<tr><td><code>service_offset_m</code></td><td>Offset towards the ascent side, 3–10 metres; default 3.5. Leave at least 1 m around the pylons.</td></tr>
+<tr><td><code>evacuation_routes</code></td><td>Optional downhill emergency paths, in world centimetres.</td></tr>
 </tbody></table></div>
 <p>Keep the first line straight. With exactly <code>pylons + 2</code> route points, the interior points place the supports and turns above 5° receive bend supports. Otherwise the loader fits supports to the route and terrain. Inspect intentional bends in the game. One session supports at most sixteen configured installations.</p>
+</section>
+<section class="step" id="evacuation"><h2>Service corridors and stopped lifts</h2>
+<p>With <strong>loader 1.28.0 or newer</strong>, stopping a surface lift releases its passengers. They ski down its closed service corridor using the game's normal simulation. Snowcats wait before entering or continuing that corridor until the skiers have cleared it. New grooming requests also wait. Restarting waits for clearance; a manual stop remains off afterwards. Ordinary chairlifts retain their native behaviour.</p>
+<p>Add optional emergency exits to the lift definition without copying the mapmod:</p>
+<div class="command"><pre><code>"service_width_m": 5,
+"service_offset_m": 3.5,
+"evacuation_routes": [
+  [[-8350, 0, 0], [-10000, 2000, 0], [-12000, 5000, 0]]
+]</code></pre><button type="button" class="copy">Copy</button></div>
+<p>Adapt these practice-line coordinates to your terrain and connect the last point to a safe downhill piste. Start within <strong>10 metres</strong> of the service corridor, then descend to the exit. Heights are sampled from the map; local rises over 5 metres are rejected. Use 2–128 points per path, at most 16 paths and 1,024 points per lift.</p>
+<p>A skier considers entries below their current position and chooses the <strong>shortest remaining distance</strong> to a safe exit, including the service approach. Without a shorter eligible exit, they continue to the lower terminal. Service trails remain closed to ordinary downhill traffic. Test both sides of each entry and save/reload during evacuation; test authored route changes in a new game.</p>
 </section>
 <section class="step" id="test"><p class="step-number">STEP 05</p><h2>Build the separate projects, then play</h2>
 <p>Open a terminal in the extracted practice folder:</p>

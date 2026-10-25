@@ -33,7 +33,7 @@ function Riders.read(state,guests,now)
         else
             local p=h.WorldPosition;local g=cold.GuestId
             by_lift[known.id]=by_lift[known.id] or {}
-            by_lift[known.id][#by_lift[known.id]+1]={X=p.X,Y=p.Y,Z=p.Z,
+            by_lift[known.id][#by_lift[known.id]+1]={X=p.X,Y=p.Y,Z=p.Z,index=index-1,
                 discipline=cold.Discipline,color=h.ColorIndex,guest={A=g.A,B=g.B,C=g.C,D=g.D},key=known.key}
         end
     end

@@ -19,6 +19,7 @@ local Chair=require('surface_lift_chair')
 local Groom=require('surface_lift_grooming')
 local Refresh=require('surface_lift_refresh')
 local Riders=require('surface_lift_riders')
+local Evac=require('surface_lift_evacuation')
 local Lifts={}
 local adapted={}
 local rendered={}
@@ -31,7 +32,8 @@ end
 function Lifts.is_adapted(lift) return lift and adapted[lift:GetAddress()]~=nil end
 function Lifts.closed_reason(lift)
     local i=lift and adapted[lift:GetAddress()]
-    return i and (i.snow_blocked and (i.snow_reason=='excess'and 'Excès de neige sur la ligne de montée — damage nécessaire' or 'Manque de neige sur la ligne de montée')
+    return i and ((i.evacuation_waiting or 0)>0 and 'Évacuation de la voie de service en cours'
+        or i.snow_blocked and (i.snow_reason=='excess'and 'Excès de neige sur la ligne de montée — damage nécessaire' or 'Manque de neige sur la ligne de montée')
         or i.requested_speed==0 and 'Arrêt manuel') or nil
 end
 local function valid(o) return o and o:IsValid() end
@@ -56,7 +58,7 @@ local function snow_status(state,item,blocked,reason)
     item.snow_reason=reason
     -- Native Off winds down while carrying existing riders. A bare towing
     -- line requires an immediate mechanical stop, including those riders.
-    item.lift.OperatingSpeed=(blocked or item.requested_speed==0) and 0 or item.definition.speed_mps*100
+    item.lift.OperatingSpeed=(blocked or item.requested_speed==0 or(item.evacuation_waiting or 0)>0) and 0 or item.definition.speed_mps*100
     if blocked then set_speed(item,0)
     elseif item.requested_speed>0 then set_speed(item,item.requested_speed) end
     state.api:mod_state().speed_requests[item.id]=item.requested_speed
@@ -104,7 +106,7 @@ local function hooks()
         if item and not item.setting_speed then
             item.requested_speed=setting:get()
             item.state.api:mod_state().speed_requests[item.id]=item.requested_speed
-            item.lift.OperatingSpeed=(item.snow_blocked or item.requested_speed==0) and 0 or item.definition.speed_mps*100
+            item.lift.OperatingSpeed=(item.snow_blocked or item.requested_speed==0 or(item.evacuation_waiting or 0)>0) and 0 or item.definition.speed_mps*100
             if item.snow_blocked and item.requested_speed~=0 then set_speed(item,0) end
         end
     end)
@@ -275,6 +277,7 @@ local function restore(item,removed)
     adapted[item.address]=nil
     rendered[item.address]=nil
     if item.audio then Audio.dispose(item.audio) end
+    Evac.remove(item.state,item)
     Groom.remove(item.state,item)
     destroy(item.visual)
     if removed or not current(item.lift) then return end
@@ -324,6 +327,7 @@ local function attach(state,a,d)
     hide_native(item);visual(state,item)
     item.audio=Audio.create(item)
     Groom.attach(state,item)
+    Evac.attach(state,item)
     state.bindings[d.name]=item.id
     return item
 end
@@ -434,6 +438,7 @@ local function update(state)
             Wheels.update(item,item.native_phase,item.native_length,env.seconds,item.lift:GetEffectiveOperatingSpeed()*math.max(1,env.rate or 1),env.paused,camera)
         end
     end end
+    Evac.update(state,passengers,env)
     -- Bind real boarding events to retained hangers. The game's uniformly
     -- spaced virtual seats enforce the same configured minimum headway.
     for _,item in ipairs(state.items)do if item.definition.kind~='fixed_chair' and not item.disposed and item.native_phase then
@@ -593,6 +598,7 @@ function Lifts.configure(api,definitions,assets)
     hooks()
     local function cleanup()
         if state.stopped then return end;state.stopped=true
+        Evac.dispose(state)
         for _,item in ipairs(state.items) do restore(item) end
         for _,p in ipairs(state.pool) do destroy(p.actor) end
         Pose.dispose(state)
@@ -631,6 +637,7 @@ function Lifts.configure(api,definitions,assets)
             end
         end
         Native.visuals(state.items)
+        if state.groom_hidden then Terrain.rebuild_trail_visuals(true)end
         api:mod_state().bindings=state.bindings
     end,debug.traceback)
     if not ok then cleanup();error(message,2) end
@@ -670,6 +677,8 @@ function Lifts.configure(api,definitions,assets)
                 out[#out].grooming_trail=item.groom_trail
                 out[#out].grooming_requests=item.groom_requests
                 out[#out].grooming_stamps=item.groom_stamps
+                out[#out].evacuation_waiting=item.evacuation_waiting or 0
+                out[#out].evacuated=item.evacuated or 0
                 out[#out].requested_speed=item.requested_speed
                 out[#out].ascent_side=item.definition.ascent_side or 'right'
                 out[#out].moving_wheels=#(item.wheels or{})

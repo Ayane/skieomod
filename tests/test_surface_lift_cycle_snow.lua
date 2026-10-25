@@ -123,6 +123,13 @@ assert(C.encode(restored)==encoded,'Hanger identities, guests and FIFO order cha
 assert(#encoded*6<27000,'All six detachable lifts exceed the state budget')
 assert(not pcall(C.decode,encoded:sub(1,-3),rail,1500),'Truncated retained stock accepted')
 assert(not pcall(C.decode,encoded..'AAAA',rail,1500),'Trailing hanger bytes accepted')
+local shorter={length=1500,points=rail.points}
+local rebased=C.decode(C.encode(saved),shorter,1500)
+for _,p in ipairs(rebased.poles)do if p.s then assert(p.s>=0 and p.s<=shorter.length)end end
+local old=C.decode('U0tIUAIAAAAAAAAAAAAAAAEAAAAA+kQCAAAA4PhE',shorter,1500)
+assert(old.poles[1].id==1 and old.poles[1].s==1500 and old.poles[2].id==2 and old.poles[2].s<1500,'Legacy snow-adjusted rail lost FIFO identity or exceeded its endpoint')
+local extended=C.decode(C.encode(old),{length=2100,points=rail.points},1500)
+assert(extended.poles[1].s==2100,'Stored rail progress did not follow a longer restored rail')
 print('Compact retained hanger state roundtrips inside the 32 KiB map state limit')
 local negative_guid=string.format('%08x-%08x-%08x-%08x',-1,-2,123,0)
 local signed=C.create(4,rail,1500);assert(C.dispatch(signed,rail,0,negative_guid,false,1500))

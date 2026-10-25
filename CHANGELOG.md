@@ -7,6 +7,20 @@ have their own package versions. Download the
 
 ## [Unreleased]
 
+## [1.28.0] - 2026-10-25
+
+- Narrow Veymont's surface-lift service corridors to 5 metres and move them
+  clear of the pylons; bound the snow-clearing blade to the corridor.
+- Release surface-lift passengers when a line stops and send them downhill
+  on native service routes, with optional shorter authored emergency exits.
+- Hold native snowcats and new grooming requests until evacuated skiers clear
+  the corridor, including jobs already in progress; preserve evacuation in saves.
+- Add groomed emergency exits at both Pré Levé bends (P6 to Les Bouquetins,
+  P9 to Les Tétras) and from Pierre Blanche to Marmottes.
+- Restore detachable hanger positions when changed snow alters the station rail
+  length, including saves made before this update.
+- Document service geometry and emergency-route configuration in the tutorial.
+
 ## [1.27.0] - 2026-10-25
 
 - Let maps override surface-lift models and palettes per installation and per

@@ -6,7 +6,7 @@ Pour ajouter une remontée à votre propre carte, commencez par le
 Le [chapitre sur les modèles personnalisés](https://skieomod.emillon.fr/tutorials/surface-lifts/#models)
 explique l’export Blender, les rôles des maillages et la publication de votre propre mapmod.
 
-Veymont 0.8.0 distingue le Blanchon, télésiège fixe deux places, des huit
+Veymont 0.8.1 distingue le Blanchon, télésiège fixe deux places, des huit
 remontées à perches. Le mapmod `community.surface-lifts` est distribué dans
 une archive séparée, comme les renards.
 
@@ -203,8 +203,11 @@ un arrêt manuel reste un arrêt après le retour de la neige. Les remontées
 éloignées de la caméra sont elles aussi contrôlées. Le contrôle est périodique,
 sa latence dépend du nombre d'échantillons et de la cadence du jeu.
 
-Les huit couloirs de montée, de 20 m de large, sont enregistrés dans le système
-de damage natif et fermés aux descentes des clients. Leur identité suit le
+Les huit couloirs de service font désormais 5 m de large et leur axe est décalé
+de 3,5 m du côté de la montée, laissant 1 m libre autour des pylônes. Ils sont
+enregistrés dans le système de damage natif et fermés aux descentes ordinaires.
+Les dameuses travaillent sur leur axe, sans décalage de lame vers les pylônes.
+Leur identité suit le
 GUID de la remontée et leur géométrie suit les virages et le terrain. Les
 demandes d'entretien utilisent le même chemin que le bouton natif « Damer
 maintenant » ; le garage, les employés, les horaires et les trajets des
@@ -217,6 +220,37 @@ Le pont natif emploie l'opération de déneigement du moteur, bornée à 256
 empreintes par appel et protégée par les empreintes des deux fonctions
 complètes revues sur le build Steam 26178224. Les textures de lecture ne
 sont pas utilisées pour modifier la neige.
+
+Depuis le chargeur 1.28.0, un arrêt libère les passagers des téléskis et les fait
+redescendre par la voie de service avec la simulation native. Le suivi des
+passagers, les réservations de sièges et les files sont libérés par le jeu.
+Les dameuses suspendent réellement leur trajet et leur travail tant que des
+skieurs évacués occupent le couloir, y compris si un chantier est déjà engagé.
+La reprise de la remontée attend également la libération du passage.
+L'évacuation et les trajets natifs sont conservés en sauvegarde.
+
+Veymont ajoute deux sorties au Pré Levé : **P6 → Les Bouquetins** et
+**P9 → Les Tétras**, et un raccord de Pierre Blanche vers **Marmottes**.
+Les deux raccords du Pré Levé sont reportés depuis l'orthophotographie IGN aux
+coudes indiqués par l'auteur de la carte ; celui de Pierre Blanche suit le
+[chemin OSM 867712604](https://www.openstreetmap.org/way/867712604).
+Le relevé sourcé est conservé dans `maps/veymont/evacuation-routes.json`.
+`python3 -m tools.build_veymont_evacuation` rééchantillonne les altitudes et
+met à jour le manifeste. Ces voies forestières sont dégagées des arbres et
+intégrées au damage nocturne natif ; elles attendent aussi la fin de l'évacuation.
+
+Une définition peut régler `service_width_m` (4–10 m, défaut 5) et
+`service_offset_m` (3–10 m vers la montée, défaut 3,5). Le bord du couloir doit
+rester à au moins 1 m des pylônes. `evacuation_routes` contient des voies de
+secours descendantes, chacune sous forme de points `[x,y,z]` en centimètres
+monde. Le départ doit se trouver à moins de 10 m du couloir ; l'arrivée doit
+rejoindre une piste sûre située plus bas. Le chargeur rééchantillonne les
+altitudes et refuse les remontées locales de plus de 5 m. Les limites sont de
+16 voies par installation, 2–128 points par voie et 1 024 points au total.
+Chaque skieur choisit la sortie accessible en aval demandant la plus courte
+distance, approche comprise ; sinon il descend jusqu'au départ du téléski.
+Voir le [tutoriel](surface-lifts-tutorial.md#service-corridors-and-stopped-lifts)
+pour un exemple. Les télésièges conservent leur comportement natif.
 
 Les poulies ordinaires Poma sont verticales et alignées sur la pente du
 câble. Les câbles mobiles utilisent le matériau sans accumulation de neige.
@@ -242,6 +276,25 @@ réordonnés ou raccourcis, les associations malgré un décalage de phase natif
 les roues hors champ, la pause et le plafond de capture pendant les déplacements
 de caméra. Les tests de cycle couvrent aussi une sortie de gare hors champ.
 Les archives se construisent avec `skieomod build --check-scripts` lorsque `luac` 5.4 est installé ; les tests Lua utilisent également Lua 5.4.
+`tests/test_surface_lift_evacuation_routes.lua` contrôle le choix de la sortie
+accessible la plus courte, la continuité des voies natives et le rejet des
+trajets déconnectés ou trop montants. `tests/test_surface_lift_evacuation.lua`
+contrôle les GUID signés, les skieurs blessés, la pause, la compaction des
+visiteurs, les occupations distinctes du couloir et des sorties forestières,
+et la période de restauration. `tests/test_veymont_evacuation.py` conserve les
+deux raccords des P6/P9 et les altitudes du manifeste sur le R16 réel.
+Le cycle des perches conserve aussi la longueur du rail de stockage pour
+recaler les positions lors d'une reprise avec un enneigement différent ;
+les anciens mémos restent lisibles.
 Les essais visuels et les cycles de sauvegarde utilisent UE4SS dans une copie
 isolée du jeu, avec Gamescope headless ; aucune touche ni activation de fenêtre
 n'est nécessaire.
+
+La revue de 1.28.0 sur le build Steam 26178224 vérifie en jeu les huit
+couloirs de 5 m, les 31 voies et leur conservation après GC. Les essais
+confirment le passage par chacune des trois sorties forestières, le retour
+du compteur natif de passagers à zéro, l'immobilisation d'une dameuse déjà
+en travail, puis la reprise du damage et des embarquements. Une vraie
+sauvegarde du Blavet en cours d'évacuation conserve les six GUID, leur
+activité native de descente, leur voie et les blocages de damage après
+rechargement ; les skieurs terminent ensuite leur descente.

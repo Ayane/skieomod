@@ -81,7 +81,7 @@ function C.at(rail,s)
 end
 function C.create(count,rail,minimum)
  assert(count>=1 and count<=512,'Too many detachable carriers')
- local s={poles={},minimum=minimum,pitch=math.min(9,rail.length/(count+5)),travel=0,order=count+4,dispatches=0,returns=0}
+ local s={poles={},rail_length=rail.length,minimum=minimum,pitch=math.min(9,rail.length/(count+5)),travel=0,order=count+4,dispatches=0,returns=0}
  for i=1,count+4 do s.poles[i]={id=i,state='stock',s=rail.length-(i-1)*s.pitch,order=i}end
  return s
 end
@@ -103,6 +103,7 @@ function C.release(s,p)
  p.guest=nil
 end
 function C.advance(s,rail,step)
+ s.rail_length=rail.length
  step=math.max(0,step);s.travel=s.travel+step
  if step==0 then return end
  local queue={};for _,p in ipairs(s.poles)do if p.state~='line'then queue[#queue+1]=p end end
@@ -180,7 +181,7 @@ function C.encode(s)
  local queue,line={},{}
  for _,p in ipairs(s.poles)do if p.state=='line'then line[#line+1]=p else queue[#queue+1]=p end end
  table.sort(queue,function(a,b)return a.order<b.order end);table.sort(line,function(a,b)return a.id<b.id end)
- local parts={string.pack('<c4I2I4I4I2','SKHP',#s.poles,s.dispatches,s.returns,s.last_id or 0)}
+ local parts={string.pack('<c4I2I4I4I2f','SKH2',#s.poles,s.dispatches,s.returns,s.last_id or 0,assert(s.rail_length))}
  for _,p in ipairs(queue)do parts[#parts+1]=string.pack('<I2Bf',p.id,p.state=='stock'and 0 or 1,p.s)end
  for _,p in ipairs(line)do
   parts[#parts+1]=string.pack('<I2BI2',p.id,p.guest and 3 or 2,p.index)
@@ -192,8 +193,13 @@ function C.encode(s)
 end
 function C.decode(text,rail,minimum)
  local bytes=unbase64(text);local magic,n,dispatches,returns,last_id,at=string.unpack('<c4I2I4I4I2',bytes)
- assert(magic=='SKHP'and n>=1 and n<=516 and last_id<=n,'Invalid retained hangers')
- local s={poles={},minimum=minimum,pitch=math.min(9,rail.length/(n+1)),travel=0,order=0,dispatches=dispatches,returns=returns}
+ assert((magic=='SKHP'or magic=='SKH2')and n>=1 and n<=516 and last_id<=n,'Invalid retained hangers')
+ local previous_length
+ if magic=='SKH2' then
+  previous_length,at=string.unpack('<f',bytes,at)
+  assert(previous_length==previous_length and previous_length>0 and previous_length<1e6,'Invalid retained hanger rail length')
+ end
+ local s={poles={},rail_length=rail.length,minimum=minimum,pitch=math.min(9,rail.length/(n+1)),travel=0,order=0,dispatches=dispatches,returns=returns}
  if last_id>0 then s.last_id=last_id end
  local seen={}
  for _=1,n do
@@ -201,7 +207,7 @@ function C.decode(text,rail,minimum)
   assert(id>=1 and id<=n and not seen[id]and tag<=3,'Invalid hanger identity');seen[id]=true
   local p={id=id}
   if tag<2 then
-   p.s,at=string.unpack('<f',bytes,at);assert(p.s>=0 and p.s<=rail.length+.1,'Stored hanger is outside its rail')
+   p.s,at=string.unpack('<f',bytes,at);assert(p.s==p.s and p.s>=0 and p.s<=(previous_length or rail.length+1000)+.1,'Stored hanger is outside its rail')
    p.state=tag==0 and'stock'or'rail';s.order=s.order+1;p.order=s.order
   else
    p.state='line';p.index,at=string.unpack('<I2',bytes,at)
@@ -213,6 +219,15 @@ function C.decode(text,rail,minimum)
   s.poles[#s.poles+1]=p
  end
  assert(at==#bytes+1,'Trailing hanger memento bytes')
+ -- Snow changes the clamp's boarding reach and thus the station rail length.
+ -- Preserve hanger identities/FIFO order while rebasing their rail progress.
+ -- Legacy saves omitted the length; a stocked front hanger anchors a modest
+ -- contraction (up to 10 m), otherwise the current rail is the safe baseline.
+ if not previous_length then
+  previous_length=rail.length
+  for _,p in ipairs(s.poles)do if p.s then previous_length=math.max(previous_length,p.s)end end
+ end
+ for _,p in ipairs(s.poles)do if p.s then p.s=math.min(rail.length,p.s*rail.length/previous_length)end end
  return s
 end
 return C

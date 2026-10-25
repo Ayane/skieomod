@@ -11,14 +11,14 @@ local route=G.route(definition,function()return 0 end)
 local curves=Groom.curves(route)
 assert(#curves>=4)
 local first,last=curves[1],curves[#curves]
-assert(math.abs(first.StartPoint.X-(route.points[#route.points].x-route.points[#route.points].nx*160))<1e-8)
-assert(math.abs(last.Endpoint.Y-(route.points[1].y-route.points[1].ny*160))<1e-8)
+assert(math.abs(first.StartPoint.X-(route.points[#route.points].x-route.points[#route.points].nx*350))<1e-8)
+assert(math.abs(last.Endpoint.Y-(route.points[1].y-route.points[1].ny*350))<1e-8)
 for i,c in ipairs(curves)do
- assert(c.CorridorWidth==2000)
+ assert(c.CorridorWidth==500)
  if i>1 then assert(c.StartPoint==curves[i-1].Endpoint,'Maintenance corridor disconnected')end
  assert(c.ControlPoint.X==(c.StartPoint.X+c.Endpoint.X)*.5)
 end
-local actor={x=840,y=2000,IsValid=function()return true end,IsActorBeingDestroyed=function()return false end,
+local actor={x=650,y=2000,IsValid=function()return true end,IsActorBeingDestroyed=function()return false end,
  GetFullName=function()return 'SnowcatVehicleActor test'end,GetWorld=function()return world end,
  K2_GetActorLocation=function(self)return{X=self.x,Y=self.y,Z=0}end,GetAddress=function()return 2 end}
 local job=true
@@ -41,10 +41,12 @@ actor.y=2300;Groom.update(state,env);assert(draws>0,'A moving native snowcat on 
 local before=draws
 actor.y=5900;Groom.update(state,env);assert(draws==before,'A teleport changed the snow')
 actor.x=8000;actor.y=6000;Groom.update(state,env);actor.x=8100;Groom.update(state,env);assert(draws==before,'A snowcat outside the ascent graded the line')
-actor.x=840;actor.y=2500;Groom.update(state,env)
+actor.x=650;actor.y=2500;Groom.update(state,env)
 job=false;actor.y=2800;Groom.update(state,env);assert(draws==before,'Snow changed without a native maintenance job')
 job=true;snow.snow_cm=50;actor.y=3000;Groom.update(state,env);assert(draws==before,'Blade added snow to a shallow track')
 snow.snow_cm=300;snow.snow_ready=false;actor.y=3200;Groom.update(state,env);assert(draws==before,'Unknown snow was overwritten')
+snow.snow_ready=true;item.evacuation_waiting=1;actor.y=3300;Groom.update(state,env);assert(draws==before,'Snowcat graded an evacuation corridor')
+item.evacuation_waiting=0
 snow.snow_ready=true;env.paused=true;actor.y=3400;Groom.update(state,env);assert(draws==before,'Paused snowcat changed snow')
 -- Exercise the real packet writer: a long blade sweep must retain its last
 -- samples, and an old success file must never validate a silent native call.
@@ -66,7 +68,7 @@ package.loadlib=function()return function()
  batches[#batches+1]=storage[job]
  if reply then storage[status]='ok: native snowcat blade'end
 end end
-local stamps={};for i=1,55 do stamps[i]={x=i*100,y=0,nx=0,ny=1}end
+local stamps={};for i=1,300 do stamps[i]={x=i*100,y=0,radius=250}end
 grade(state,stamps)
 assert(#batches==2)
 local total=0
@@ -75,9 +77,9 @@ for _,bytes in ipairs(batches)do
  assert(magic=='SKSG'and version==2 and owner==4 and cls==5 and count<=256)
  assert(#bytes==32+count*24);total=total+count
 end
-assert(total==275,'Long native movement lost blade samples')
-local x,y=string.unpack('<dd',batches[2],#batches[2]-23)
-assert(x==5500 and y==200,'Last blade edge was dropped')
+assert(total==300,'Long native movement lost blade samples')
+local x,y,radius=string.unpack('<ddf',batches[2],#batches[2]-23)
+assert(x==30000 and y==0 and radius==250,'Last bounded blade footprint was dropped')
 reply=false;assert(not pcall(grade,state,{{x=0,y=0}}),'A stale native success validated a failed call')
 io.open,os.remove,package.loadlib=original_open,original_remove,original_load
 print('Native snowcat maintenance: connected ascent, movement, snow and pause guards, complete bounded blade packets and stale-result rejection OK')

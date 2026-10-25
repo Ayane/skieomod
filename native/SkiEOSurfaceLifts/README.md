@@ -65,3 +65,20 @@ never spawns or teleports a groomer or fabricates a completed maintenance job.
 Build with `sh native/SkiEOSurfaceLifts/build.sh` (MinGW-w64). It uses the same
 unmodified MinHook 1.3.4 sources as SkiEOTrailRatings; the distributed loader
 includes `LICENSE-MINHOOK.md`. No game machine code or game assets are shipped.
+
+`evacuation.h` adds a game-thread-only bridge for stopped surface lifts on
+26178224. Lua validates reflected arrays and route fields. The bridge hashes
+all complete reviewed functions before using the native release accounting,
+route destructors/constructors, activity transition and skiing projection.
+The public OnLiftDeleted path releases seats and reservations; the actor and
+save GUID remain. SKEV v1 has a 64-byte header and at most 4,096 48-byte guest
+entries, checked by index and GUID before any mutation. Ski routes use native
+trail-ID arrays, so movement and serialization stay native.
+
+SKWT v2 is a fixed 2,208-byte job with a 32-byte header and up to 272 ordered
+trail-ID/blocked pairs. Three guarded native snowcat phase hooks stop active
+jobs before movement or grading while evacuated skiers occupy the corridor.
+For registered service/escape trails they also zero the native lateral lane
+offset, whose use is anchored by the complete reviewed position helper. Native
+snowcats follow the narrow corridor centre rather than driving through pylons.
+An empty job clears this registry on disposal; other jobs forward unchanged.
