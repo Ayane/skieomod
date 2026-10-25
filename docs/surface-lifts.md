@@ -75,6 +75,32 @@ Chaque définition contient `name`, `route` (points `[x,y,z]` en cm), `kind`
 `return_station`, `release`, `fixed`, `modern`, `lattice`, `chair_drive`,
 `chair_return` à des ressources déclarées par le paquet. Les fichiers SKPM sont bornés et validés avant tout appel Unreal.
 
+Depuis le chargeur **1.27.0**, une définition peut contenir `models`, un
+objet partiel associant ces rôles à des fichiers de **la carte**. Elle peut
+également contenir `pylon_models`, un tableau de `{index, models}`. Les indices
+commencent à 1 au premier pylône intermédiaire depuis la gare aval, sans les
+terminaux. Les rôles par pylône sont `tower`, `angle_tower`, `return_support`,
+`return_angle`, `fixed_return_support`, `guide_wheel`, `chair_tower`, `chair_head`
+et `palette`. Pour les télésièges, les supports natifs sont triés le long de
+l'axe. Un indice doit exister et ne peut être déclaré deux fois.
+
+La priorité est : modèles fournis par le mapmod, surcharge de la remontée,
+surcharge du pylône. Les fichiers personnalisés doivent figurer dans
+`content.assets` de la carte. Le chargeur lit les ressources du mapmod dans
+son propre paquet et les surcharges dans celui de la carte, même si les chemins
+sont identiques. Il prépare tous les modèles avant de modifier les acteurs
+natifs et rejette les rôles inconnus, chemins invalides et données mal formées.
+Le mapmod `community.surface-lifts` **0.1.0** reste inchangé : il transmet déjà
+ces définitions au chargeur. Aucune copie du mapmod n'est nécessaire.
+
+Les fichiers réutilisés ne sont décodés/importés qu'une fois par session.
+Limites globales : 64 maillages personnalisés en plus des 24 modèles par défaut,
+32 palettes, 32 Mio de SKPM et 500 000 sommets décodés. Les perches visibles
+partagent toujours un pool de 128 emplacements ; son réordonnancement réutilise
+les variantes existantes plutôt que de recréer des composants par image.
+Le [tutoriel](https://skieomod.emillon.fr/tutorials/surface-lifts/#models)
+présente le JSON complet et une carte d'exercice à deux remontées.
+
 Les corps natifs restent enregistrés : gestion, billets, employés, entretien
 et sérialisation ne sont pas remplacés par une simulation parallèle. Un
 maillage de sockets transitoire, propre à chaque acteur, fournit une place

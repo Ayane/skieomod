@@ -33,7 +33,7 @@
 <section class="step" id="dependency"><p class="step-number">STEP 03</p><h2>Let your map request the mapmod</h2>
 <p>Use <strong>File → Show project folder</strong>, then open <code>custom-map.json</code> in a text editor. Add this entry to the top-level <code>dependencies</code> array, preserving other dependencies:</p>
 <div class="command"><pre><code>{"id": "community.surface-lifts", "version": "=0.1.0"}</code></pre><button type="button" class="copy">Copy</button></div>
-<p>The ID and version select a separate <code>.skieomod</code> package. Keep that package separate from your <code>.skieomap</code>; do not copy its assets or <code>custom-mod.json</code> into the map. Published maps download their declared dependencies before starting.</p>
+<p>The ID and version select a separate <code>.skieomod</code> package. Keep that package separate from your <code>.skieomap</code>; leave its default assets and <code>custom-mod.json</code> there. Published maps download their declared dependencies before starting. Your optional replacement models belong to the map itself; see <a href="#models">step 7</a>.</p>
 </section>
 <section class="step" id="route"><p class="step-number">STEP 04</p><h2>Give the towing line its route</h2>
 <p>Add this top-level <code>extensions</code> fragment to the map manifest, merging it with any existing extensions:</p>
@@ -85,78 +85,70 @@ skieomod run practice-mountain --dependency surface-lifts</code></pre><button ty
 </section>
 <section class="step" id="models">
 <p class="step-number">OPTIONAL · STEP 07</p><h2>Use your own models</h2>
-<p>The standard map options choose among the models shipped by the mapmod. To
-supply your own geometry, make a separate version of the mapmod and change its
-model table. A <code>drive</code> value such as <code>Assets/my-drive.skpm</code> is not supported:
-<code>drive</code> still accepts only <code>open</code>, <code>covered</code> or <code>modern</code>.</p>
-<h3>Make your own mapmod project</h3>
-<p>Copy the extracted <code>surface-lifts/</code> folder to <code>my-surface-lifts/</code>. In its
-<code>custom-mod.json</code>, change <code>id</code> to a namespaced ID you own, for example
-<code>yourname.surface-lifts</code>. Set your own <code>metadata.name</code>, <code>metadata.authors</code> and
-<code>metadata.version</code> (start at <code>0.1.0</code>). Keep the <code>map-api</code> runtime, <code>gameplay</code>
-permission, scripts and existing assets. Retain the original <code>LICENSE</code> and
-credits, and credit your added models in <code>CREDITS.txt</code>.</p>
-<p>The fork replaces <code>community.surface-lifts</code> for this map. Keep only one of them
-in the dependency graph: the loader accepts <strong>one <code>configure_surface_lifts</code>
-call per map session</strong>. The model table is shared by every configured line;
-there is currently no separate custom model table per lift.</p>
-<h3>Create and export a model with Blender</h3>
-<p>The loader reads <strong><code>.skpm</code> static meshes and one shared PNG palette</strong>. Keep your
-<code>.blend</code> files as authoring sources; FBX, OBJ and <code>.blend</code> files are not runtime
-lift models. No Unreal cooking or DLL build is needed for a model replacement.</p>
-<p>A working exporter and the original geometry definitions are in
-<a href="https://github.com/Ayane/skieomod/blob/main/tools/build_surface_lift_models.py"><code>tools/build_surface_lift_models.py</code></a>.
-Download a <a href="https://github.com/Ayane/skieomod/archive/refs/heads/main.zip">repository source checkout</a>
-into a separate work folder. The generator recreates its Blender scene from
-Python definitions; it does not read an edited <code>.blend</code> file. Add your geometry
-before the final <code># Keep an immediately usable authoring overview</code> block.
-For example, this creates a wider blue mast while keeping the standard support
-attachment positions:</p>
-<div class="command"><pre><code class="language-python">box('my footing', (0, 0, .12), (1.1, 1.1, .24), 2)
-rod('my blue mast', (0, 0, .24), (0, 0, 6.55), .24, 3, 12)
-rod('my crossarm', (0, 0, 6.8), (0, 1.65, 6.8), .09)
-rod('my brace', (0, 0, 4.8), (0, 1.6, 6.5), .06)
-ladder(.24, -.2, 6.6)
-export('my-tower')
+<p>With <strong>loader 1.27.0 or newer</strong>, your map can replace models for each lift and
+individual pylon while continuing to use the published
+<code>community.surface-lifts</code> <strong>0.1.0</strong> dependency. Keep its ID and dependency pin;
+you do not need to copy, edit or republish the mapmod.</p>
+<h3>Try the custom-model example</h3>
+<p>Download <a href="https://skieomod.emillon.fr/tutorials/surface-lifts/files/surface-lift-custom-models.zip">the custom-model practice map</a>
+and extract <code>practice-custom-models/</code> beside the original <code>surface-lifts/</code>
+project. It contains two native lifts: <strong>Practice platter</strong> has blue frames
+and lower pole casings, with an orange P2 and orange P2 pulleys; <strong>Default
+platter</strong> keeps the stock models. These cosmetic variants retain the original
+geometry and attachment points. Their files belong to the map, not the mapmod.</p>
+<p>Open <code>practice-custom-models/custom-map.json</code> in the editor, or inspect
+<a href="https://skieomod.emillon.fr/tutorials/surface-lifts/files/custom-models-options.json">its complete extension settings</a>.
+From the shared parent folder:</p>
+<div class="command"><pre><code class="language-sh">skieomod build surface-lifts
+skieomod build practice-custom-models --dependency surface-lifts
+skieomod run practice-custom-models --dependency surface-lifts
 </code></pre><button type="button" class="copy">Copy</button></div>
-<p>With Blender available as <code>blender</code>, run this from the repository checkout:</p>
-<div class="command"><pre><code class="language-sh">blender --background --threads 2 --python tools/build_surface_lift_models.py
+<h3>Select models per lift and pylon</h3>
+<p>In your map's <code>custom-map.json</code>, add <code>models</code> and optional <code>pylon_models</code> inside
+the relevant entry of <code>extensions[&quot;community.surface-lifts&quot;].lifts</code>. This is a
+fragment to add to an existing lift definition, keeping its name, route,
+<code>kind</code>, speed, capacity, <code>pylons</code> and other settings:</p>
+<div class="command"><pre><code class="language-json">&quot;models&quot;: {
+  &quot;drive&quot;: &quot;Assets/blue-drive.skpm&quot;,
+  &quot;tower&quot;: &quot;Assets/blue-tower.skpm&quot;,
+  &quot;platter_lower&quot;: &quot;Assets/blue-platter-lower.skpm&quot;,
+  &quot;palette&quot;: &quot;Assets/lift-palette.png&quot;
+},
+&quot;pylon_models&quot;: [{
+  &quot;index&quot;: 2,
+  &quot;models&quot;: {
+    &quot;tower&quot;: &quot;Assets/orange-tower.skpm&quot;,
+    &quot;guide_wheel&quot;: &quot;Assets/orange-guide-wheel.skpm&quot;
+  }
+}]
 </code></pre><button type="button" class="copy">Copy</button></div>
-<p>Copy the generated <code>mod/SkiEO-SurfaceLifts/Assets/my-tower.skpm</code> into
-<code>my-surface-lifts/Assets/my-tower.skpm</code>. This example uses the unchanged palette
-already in your fork. The script also writes <code>build/surface-lifts/models.blend</code>
-as a visual overview. Its collections are spread apart for inspection <strong>after
-export</strong>; those overview offsets must not enter your runtime meshes.</p>
-<p>The supplied exporter uses metres in Blender, bakes object transforms, then
-writes centimetres with <code>(x, -y, z)</code> coordinates and reflected normals. Model
-local X runs along the line, Z points up, and the loader handles rotation and
-left/right mirroring. Keep the source model's local origin and attachment
-positions: a tower is anchored at its foot, a station at its route-terminal
-reference, a wheel at its centre and a pole at its cable clamp. Do not centre
-each object independently before export.</p>
-<p>For hand-modelled meshes, reuse the script's <code>export(name)</code> routine in your
-Blender authoring script with your mesh objects in <code>parts</code>, the output folder
-in <code>OUT</code>, and the palette materials in <code>mats</code>. Each object's first material
-must belong to <code>mats</code>. This exporter assigns a palette colour per object; it
-does not export Blender shader graphs or an existing UV unwrap. Edit <code>PALETTE</code>
-and regenerate <code>palette.png</code> if you need different colours; replacing the
-shared palette changes every model using those colours.</p>
-<h3>Declare the files and select their roles</h3>
-<p>Add <code>Assets/my-tower.skpm</code> to <strong>both</strong> <code>files</code> and <code>content.assets</code> in
-<code>my-surface-lifts/custom-mod.json</code>. Append to the existing arrays; keep the
-other entries. Paths are relative to the mapmod root, use <code>/</code>, and are
-case-sensitive. Every new mesh or replacement PNG needs both declarations.</p>
-<p>In <code>my-surface-lifts/Scripts/main.lua</code>, keep the existing <code>local models = {...}</code>
-table. Insert this assignment immediately after that table, before
-<code>return function(api)</code>:</p>
-<div class="command"><pre><code class="language-lua">models.tower = 'Assets/my-tower.skpm'
-</code></pre><button type="button" class="copy">Copy</button></div>
-<p>This changes ordinary intermediate pylons. Bend pylons and the separately
-assembled wheels keep their original models. Other replacement slots are:</p>
+<p>Each model path is relative to <strong>your map project</strong>. Copy your replacement
+meshes and PNGs there, then add every path to the map's <code>content.assets</code> array,
+preserving existing entries. Unlike a mapmod manifest, a map does not need a
+separate top-level <code>files</code> array. Use <code>/</code> and exact spelling/case. Reopen the
+project in the editor after external edits.</p>
+<p>The selection order is <strong>mapmod defaults → this lift's <code>models</code> → this pylon's
+<code>models</code></strong>. Any omitted role inherits its previous value. A lift without
+<code>models</code> keeps the original appearance. A <code>models</code> object can replace only one
+piece; you do not need to supply all 24 models. <code>drive</code> and <code>return_station</code>
+retain their ordinary enum settings (<code>open</code>, <code>covered</code>, <code>modern</code>, etc.); the
+model role replaces the mesh chosen by those settings.</p>
+<p><code>index: 1</code> means the first intermediate pylon from the lower station, <code>2</code> means
+P2, and so on up to <code>pylons</code>. The two terminals are excluded. Each index may
+appear only once. The per-pylon roles are <code>tower</code>, <code>angle_tower</code>,
+<code>return_support</code>, <code>return_angle</code>, <code>fixed_return_support</code>, <code>guide_wheel</code>,
+<code>chair_tower</code>, <code>chair_head</code> and <code>palette</code>. <code>guide_wheel</code> replaces that pylon's
+moving pulleys, including its return-side pulleys when present. A bend uses
+<code>angle_tower</code>, so override that role if the target pylon is a bend.</p>
+<p>The same settings work for the mapmod's <code>chairlifts</code> entries. Their pylons are
+numbered along the route from bottom to top using the actual native supports;
+the chosen index must exist. If you change a route or support count, check the
+numbering again in a new game.</p>
+<h3>Available model roles</h3>
 <div class="table-wrap"><table>
 <thead>
 <tr>
-<th>Model table key</th>
+<th><code>models</code> key</th>
 <th>Role and selection</th>
 </tr>
 </thead>
@@ -207,38 +199,75 @@ assembled wheels keep their original models. Other replacement slots are:</p>
 </tr>
 <tr>
 <td><code>palette</code></td>
-<td>Shared PNG texture for all models.</td>
+<td>PNG texture shared by this lift or pylon.</td>
 </tr>
 </tbody>
 </table></div>
-<p>All <strong>24 mesh slots plus <code>palette</code> are required</strong>, including slots unused by
-your particular line. Keep the original files for anything you do not replace.
-The cable, wheel placement, towing poses and telescopic animation are generated
-by the loader; changing a mesh does not move their attachment points. Start
-with cosmetic changes that preserve the reference dimensions. Each SKPM mesh
-must fit the loader limits: 16 MiB, 150,000 vertices and 450,000 triangle indices
-(150,000 triangles). Keep repeated poles and wheels much smaller.</p>
-<h3>Bind the map to your fork, test and publish</h3>
-<p>In <code>practice-mountain/custom-map.json</code>, replace the dependency ID with
-<code>yourname.surface-lifts</code> and pin <code>=0.1.0</code>. Rename the extension key from
-<code>community.surface-lifts</code> to <code>yourname.surface-lifts</code>, keeping its <code>lifts</code>
-configuration unchanged. The extension key must match the fork's ID because
-<code>api:mapmod_options()</code> reads that namespace. Reopen the map in the editor after
-external edits.</p>
-<p>Run from the parent folder containing the two projects:</p>
-<div class="command"><pre><code class="language-sh">skieomod build my-surface-lifts
-skieomod build practice-mountain --dependency my-surface-lifts
-skieomod run practice-mountain --dependency my-surface-lifts
+<p>A palette may be replaced per lift or pylon. It colours the meshes using that
+bank; the generated cable and support fittings keep the lift palette. PNGs
+must be square, power-of-two, 8-bit RGB/RGBA images up to 512 × 512 pixels.</p>
+<p>The cable, wheel placement, towing poses and telescopic animation are generated
+by the loader. Keep the reference origins and attachment dimensions when
+replacing a mesh. Each SKPM is limited to 16 MiB, 150,000 vertices and 450,000
+triangle indices. Across the session, the loader permits up to 64 custom
+meshes and 32 palettes, with all meshes together capped at 32 MiB and 500,000
+vertices. Assets reused by several lifts or pylons are decoded/imported once.
+Keep repeated poles and wheels small.</p>
+<h3>Create and export a model with Blender</h3>
+<p>The loader reads <strong><code>.skpm</code> static meshes and PNG palettes</strong>. Keep your
+<code>.blend</code> files as authoring sources; FBX, OBJ and <code>.blend</code> files are not runtime
+lift models. No Unreal cooking or DLL build is needed for a model replacement.</p>
+<p>A working exporter and the original geometry definitions are in
+<a href="https://github.com/Ayane/skieomod/blob/main/tools/build_surface_lift_models.py"><code>tools/build_surface_lift_models.py</code></a>.
+Download a <a href="https://github.com/Ayane/skieomod/archive/refs/heads/main.zip">repository source checkout</a>
+into a separate work folder. The generator recreates its Blender scene from
+Python definitions; it does not read an edited <code>.blend</code> file. Add your geometry
+before the final <code># Keep an immediately usable authoring overview</code> block.
+For example, this creates a wider blue mast while keeping the standard support
+attachment positions:</p>
+<div class="command"><pre><code class="language-python">box('my footing', (0, 0, .12), (1.1, 1.1, .24), 2)
+rod('my blue mast', (0, 0, .24), (0, 0, 6.55), .24, 3, 12)
+rod('my crossarm', (0, 0, 6.8), (0, 1.65, 6.8), .09)
+rod('my brace', (0, 0, 4.8), (0, 1.6, 6.5), .06)
+ladder(.24, -.2, 6.6)
+export('my-tower')
 </code></pre><button type="button" class="copy">Copy</button></div>
-<p>Inspect a straight support, a bend if used, both terminals, moving wheels and
-occupied/unoccupied poles. Check a new game and a save/reload. If a model is
-missing, check both manifest lists and exact path spelling; if it floats or
-misses the cable, compare its origin and dimensions with the original mesh.</p>
-<p>Give the practice map your own map ID before publishing it. Publish your
-mapmod first with <code>skieomod publish my-surface-lifts</code>, then publish the map with
-<code>skieomod publish practice-mountain</code>. Keep them as separate packages. For later
-model edits, increase the fork's <code>metadata.version</code>, update the map's dependency
-pin and version, rebuild and publish both projects.</p>
+<p>With Blender available as <code>blender</code>, run this from the repository checkout:</p>
+<div class="command"><pre><code class="language-sh">blender --background --threads 2 --python tools/build_surface_lift_models.py
+</code></pre><button type="button" class="copy">Copy</button></div>
+<p>Copy the generated <code>mod/SkiEO-SurfaceLifts/Assets/my-tower.skpm</code> into
+<code>practice-mountain/Assets/my-tower.skpm</code>. This example uses the unchanged palette
+shipped by the mapmod, so this mesh does not need a custom <code>palette</code> entry. The script also writes <code>build/surface-lifts/models.blend</code>
+as a visual overview. Its collections are spread apart for inspection <strong>after
+export</strong>; those overview offsets must not enter your runtime meshes.</p>
+<p>The supplied exporter uses metres in Blender, bakes object transforms, then
+writes centimetres with <code>(x, -y, z)</code> coordinates and reflected normals. Model
+local X runs along the line, Z points up, and the loader handles rotation and
+left/right mirroring. Keep the source model's local origin and attachment
+positions: a tower is anchored at its foot, a station at its route-terminal
+reference, a wheel at its centre and a pole at its cable clamp. Do not centre
+each object independently before export.</p>
+<p>For hand-modelled meshes, reuse the script's <code>export(name)</code> routine in your
+Blender authoring script with your mesh objects in <code>parts</code>, the output folder
+in <code>OUT</code>, and the palette materials in <code>mats</code>. Each object's first material
+must belong to <code>mats</code>. This exporter assigns a palette colour per object; it
+does not export Blender shader graphs or an existing UV unwrap. Edit <code>PALETTE</code>
+and regenerate <code>palette.png</code> if you need different colours; replacing the
+shared palette changes every model using those colours.</p>
+<h3>Test, save and publish your map</h3>
+<p>Inspect both terminals, a straight support, bends, moving wheels and occupied
+and empty poles. Test in a new game and after saving/reloading. The normal
+native identities and management data remain unchanged; appearance is rebuilt
+from the map's configuration on loading.</p>
+<p>If a mesh is missing, check its path and <code>content.assets</code>; invalid paths,
+unknown roles, duplicate pylon indices and malformed SKPMs stop loading with an
+error. Files are read from the map's declared assets, even if the mapmod has a
+file with the same name. If a model floats or misses the cable, compare its
+origin and dimensions with the original.</p>
+<p>Increase your map version, rebuild and publish it using <code>skieomod publish practice-custom-models</code> (choose your own map ID before publishing the practice
+project). Players receive your replacement assets with the map and download
+the shared mapmod separately. A mapmod fork is useful only if you want to
+change its behaviour rather than supply different models.</p>
 </section>
 <section class="step" id="questions"><p class="step-number">TROUBLESHOOTING</p><h2>When the line does not behave as expected</h2>
 <details><summary>The original chairlift is still visible</summary><p>Check the dependency, exact name, centimetre conversion and lower terminal. Inspect UE4SS.log for <code>Surface lifts: 1 native installations adapted</code>. Check that loading finished successfully.</p></details>

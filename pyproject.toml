@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "skieo-custom-map"
-version = "1.26.2"
+version = "1.27.0"
 description = "Create, build, run and prepare Ski-E-O! maps and mods for Steam Workshop"
 authors = [{name = "Albatar (Élie Millon)"}]
 license = "BSD-3-Clause"

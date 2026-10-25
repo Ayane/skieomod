@@ -48,9 +48,10 @@ function W.travel(previous,phase,length,seconds,speed,paused)
  if delta>math.max(500,speed*dt*8)then return 0 end
  return delta
 end
-function W.add(item,state,base,radius,sign,model)
+function W.add(item,state,base,radius,sign,model,bank)
+ bank=bank or item.bank
  local Mesh=require('portable_mesh')
- local c=Mesh.component(item.visual,state.models[model or 'guide_wheel'],state.material)
+ local c=Mesh.component(item.visual,bank.models[model or 'guide_wheel'],bank.material)
  c:K2_SetWorldTransform(base,false,{},true)
  item.wheels=item.wheels or{};item.wheels[#item.wheels+1]={component=c,base=base,radius=radius,sign=sign or 1,travel=0}
  return c

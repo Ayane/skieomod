@@ -19,7 +19,7 @@ else:
     from custom_packages import inspect_package, pack_package, resolve
     from custom_maps import ManifestError, inspect_archive, load_manifest, pack, safe_relative_path, semver_compare, validate_manifest, validate_zip
 
-VERSION = '1.26.2'
+VERSION = '1.27.0'
 NAME = 'SkiEO-CustomMaps'
 RECORD = 'loader-release.json'
 MAX_ARCHIVE_BYTES = 64 * 1024 * 1024

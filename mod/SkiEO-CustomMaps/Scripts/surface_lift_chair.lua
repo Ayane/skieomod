@@ -1,3 +1,4 @@
+local Models=require('surface_lift_models')
 -- Reuse the native seats/queues and correct their cable's direction and tower
 -- passages. Static tower frames and moving rollers are separate components.
 local G=require('surface_lift_geometry')
@@ -29,6 +30,8 @@ function C.prepare(item,set_spline,Native)
   end
   item.chair_towers[#item.chair_towers+1]={base=base,heads=heads,component=component}
  end)
+ table.sort(item.chair_towers,function(a,b)return G.nearest(item.route,a.base.X,a.base.Y)<G.nearest(item.route,b.base.X,b.base.Y)end)
+ for index in pairs(item.pylon_banks)do assert(index<=#item.chair_towers,'Pylon model index exceeds native chairlift support count')end
  local groups={};local points={}
  for _,p in ipairs(item.splines.CableSpline.points)do
   local group
@@ -68,7 +71,8 @@ function C.prepare(item,set_spline,Native)
 end
 function C.towers(item,state)
  local supports={guides={},wheels={}};local spline=item.lift.CableSpline
- for _,t in ipairs(item.chair_towers)do
+ for index,t in ipairs(item.chair_towers)do
+  local bank=Models.support(item,index)
   local d=G.nearest(item.route,t.base.X,t.base.Y);local at=G.sample(item.route,d)
   local height=(t.heads[1].Z+t.heads[2].Z)*.5-t.base.Z;local maximum=-math.huge
   local support={x=t.base.X,y=t.base.Y,z=t.base.Z,height=height,return_height=height}
@@ -83,16 +87,16 @@ function C.towers(item,state)
     local tangent=P.sub(v(b),v(a));local radial={X=0,Y=0,Z=change>0 and -1 or 1}
     local base=W.frame(v(p),tangent,radial,18)
     maximum=math.max(maximum,base.Translation.Z+18)
-    W.add(item,state,base,18)
+    W.add(item,state,base,18,nil,nil,bank)
     supports.wheels[#supports.wheels+1]={base=base,support=#supports,lane=-160}
    end
   end
   local deck=maximum+50
   support.height=deck-t.base.Z-104;support.return_height=support.height
-  M.component(item.visual,state.models.chair_tower,state.material,t.base,math.deg(at.yaw),{X=1,Y=1,Z=(deck-t.base.Z-24)/900})
-  M.component(item.visual,state.models.chair_head,state.material,{X=t.base.X,Y=t.base.Y,Z=deck},math.deg(at.yaw))
+  M.component(item.visual,bank.models.chair_tower,bank.material,t.base,math.deg(at.yaw),{X=1,Y=1,Z=(deck-t.base.Z-24)/900})
+  M.component(item.visual,bank.models.chair_head,bank.material,{X=t.base.X,Y=t.base.Y,Z=deck},math.deg(at.yaw))
  end
- M.component(item.visual,Station.mounts(item.route,supports,G),state.material,{0,0,0})
+ M.component(item.visual,Station.mounts(item.route,supports,G),item.bank.material,{0,0,0})
 end
 function C.cable_mesh(item)
  local spline=item.lift.CableSpline;local length=spline:GetSplineLength();local points={}

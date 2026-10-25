@@ -1,0 +1,73 @@
+{
+  "lifts": [
+    {
+      "name": "Practice platter",
+      "kind": "detachable_platter",
+      "route": [
+        [
+          -8000,
+          24000,
+          0
+        ],
+        [
+          -8000,
+          0,
+          0
+        ],
+        [
+          -8000,
+          -24000,
+          0
+        ]
+      ],
+      "speed_mps": 2.5,
+      "capacity_per_hour": 600,
+      "pylons": 4,
+      "drive": "open",
+      "return_station": "floating",
+      "ascent_side": "left",
+      "models": {
+        "drive": "Assets/blue-drive.skpm",
+        "tower": "Assets/blue-tower.skpm",
+        "platter_lower": "Assets/blue-platter-lower.skpm",
+        "palette": "Assets/lift-palette.png"
+      },
+      "pylon_models": [
+        {
+          "index": 2,
+          "models": {
+            "tower": "Assets/orange-tower.skpm",
+            "guide_wheel": "Assets/orange-guide-wheel.skpm"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Default platter",
+      "kind": "detachable_platter",
+      "route": [
+        [
+          8000,
+          24000,
+          0
+        ],
+        [
+          8000,
+          0,
+          0
+        ],
+        [
+          8000,
+          -24000,
+          0
+        ]
+      ],
+      "speed_mps": 2.5,
+      "capacity_per_hour": 600,
+      "pylons": 4,
+      "drive": "open",
+      "return_station": "floating",
+      "ascent_side": "left"
+    }
+  ]
+}

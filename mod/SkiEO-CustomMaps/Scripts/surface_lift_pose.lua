@@ -1,3 +1,4 @@
+local Models=require('surface_lift_models')
 -- Native equipped skeleton, posed only for nearby towing passengers. Native
 -- crowd rendering takes over again at alighting or outside the detailed LOD.
 local Mesh=require('portable_mesh')
@@ -52,9 +53,13 @@ function Pose.prepare(state,discipline)
     state.poses=state.poses or {}
     return source
 end
-local function entry(state,index,discipline,source)
+local function entry(state,index,discipline,source,bank)
     state.pose_pool=state.pose_pool or {};local key=discipline..':'..index
-    if state.pose_pool[key]then return state.pose_pool[key]end
+    if state.pose_pool[key]then
+        local e=state.pose_pool[key]
+        if e.bank~=bank then Models.rebind(e.bundle,e.bank,bank,'poles_bundle');e.bank=bank end
+        return e
+    end
     local a=Mesh.actor();local c=a:AddComponentByClass(Mesh.load('/Script/Engine.PoseableMeshComponent'),false,Mesh.transform({0,0,0}),false)
     c:SetSkinnedAssetAndUpdate(source.component:GetSkeletalMesh_DEPRECATED(),true)
     c:SetCollisionEnabled(0);c:CopyPoseFromSkeletalComponent(source.component)
@@ -63,7 +68,7 @@ local function entry(state,index,discipline,source)
     -- The original two sticks share a material section. Replace that section
     -- with a single pair carried in the free hand; native skis stay on the rig.
     if discipline==0 then c:ShowMaterialSection(7,7,false,0)end
-    local e={actor=a,component=c,bones={},discipline=discipline,sole_z=source.sole_z,bundle=Mesh.component(a,state.models.poles_bundle,state.material)}
+    local e={actor=a,component=c,bones={},discipline=discipline,sole_z=source.sole_z,bank=bank,bundle=Mesh.component(a,bank.models.poles_bundle,bank.material)}
     for _,name in ipairs({'Hip','Belly','UpperArm_L','LowerArm_L','Hand_L','UpperArm_R','LowerArm_R','Hand_R',
         'UpperLeg_L','LowerLeg_L','Foot_L','UpperLeg_R','LowerLeg_R','Foot_R'})do
         local n=UE.FindOrAddFName(name);e.bones[name]={name=n,t=transform(source.component:GetBoneTransform(n,2))}
@@ -78,11 +83,12 @@ local function entry(state,index,discipline,source)
     end
     state.pose_pool[key]=e;state.poses[#state.poses+1]=e;return e
 end
-function Pose.place(state,index,rider,yaw,surface)
+function Pose.place(state,index,rider,yaw,surface,bank)
+    bank=bank or state.bank
     local source=Pose.prepare(state,rider.discipline)
     if state.clock_seconds-source.started<.2 then return nil end
     if rider.discipline==1 and state.clock_seconds-Pose.prepare(state,0).started<.2 then return nil end
-    local e=entry(state,index,rider.discipline,source);local legs={};materials(state);e.rider_key=rider.key;e.frame=state.clock_seconds
+    local e=entry(state,index,rider.discipline,source,bank);local legs={};materials(state);e.rider_key=rider.key;e.frame=state.clock_seconds
     local board_z,board_q
     if rider.discipline==1 then
         board_z,board_q=P.board_frame(rider.X,rider.Y,yaw,surface,e.sole_z)

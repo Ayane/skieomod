@@ -45,5 +45,31 @@ class SurfaceLiftTutorialTests(unittest.TestCase):
         _,manifest,_=inspect_package(tutorial.FILES/'tutorial.surface-lift-practice-0.1.0.skieomap','map')
         self.assertEqual(manifest['extensions']['community.surface-lifts'],tutorial.OPTIONS)
 
+    def test_custom_models_stay_in_the_map_with_the_original_shared_dependency(self):
+        with tempfile.TemporaryDirectory()as directory:
+            root=Path(directory)
+            with zipfile.ZipFile(tutorial.FILES/'surface-lift-custom-models.zip')as archive:
+                archive.extractall(root)
+            project=root/'practice-custom-models'
+            manifest=json.loads((project/'custom-map.json').read_text())
+            self.assertEqual(manifest['dependencies'],[{'id':'community.surface-lifts','version':'=0.1.0'}])
+            self.assertEqual(manifest['extensions']['community.surface-lifts'],tutorial.CUSTOM_OPTIONS)
+            scene=json.loads((project/'Scene/objects.json').read_text())
+            native={o['name']:o for o in compile_scene(scene,manifest)if o['kind']=='lift'}
+            self.assertEqual(len(native),2)
+            for lift in tutorial.CUSTOM_OPTIONS['lifts']:
+                self.assertEqual(native[lift['name']]['position_cm'],lift['route'][0][:2])
+                self.assertEqual(native[lift['name']]['end_position_cm'],lift['route'][-1][:2])
+                overrides=[lift.get('models',{}),*[p['models']for p in lift.get('pylon_models',[])]]
+                for models in overrides:
+                    for path in models.values():
+                        self.assertIn(path,manifest['content']['assets'])
+                        self.assertTrue((project/path).is_file())
+            with contextlib.redirect_stdout(io.StringIO()):archive,_=projects.build(project)
+            with zipfile.ZipFile(archive)as package:
+                self.assertTrue(any(p.endswith('.skpm')for p in package.namelist()))
+                self.assertNotIn('custom-mod.json',package.namelist())
+                self.assertFalse(any(p.endswith('.dll')for p in package.namelist()))
+
 
 if __name__=='__main__':unittest.main()

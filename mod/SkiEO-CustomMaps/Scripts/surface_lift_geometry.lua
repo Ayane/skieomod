@@ -19,6 +19,7 @@ function G.validate(d)
     assert(d.drive==nil or d.drive=='open' or d.drive=='covered' or d.drive=='modern','Unknown drive station')
     assert(d.return_station==nil or d.return_station=='floating' or d.return_station=='release' or d.return_station=='lattice','Unknown return station')
     assert(type(d.pylons)=='number' and d.pylons%1==0 and d.pylons>=1 and d.pylons<=32,'Invalid pylon count')
+    require('surface_lift_models').validate(d)
 end
 function G.route(definition,ground)
     G.validate(definition)

@@ -1,3 +1,4 @@
+local Models=require('surface_lift_models')
 -- Native queues, dispatch, passengers, staff, maintenance and save GUIDs remain
 -- owned by LiftActor. A private socket mesh gives passengers standing places;
 -- its transport spline follows the snow, separately from the visible cable.
@@ -197,9 +198,10 @@ end
 local function visual(state,item)
     local a=Mesh.actor();item.visual=a
     local route,supports=item.route,item.supports
-    local function part(model,p,scale)
+    local function part(model,p,scale,bank)
+        bank=bank or item.bank
         if scale then scale.Y=scale.Y*(route.mirror or 1)end
-        return Mesh.component(a,state.models[model],state.material,p,math.deg(p.yaw),scale)
+        return Mesh.component(a,bank.models[model],bank.material,p,math.deg(p.yaw),scale)
     end
     local bottom,top=supports[1],supports[#supports]
     if item.definition.kind=='fixed_chair' then
@@ -220,7 +222,7 @@ local function visual(state,item)
             local base=Mesh.transform({x=anchor.x,y=anchor.y,z=z/48},math.deg(p.yaw),{X=radius/200,Y=radius/200,Z=1})
             Wheels.add(item,state,base,radius,route.mirror,'inclined_wheel')
             if drive then
-                local motor=Mesh.component(a,state.models.motor,state.material)
+                local motor=Mesh.component(a,item.bank.models.motor,item.bank.material)
                 local at={X=base.Translation.X,Y=base.Translation.Y,Z=base.Translation.Z+35}
                 motor:K2_SetWorldTransform({Translation=at,Rotation=base.Rotation,Scale3D={X=1,Y=1,Z=1}},false,{},true)
             end
@@ -228,7 +230,7 @@ local function visual(state,item)
         terminal('chair_drive',item.lift.StartLoopSpline,bottom,true)
         terminal('chair_return',item.lift.EndLoopSpline,top)
         Chair.towers(item,state)
-        item.cable_component=Mesh.component(a,Chair.cable_mesh(item),state.material,{0,0,0})
+        item.cable_component=Mesh.component(a,Chair.cable_mesh(item),item.bank.material,{0,0,0})
         return
     end
     local station=bottom;local station_scale=bottom.height/500
@@ -246,16 +248,17 @@ local function visual(state,item)
     part(item.definition.return_station=='release' and 'release' or item.definition.return_station=='lattice' and 'lattice' or 'return_station',top,{X=1,Y=1,Z=top.height/500})
     for i=2,#supports-1 do
         local p=supports[i]
-        part(p.angle and 'angle_tower' or 'tower',p,{X=1,Y=1,Z=p.height/600})
+        local bank=Models.support(item,i-1)
+        part(p.angle and 'angle_tower' or 'tower',p,{X=1,Y=1,Z=p.height/600},bank)
         if p.return_used then
-            part(item.definition.kind=='fixed_platter' and 'fixed_return_support' or p.angle and 'return_angle' or 'return_support',p,{X=1,Y=1,Z=p.height/600})
+            part(item.definition.kind=='fixed_platter' and 'fixed_return_support' or p.angle and 'return_angle' or 'return_support',p,{X=1,Y=1,Z=p.height/600},bank)
         end
     end
     for terminal,p in ipairs({bottom,top})do
         local base=G.wheel_transform(p)
         Wheels.add(item,state,base,200*base.Scale3D.X,route.mirror,'inclined_wheel')
         if terminal==1 then
-            local motor=Mesh.component(a,state.models.motor,state.material)
+            local motor=Mesh.component(a,item.bank.models.motor,item.bank.material)
             motor:K2_SetWorldTransform({Translation=base.Translation,Rotation=base.Rotation,Scale3D={X=1,Y=1,Z=1}},false,{},true)
         end
     end
@@ -263,9 +266,9 @@ local function visual(state,item)
         Wheels.add(item,state,g.transform,g.radius,(group==supports.guides[1]and 1 or -1)*(g==group[-160]and 1 or -1))
     end end
     supports.wheels=Wheels.supports(route,supports,G,item.definition.kind)
-    for _,w in ipairs(supports.wheels)do Wheels.add(item,state,w.base,w.radius,w.sign)end
-    Mesh.component(a,Station.mounts(route,supports,G),state.material,{0,0,0})
-    item.cable_component=Mesh.component(a,G.cable_mesh(route,supports,nil,item.definition),state.material,{0,0,0})
+    for _,w in ipairs(supports.wheels)do Wheels.add(item,state,w.base,w.radius,w.sign,nil,Models.support(item,w.support-1))end
+    Mesh.component(a,Station.mounts(route,supports,G),item.bank.material,{0,0,0})
+    item.cable_component=Mesh.component(a,G.cable_mesh(route,supports,nil,item.definition),item.bank.material,{0,0,0})
 end
 local function restore(item,removed)
     if item.disposed then return end;item.disposed=true
@@ -288,6 +291,8 @@ local function restore(item,removed)
 end
 local function attach(state,a,d)
     local item={state=state,lift=a,address=a:GetAddress(),definition=d,original={},splines={},hidden={},id=guid(a:GetLiftId())}
+    local appearance=state.appearances[d]
+    item.bank=appearance.bank;item.pylon_banks=appearance.pylons
     state.items[#state.items+1]=item
     rendered[item.address]=item
     for _,key in ipairs(FIELDS) do item.original[key]=a[key] end
@@ -322,13 +327,7 @@ local function attach(state,a,d)
     state.bindings[d.name]=item.id
     return item
 end
-local function pool(state,index)
-    if state.pool[index] then return state.pool[index] end
-    local a=Mesh.actor();local c=Mesh.component(a,state.models.platter,state.material)
-    local p={actor=a,component=c,upper=Mesh.component(a,state.models.platter_upper,state.material),
-        shaft=Mesh.component(a,state.models.platter_shaft,state.material),lower=Mesh.component(a,state.models.platter_lower,state.material)}
-    state.pool[index]=p;return p
-end
+local pool=Models.perch
 local function place_perch(instance,kind,t,length)
     local fixed=kind=='fixed_platter'
     if not instance.visible or instance.kind~=kind then
@@ -463,7 +462,7 @@ local function update(state)
                             if j<=24 or pole.state=='rail' or pole.order>item.cycle.order-8 then
                                 local p=Cycle.at(item.rail,pole.s)
                                 local e=(p.x-camera.x)^2+(p.y-camera.y)^2+(p.z-camera.z)^2
-                                if e<18000^2 then stocks[#stocks+1]={p=p,distance=e}end
+                                if e<18000^2 then stocks[#stocks+1]={p=p,distance=e,item=item}end
                             end
                         end
                     end
@@ -496,7 +495,7 @@ local function update(state)
         -- In stations follow the native loop horizontally; along the line use
         -- the same lanes as the visible cable and terrain-following transport.
         if d<200 or d>item.route.length-200 then cable.x=p.X;cable.y=p.Y end
-        local instance=pool(state,i)
+        local instance=pool(state,i,item.bank)
         local transform,length
         local fixed=item.definition.kind=='fixed_platter'
         item.perch_springs=item.perch_springs or {}
@@ -509,7 +508,7 @@ local function update(state)
                     if z then return z,grade end
                     local along=d+(x-passenger.X)*math.cos(center.yaw)+(y-passenger.Y)*math.sin(center.yaw)
                     return towing_surface(item,along,x,y)
-                end)
+                end,item.bank)
             end
             seat=seat or {X=passenger.X-math.cos(center.yaw)*26,Y=passenger.Y-math.sin(center.yaw)*26,Z=passenger.Z+88}
             if fixed then
@@ -560,7 +559,7 @@ local function update(state)
     end end
     table.sort(stocks,function(a,b)return a.distance<b.distance end)
     for i=1,math.min(64,#stocks)do local p=stocks[i].p
-        n=n+1;local instance=pool(state,n)
+        n=n+1;local instance=pool(state,n,stocks[i].item.bank)
         place_perch(instance,'detachable_platter',Mesh.transform(p,math.deg(p.yaw)),295)
     end
     for i=n+1,#state.pool do local p=state.pool[i];if p.visible then
@@ -603,11 +602,11 @@ function Lifts.configure(api,definitions,assets)
         if session._surface_lifts==state then session._surface_lifts=nil end
     end
     local ok,message=xpcall(function()
-        for _,name in ipairs({'platter','platter_upper','platter_shaft','platter_lower','poles_bundle','tower','angle_tower','return_support','return_angle','fixed_return_support','inclined_wheel','guide_wheel','motor','chair_tower','chair_head','drive','covered','return_station','release','fixed','modern','lattice','chair_drive','chair_return'}) do
-            assert(type(assets[name])=='string','Missing lift model: '..name)
-            state.models[name]=Mesh.decode(api:read_asset(assets[name]))
-        end
-        state.material=Mesh.material(api,assets.palette)
+        state.model_library=Models.new(api,assets)
+        state.bank=state.model_library.base
+        state.models=state.bank.models;state.material=state.bank.material
+        state.appearances={}
+        for _,d in ipairs(definitions)do state.appearances[d]=state.model_library:definition(d)end
         local world=UE.GetWorld();local found={}
         local actors={};UE.GetGameplayStatics():GetAllActorsOfClass(world,Mesh.load('/Script/SkiResortSimulator.LiftActor'),actors)
         for _,a in ipairs(actors) do
@@ -620,7 +619,14 @@ function Lifts.configure(api,definitions,assets)
                         local p=a:GetBottomTerminalLocation();local b=d.route[1]
                         match=(p.X-b[1])^2+(p.Y-b[2])^2<5000^2
                     end
-                    if match then assert(not found[d.name],'Ambiguous surface lift binding');found[d.name]=true;attach(state,a,d) end
+                    if match then
+                        assert(not found[d.name],'Ambiguous surface lift binding');found[d.name]=true
+                        -- Complete source-terrain placement before taking over
+                        -- its splines. Deferred native grounding would otherwise
+                        -- rebuild a chairlift over the configured towing route.
+                        Terrain.align_lift(a)
+                        attach(state,a,d)
+                    end
                 end
             end
         end

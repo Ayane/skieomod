@@ -53,9 +53,10 @@ other dependencies, terrain settings and build settings:
 {"id": "community.surface-lifts", "version": "=0.1.0"}
 ```
 
-Keep the mapmod in its own project/package. Do not copy its meshes, scripts or
-`custom-mod.json` into the map. The game downloads the declared dependency
-when players start a published map.
+Keep the mapmod in its own project/package, with its default meshes, scripts
+and `custom-mod.json`. The game downloads that dependency when players start
+a published map. Optional replacement models belong to the map itself, as
+explained in step 7.
 
 ## 4. Describe the line
 
@@ -154,28 +155,111 @@ If you change the mapmod itself, use your own ID and version.
 
 ## 7. Use your own models (optional)
 
-The standard map options choose among the models shipped by the mapmod. To
-supply your own geometry, make a separate version of the mapmod and change its
-model table. A `drive` value such as `Assets/my-drive.skpm` is not supported:
-`drive` still accepts only `open`, `covered` or `modern`.
+With **loader 1.27.0 or newer**, your map can replace models for each lift and
+individual pylon while continuing to use the published
+`community.surface-lifts` **0.1.0** dependency. Keep its ID and dependency pin;
+you do not need to copy, edit or republish the mapmod.
 
-### Make your own mapmod project
+### Try the custom-model example
 
-Copy the extracted `surface-lifts/` folder to `my-surface-lifts/`. In its
-`custom-mod.json`, change `id` to a namespaced ID you own, for example
-`yourname.surface-lifts`. Set your own `metadata.name`, `metadata.authors` and
-`metadata.version` (start at `0.1.0`). Keep the `map-api` runtime, `gameplay`
-permission, scripts and existing assets. Retain the original `LICENSE` and
-credits, and credit your added models in `CREDITS.txt`.
+Download [the custom-model practice map](https://skieomod.emillon.fr/tutorials/surface-lifts/files/surface-lift-custom-models.zip)
+and extract `practice-custom-models/` beside the original `surface-lifts/`
+project. It contains two native lifts: **Practice platter** has blue frames
+and lower pole casings, with an orange P2 and orange P2 pulleys; **Default
+platter** keeps the stock models. These cosmetic variants retain the original
+geometry and attachment points. Their files belong to the map, not the mapmod.
 
-The fork replaces `community.surface-lifts` for this map. Keep only one of them
-in the dependency graph: the loader accepts **one `configure_surface_lifts`
-call per map session**. The model table is shared by every configured line;
-there is currently no separate custom model table per lift.
+Open `practice-custom-models/custom-map.json` in the editor, or inspect
+[its complete extension settings](https://skieomod.emillon.fr/tutorials/surface-lifts/files/custom-models-options.json).
+From the shared parent folder:
+
+```sh
+skieomod build surface-lifts
+skieomod build practice-custom-models --dependency surface-lifts
+skieomod run practice-custom-models --dependency surface-lifts
+```
+
+### Select models per lift and pylon
+
+In your map's `custom-map.json`, add `models` and optional `pylon_models` inside
+the relevant entry of `extensions["community.surface-lifts"].lifts`. This is a
+fragment to add to an existing lift definition, keeping its name, route,
+`kind`, speed, capacity, `pylons` and other settings:
+
+```json
+"models": {
+  "drive": "Assets/blue-drive.skpm",
+  "tower": "Assets/blue-tower.skpm",
+  "platter_lower": "Assets/blue-platter-lower.skpm",
+  "palette": "Assets/lift-palette.png"
+},
+"pylon_models": [{
+  "index": 2,
+  "models": {
+    "tower": "Assets/orange-tower.skpm",
+    "guide_wheel": "Assets/orange-guide-wheel.skpm"
+  }
+}]
+```
+
+Each model path is relative to **your map project**. Copy your replacement
+meshes and PNGs there, then add every path to the map's `content.assets` array,
+preserving existing entries. Unlike a mapmod manifest, a map does not need a
+separate top-level `files` array. Use `/` and exact spelling/case. Reopen the
+project in the editor after external edits.
+
+The selection order is **mapmod defaults → this lift's `models` → this pylon's
+`models`**. Any omitted role inherits its previous value. A lift without
+`models` keeps the original appearance. A `models` object can replace only one
+piece; you do not need to supply all 24 models. `drive` and `return_station`
+retain their ordinary enum settings (`open`, `covered`, `modern`, etc.); the
+model role replaces the mesh chosen by those settings.
+
+`index: 1` means the first intermediate pylon from the lower station, `2` means
+P2, and so on up to `pylons`. The two terminals are excluded. Each index may
+appear only once. The per-pylon roles are `tower`, `angle_tower`,
+`return_support`, `return_angle`, `fixed_return_support`, `guide_wheel`,
+`chair_tower`, `chair_head` and `palette`. `guide_wheel` replaces that pylon's
+moving pulleys, including its return-side pulleys when present. A bend uses
+`angle_tower`, so override that role if the target pylon is a bend.
+
+The same settings work for the mapmod's `chairlifts` entries. Their pylons are
+numbered along the route from bottom to top using the actual native supports;
+the chosen index must exist. If you change a route or support count, check the
+numbering again in a new game.
+
+### Available model roles
+
+| `models` key | Role and selection |
+| --- | --- |
+| `tower`, `angle_tower` | Ordinary and bend support frames. The reference mast is scaled vertically from a 6 m base height. |
+| `return_support`, `return_angle`, `fixed_return_support` | Separate high-return frames and fixed-pole return arms. Preserve their reference attachment positions. |
+| `drive` | Open lower station for `detachable_platter` with `drive: "open"`. |
+| `covered`, `modern` | Lower stations selected by `drive: "covered"` or `drive: "modern"`. |
+| `fixed` | Lower station for `fixed_platter` with `drive: "open"`. |
+| `return_station`, `release`, `lattice` | Upper stations selected by `return_station: "floating"`, `"release"` or `"lattice"`. |
+| `inclined_wheel`, `guide_wheel`, `motor` | Separate rotating wheels and motor. The reference wheel radii are 2 m and 0.8 m, centred at the origin in the XY plane. |
+| `platter` | Complete rigid TKF pole: clamp at the origin, disc about 3 m below it. |
+| `platter_upper`, `platter_shaft`, `platter_lower` | Animated TKD clamp/suspension, sliding shaft and lower spring casing with disc. Preserve all three source origins and lengths; the shaft is a 1 cm segment scaled by the animation. |
+| `poles_bundle` | The passenger's carried ski poles. |
+| `chair_drive`, `chair_return`, `chair_tower`, `chair_head` | Frames used by the `fixed_chair` configuration; native chairs remain native. |
+| `palette` | PNG texture shared by this lift or pylon. |
+
+A palette may be replaced per lift or pylon. It colours the meshes using that
+bank; the generated cable and support fittings keep the lift palette. PNGs
+must be square, power-of-two, 8-bit RGB/RGBA images up to 512 × 512 pixels.
+
+The cable, wheel placement, towing poses and telescopic animation are generated
+by the loader. Keep the reference origins and attachment dimensions when
+replacing a mesh. Each SKPM is limited to 16 MiB, 150,000 vertices and 450,000
+triangle indices. Across the session, the loader permits up to 64 custom
+meshes and 32 palettes, with all meshes together capped at 32 MiB and 500,000
+vertices. Assets reused by several lifts or pylons are decoded/imported once.
+Keep repeated poles and wheels small.
 
 ### Create and export a model with Blender
 
-The loader reads **`.skpm` static meshes and one shared PNG palette**. Keep your
+The loader reads **`.skpm` static meshes and PNG palettes**. Keep your
 `.blend` files as authoring sources; FBX, OBJ and `.blend` files are not runtime
 lift models. No Unreal cooking or DLL build is needed for a model replacement.
 
@@ -204,8 +288,8 @@ blender --background --threads 2 --python tools/build_surface_lift_models.py
 ```
 
 Copy the generated `mod/SkiEO-SurfaceLifts/Assets/my-tower.skpm` into
-`my-surface-lifts/Assets/my-tower.skpm`. This example uses the unchanged palette
-already in your fork. The script also writes `build/surface-lifts/models.blend`
+`practice-mountain/Assets/my-tower.skpm`. This example uses the unchanged palette
+shipped by the mapmod, so this mesh does not need a custom `palette` entry. The script also writes `build/surface-lifts/models.blend`
 as a visual overview. Its collections are spread apart for inspection **after
 export**; those overview offsets must not enter your runtime meshes.
 
@@ -225,74 +309,24 @@ does not export Blender shader graphs or an existing UV unwrap. Edit `PALETTE`
 and regenerate `palette.png` if you need different colours; replacing the
 shared palette changes every model using those colours.
 
-### Declare the files and select their roles
+### Test, save and publish your map
 
-Add `Assets/my-tower.skpm` to **both** `files` and `content.assets` in
-`my-surface-lifts/custom-mod.json`. Append to the existing arrays; keep the
-other entries. Paths are relative to the mapmod root, use `/`, and are
-case-sensitive. Every new mesh or replacement PNG needs both declarations.
+Inspect both terminals, a straight support, bends, moving wheels and occupied
+and empty poles. Test in a new game and after saving/reloading. The normal
+native identities and management data remain unchanged; appearance is rebuilt
+from the map's configuration on loading.
 
-In `my-surface-lifts/Scripts/main.lua`, keep the existing `local models = {...}`
-table. Insert this assignment immediately after that table, before
-`return function(api)`:
+If a mesh is missing, check its path and `content.assets`; invalid paths,
+unknown roles, duplicate pylon indices and malformed SKPMs stop loading with an
+error. Files are read from the map's declared assets, even if the mapmod has a
+file with the same name. If a model floats or misses the cable, compare its
+origin and dimensions with the original.
 
-```lua
-models.tower = 'Assets/my-tower.skpm'
-```
-
-This changes ordinary intermediate pylons. Bend pylons and the separately
-assembled wheels keep their original models. Other replacement slots are:
-
-| Model table key | Role and selection |
-| --- | --- |
-| `tower`, `angle_tower` | Ordinary and bend support frames. The reference mast is scaled vertically from a 6 m base height. |
-| `return_support`, `return_angle`, `fixed_return_support` | Separate high-return frames and fixed-pole return arms. Preserve their reference attachment positions. |
-| `drive` | Open lower station for `detachable_platter` with `drive: "open"`. |
-| `covered`, `modern` | Lower stations selected by `drive: "covered"` or `drive: "modern"`. |
-| `fixed` | Lower station for `fixed_platter` with `drive: "open"`. |
-| `return_station`, `release`, `lattice` | Upper stations selected by `return_station: "floating"`, `"release"` or `"lattice"`. |
-| `inclined_wheel`, `guide_wheel`, `motor` | Separate rotating wheels and motor. The reference wheel radii are 2 m and 0.8 m, centred at the origin in the XY plane. |
-| `platter` | Complete rigid TKF pole: clamp at the origin, disc about 3 m below it. |
-| `platter_upper`, `platter_shaft`, `platter_lower` | Animated TKD clamp/suspension, sliding shaft and lower spring casing with disc. Preserve all three source origins and lengths; the shaft is a 1 cm segment scaled by the animation. |
-| `poles_bundle` | The passenger's carried ski poles. |
-| `chair_drive`, `chair_return`, `chair_tower`, `chair_head` | Frames used by the `fixed_chair` configuration; native chairs remain native. |
-| `palette` | Shared PNG texture for all models. |
-
-All **24 mesh slots plus `palette` are required**, including slots unused by
-your particular line. Keep the original files for anything you do not replace.
-The cable, wheel placement, towing poses and telescopic animation are generated
-by the loader; changing a mesh does not move their attachment points. Start
-with cosmetic changes that preserve the reference dimensions. Each SKPM mesh
-must fit the loader limits: 16 MiB, 150,000 vertices and 450,000 triangle indices
-(150,000 triangles). Keep repeated poles and wheels much smaller.
-
-### Bind the map to your fork, test and publish
-
-In `practice-mountain/custom-map.json`, replace the dependency ID with
-`yourname.surface-lifts` and pin `=0.1.0`. Rename the extension key from
-`community.surface-lifts` to `yourname.surface-lifts`, keeping its `lifts`
-configuration unchanged. The extension key must match the fork's ID because
-`api:mapmod_options()` reads that namespace. Reopen the map in the editor after
-external edits.
-
-Run from the parent folder containing the two projects:
-
-```sh
-skieomod build my-surface-lifts
-skieomod build practice-mountain --dependency my-surface-lifts
-skieomod run practice-mountain --dependency my-surface-lifts
-```
-
-Inspect a straight support, a bend if used, both terminals, moving wheels and
-occupied/unoccupied poles. Check a new game and a save/reload. If a model is
-missing, check both manifest lists and exact path spelling; if it floats or
-misses the cable, compare its origin and dimensions with the original mesh.
-
-Give the practice map your own map ID before publishing it. Publish your
-mapmod first with `skieomod publish my-surface-lifts`, then publish the map with
-`skieomod publish practice-mountain`. Keep them as separate packages. For later
-model edits, increase the fork's `metadata.version`, update the map's dependency
-pin and version, rebuild and publish both projects.
+Increase your map version, rebuild and publish it using `skieomod publish
+practice-custom-models` (choose your own map ID before publishing the practice
+project). Players receive your replacement assets with the map and download
+the shared mapmod separately. A mapmod fork is useful only if you want to
+change its behaviour rather than supply different models.
 
 ## Troubleshooting
 

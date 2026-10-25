@@ -5,6 +5,7 @@ import contextlib
 import io
 import json
 import shutil
+import struct
 import sys
 import tempfile
 import zipfile
@@ -27,6 +28,63 @@ SCENE={'version':1,'objects':[
     {'id':'ticket-office','name':'Practice ticket office','kind':'building',
      'class':'/Game/Blueprints/Buildings/BP_TicketOffice.BP_TicketOffice_C',
      'position':[-45,260]}]}
+
+
+CUSTOM_OPTIONS=json.loads(json.dumps(OPTIONS))
+CUSTOM_OPTIONS['lifts'][0]['models']={
+    'drive':'Assets/blue-drive.skpm','tower':'Assets/blue-tower.skpm',
+    'platter_lower':'Assets/blue-platter-lower.skpm','palette':'Assets/lift-palette.png'}
+CUSTOM_OPTIONS['lifts'][0]['pylon_models']=[{'index':2,'models':{
+    'tower':'Assets/orange-tower.skpm','guide_wheel':'Assets/orange-guide-wheel.skpm'}}]
+CUSTOM_OPTIONS['lifts'].append(dict(OPTIONS['lifts'][0],name='Default platter',
+    route=[[8000,24000,0],[8000,0,0],[8000,-24000,0]]))
+
+
+def colour_variant(data,colour):
+    """Keep geometry/anchors intact; change only the grey palette entries."""
+    result=bytearray(data)
+    for i in range(struct.unpack_from('<I',data,8)[0]):
+        offset=16+i*32+24
+        if abs(struct.unpack_from('<f',data,offset)[0]-.5/8)<1e-6:
+            struct.pack_into('<f',result,offset,(colour+.5)/8)
+    return bytes(result)
+
+
+def custom_models_example(root,mountain,output):
+    project=root/'practice-custom-models'
+    shutil.copytree(mountain,project,ignore=shutil.ignore_patterns('bin','obj'))
+    p=project/'custom-map.json';manifest=json.loads(p.read_text())
+    manifest['id']='tutorial.surface-lift-models'
+    manifest['metadata']['name']='Surface lift custom models'
+    manifest['metadata']['description']='Two lifts using one shared mapmod, with per-lift and per-pylon cosmetic variants. Requires loader 1.27.0+.'
+    manifest['extensions']['community.surface-lifts']=CUSTOM_OPTIONS
+    source=ROOT/'mod/SkiEO-SurfaceLifts'
+    assets=project/'Assets';assets.mkdir(exist_ok=True)
+    for target,original,colour in [('blue-drive','poma-drive',3),('blue-tower','tower',3),
+            ('blue-platter-lower','platter-lower',3),('orange-tower','tower',6),('orange-guide-wheel','guide-wheel',6)]:
+        (assets/(target+'.skpm')).write_bytes(colour_variant((source/'Assets'/(original+'.skpm')).read_bytes(),colour))
+    shutil.copyfile(source/'Assets/palette.png',assets/'lift-palette.png')
+    names=['Assets/'+path.name for path in sorted(assets.iterdir())]
+    manifest['metadata']['license']='MIT (map); BSD-3-Clause (model variants)'
+    manifest['content'].setdefault('assets',[]).extend(names)
+    for name in ['LICENSE','CREDITS.txt']:
+        target='MODEL-LICENSE.txt'if name=='LICENSE'else'MODEL-CREDITS.txt'
+        shutil.copyfile(source/name,project/target)
+        manifest['content']['assets'].append(target)
+    p.write_text(json.dumps(manifest,indent=2)+'\n')
+    scene=json.loads(json.dumps(SCENE))
+    scene['objects'].append(dict(SCENE['objects'][0],id='default-platter',name='Default platter',
+                                 position=[80,240],end_position=[80,-240]))
+    (project/'Scene/objects.json').write_text(json.dumps(scene,indent=2)+'\n')
+    with contextlib.redirect_stdout(io.StringIO()):archive,_=projects.build(project)
+    shutil.copyfile(archive,output/'tutorial.surface-lift-models-0.1.0.skieomap')
+    with zipfile.ZipFile(output/'surface-lift-custom-models.zip','w')as archive:
+        write_zip_member(archive,'README.txt',b'Loader 1.27.0+ is required. Extract beside the original surface-lifts project. Build and run practice-custom-models with --dependency surface-lifts. Read https://skieomod.emillon.fr/tutorials/surface-lifts/#models\n')
+        write_zip_member(archive,'surface-lifts-tutorial.md',(ROOT/'docs/surface-lifts-tutorial.md').read_bytes())
+        for path in sorted(project.rglob('*')):
+            if path.is_file()and path.relative_to(project).parts[0]not in {'bin','obj'}:
+                write_zip_member(archive,project.name+'/'+path.relative_to(project).as_posix(),path.read_bytes())
+    (output/'custom-models-options.json').write_text(json.dumps(CUSTOM_OPTIONS,indent=2)+'\n')
 
 
 def build(output=None):
@@ -84,6 +142,7 @@ Use the ordinary game tools to add trails, staff and the rest of your resort.
         # The test map is also useful for isolated in-game qualification.
         target=output/'tutorial.surface-lift-practice-0.1.0.skieomap'
         shutil.copyfile(map_archive,target)
+        custom_models_example(root,mountain,output)
         return {'archive':target,'manifest':package['manifest']}
 
 

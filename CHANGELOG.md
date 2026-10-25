@@ -7,6 +7,17 @@ have their own package versions. Download the
 
 ## [Unreleased]
 
+## [1.27.0] - 2026-10-25
+
+- Let maps override surface-lift models and palettes per installation and per
+  numbered pylon, using their own declared assets and the original shared mapmod.
+- Cache model variants and palettes before attaching lifts, validate overrides,
+  and retain the shared 128-carrier rendering pool across different appearances.
+- Finish native terrain alignment before adapting a lift so deferred grounding
+  cannot rebuild its chairlift geometry over the towing route.
+- Update the tutorial with the new configuration and a two-lift practice map
+  demonstrating custom stations, poles, pylons and pulleys without a mapmod fork.
+
 ## [1.26.2] - 2026-10-25
 
 - Extend the Surface lift tutorial with custom model authoring: Blender export,
